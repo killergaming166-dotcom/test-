@@ -7,103 +7,42 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f3f4f6;
-            color: #1f2937;
-        }
-        .card {
-            background: white;
-            border-radius: 16px;
-            border: 1px solid #e5e7eb;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-            padding: 1.5rem;
-        }
-        .status-badge {
-            padding: 6px 14px;
-            border-radius: 99px;
-            font-size: 12px;
-            font-weight: 700;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.3s ease;
-        }
-        .online {
-            background-color: #ecfdf5;
-            color: #10b981;
-            border: 1px solid #d1fae5;
-        }
-        .online .dot {
-            width: 8px;
-            height: 8px;
-            background-color: #10b981;
-            border-radius: 50%;
-            box-shadow: 0 0 8px #10b981;
-        }
-        .offline {
-            background-color: #fef2f2;
-            color: #ef4444;
-            border: 1px solid #fee2e2;
-        }
-        .offline .dot {
-            width: 8px;
-            height: 8px;
-            background-color: #ef4444;
-            border-radius: 50%;
-        }
-        .btn-export {
-            background-color: #72e128;
-            color: white;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            transition: all 0.2s;
-            box-shadow: 0 4px 12px rgba(114, 225, 40, 0.2);
-        }
-        .btn-export:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 6px 15px rgba(114, 225, 40, 0.3);
-        }
-        .scan-container {
-            height: 320px;
-            background-color: #ffffff;
-            border: 2px dashed #e5e7eb;
-            border-radius: 24px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .scan-active {
-            border-color: #6366f1;
-            background-color: #f5f3ff;
-        }
-        .uid-tag {
-            font-family: monospace;
-            background: #f1f5f9;
-            color: #64748b;
-            padding: 4px 12px;
-            border-radius: 6px;
-            font-size: 13px;
-            letter-spacing: 1px;
-            margin-top: 1rem;
+        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; color: #1f2937; }
+        .card { background: white; border-radius: 16px; border: 1px solid #e5e7eb; padding: 1.5rem; }
+        .status-badge { padding: 6px 14px; border-radius: 99px; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; gap: 8px; }
+        .online { background-color: #ecfdf5; color: #10b981; border: 1px solid #d1fae5; }
+        .online .dot { width: 8px; height: 8px; background-color: #10b981; border-radius: 50%; box-shadow: 0 0 8px #10b981; }
+        .offline { background-color: #fef2f2; color: #ef4444; border: 1px solid #fee2e2; }
+        .offline .dot { width: 8px; height: 8px; background-color: #ef4444; border-radius: 50%; }
+        
+        .btn-primary { background-color: #72e128; color: white; font-weight: 700; text-transform: uppercase; transition: all 0.2s; }
+        .btn-primary:hover { transform: translateY(-1px); opacity: 0.9; }
+        
+        .input-group label { display: block; font-size: 10px; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 4px; }
+        .input-group input { width: 100%; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px; font-size: 14px; outline: none; transition: border-color 0.2s; }
+        .input-group input:focus { border-color: #6366f1; }
+
+        #regForm { transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); transform-origin: top; }
+        .form-open { animation: slideDown 0.4s ease-out; }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
-<body class="p-6 md:p-10">
+<body class="p-6 md:p-8">
 
     <div class="max-w-6xl mx-auto">
-        <div class="grid grid-cols-12 gap-8">
+        <div class="grid grid-cols-12 gap-6">
             
-            <!-- Khu vực điều khiển & Trạng thái -->
+            <!-- Cột Trái: Chính -->
             <div class="col-span-12 lg:col-span-8 space-y-6">
-                <div class="card relative">
-                    <div class="flex justify-between items-center mb-8">
+                <!-- Header -->
+                <div class="card">
+                    <div class="flex justify-between items-center mb-6">
                         <div>
-                            <h2 class="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">Hệ thống giám sát</h2>
-                            <h1 class="text-xl font-bold text-slate-800">Trạng Thái Điểm Danh</h1>
+                            <h1 class="text-xl font-bold text-slate-800">Hệ Thống Điểm Danh RFID</h1>
+                            <p class="text-xs text-slate-400 font-medium">Tự động nhận diện thành viên & Đăng ký thẻ mới</p>
                         </div>
                         <div id="cloudStatus" class="status-badge offline">
                             <div class="dot"></div>
@@ -111,32 +50,52 @@
                         </div>
                     </div>
 
-                    <!-- Chỉ số phụ -->
-                    <div class="grid grid-cols-2 gap-4 mb-8">
-                        <div class="p-5 rounded-2xl bg-slate-50 border border-slate-100">
-                            <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Kết nối Internet</p>
-                            <p class="text-lg font-bold text-emerald-500">Ổn định</p>
+                    <!-- Màn hình quét -->
+                    <div id="scanArea" class="h-64 flex flex-col items-center justify-center border-2 border-dashed border-slate-200 rounded-2xl bg-slate-50/30 transition-all duration-500">
+                        <div id="scanIndicator" class="mb-2 hidden">
+                            <span class="px-3 py-1 bg-rose-100 text-rose-600 text-[10px] font-bold rounded-full animate-pulse uppercase">Phát hiện thẻ lạ</span>
                         </div>
-                        <div class="p-5 rounded-2xl bg-slate-50 border border-slate-100">
-                            <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Thiết bị RFID</p>
-                            <p id="readerText" class="text-lg font-bold text-indigo-500">Đang chờ thẻ...</p>
+                        <h2 id="scanStatus" class="text-4xl font-black text-slate-300 uppercase tracking-tight text-center px-6">Vui lòng quét thẻ</h2>
+                        <div id="uidDisplay" class="mt-4 bg-slate-200 text-slate-500 px-4 py-1 rounded font-mono text-xs italic tracking-widest">--- --- ---</div>
+                    </div>
+                </div>
+
+                <!-- Form Đăng Ký (Ẩn mặc định, hiện khi quét thẻ lạ) -->
+                <div id="regForm" class="card hidden shadow-xl border-indigo-100">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="font-bold text-slate-700 flex items-center gap-2">
+                            <div class="w-8 h-8 bg-indigo-100 text-indigo-600 rounded-lg flex items-center justify-center">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path></svg>
+                            </div>
+                            Đăng Ký Thành Viên Mới
+                        </h3>
+                        <button onclick="closeForm()" class="text-slate-400 hover:text-slate-600">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                        </button>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="input-group">
+                            <label>Họ và tên sinh viên</label>
+                            <input type="text" id="regName" placeholder="Ví dụ: Nguyễn Văn A">
+                        </div>
+                        <div class="input-group">
+                            <label>Mã số sinh viên (MSSV)</label>
+                            <input type="text" id="regMssv" placeholder="Ví dụ: PS12345">
                         </div>
                     </div>
 
-                    <!-- Màn hình chính -->
-                    <div id="scanArea" class="scan-container">
-                        <h1 id="scanStatus" class="text-4xl font-black text-slate-300 tracking-tight text-center px-4 uppercase">
-                            Vui lòng quét thẻ
-                        </h1>
-                        <div id="uidDisplay" class="uid-tag">--- --- ---</div>
+                    <div class="mt-6 flex gap-3">
+                        <button onclick="saveUser()" class="btn-primary flex-1 py-4 rounded-xl text-sm shadow-lg shadow-green-200">
+                            Xác nhận lưu thông tin
+                        </button>
                     </div>
                 </div>
             </div>
 
-            <!-- Khu vực Thống kê -->
+            <!-- Cột Phải: Thống kê & Export -->
             <div class="col-span-12 lg:col-span-4 space-y-6">
-                <!-- Thống kê Card -->
-                <div class="card text-center py-10">
+                <div class="card text-center py-8">
                     <p class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-6">Thống kê phiên này</p>
                     <div class="flex items-center justify-around">
                         <div>
@@ -151,24 +110,14 @@
                     </div>
                 </div>
 
-                <!-- Thao tác Card -->
-                <div class="card space-y-4">
-                    <button onclick="exportExcel()" class="btn-export w-full py-4 rounded-2xl text-sm shadow-md">
-                        Xuất file dữ liệu (CSV)
+                <div class="card space-y-3">
+                    <button onclick="exportExcel()" class="btn-primary w-full py-4 rounded-xl text-xs shadow-md">
+                        XUẤT DỮ LIỆU ĐIỂM DANH (CSV)
                     </button>
                     
-                    <button onclick="window.location.reload()" class="w-full py-2 text-slate-400 text-xs font-bold uppercase tracking-widest hover:text-indigo-600 transition-colors">
-                        Làm mới hệ thống
+                    <button onclick="window.location.reload()" class="w-full py-2 text-slate-400 text-[10px] font-bold uppercase tracking-widest hover:text-indigo-600 transition-colors">
+                        Làm mới trang
                     </button>
-
-                    <div class="pt-4 border-t border-slate-50">
-                        <div class="flex items-start gap-3 p-3 bg-indigo-50/50 rounded-xl">
-                            <svg class="w-4 h-4 text-indigo-400 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                            <p class="text-[10px] text-indigo-500/80 leading-relaxed font-medium">
-                                Dữ liệu được đồng bộ Realtime từ thiết bị. Hãy xuất file trước khi đóng trình duyệt để lưu lại lịch sử.
-                            </p>
-                        </div>
-                    </div>
                 </div>
             </div>
 
@@ -192,10 +141,9 @@
                 configMSSV = c.realtime_configs[2];
             },
             onValues: (v) => {
-                // Kiểm tra trạng thái Cloud thật
+                // Cloud Status
                 const cloud = document.getElementById('cloudStatus');
                 const isOnline = configUID && v[configUID.id]?.active;
-                
                 if (isOnline) {
                     cloud.className = "status-badge online";
                     cloud.innerHTML = '<div class="dot"></div><span>Cloud Online</span>';
@@ -204,16 +152,15 @@
                     cloud.innerHTML = '<div class="dot"></div><span>Cloud Offline</span>';
                 }
 
-                // Xử lý dữ liệu thẻ
+                // Scan Logic
                 const uid = v[configUID?.id]?.value;
                 if (uid && uid !== "0" && uid !== "---" && uid !== "None") {
                     const name = v[configName?.id]?.value || "---";
                     const mssv = v[configMSSV?.id]?.value || "---";
                     
                     const now = Date.now();
-                    // Chống lặp trong 2 giây
-                    if (uid !== lastUID || (now - lastTime > 2000)) {
-                        handleNewScan(uid, name, mssv);
+                    if (uid !== lastUID || (now - lastTime > 2500)) {
+                        handleScan(uid, name, mssv);
                         lastUID = uid;
                         lastTime = now;
                     }
@@ -221,60 +168,82 @@
             }
         });
 
-        function handleNewScan(uid, name, mssv) {
-            const timeStr = new Date().toLocaleTimeString('vi-VN', { hour12: false });
-            const isGuest = (!name || name === "None" || name === "---" || name === "Sẵn sàng" || name.includes("lạ"));
-            
-            const entry = {
-                id: logs.length + 1,
-                time: timeStr,
-                name: isGuest ? "Thẻ chưa đăng ký" : name,
-                mssv: isGuest ? "Unknown" : mssv,
-                uid: uid
-            };
-
-            logs.unshift(entry);
-            updateUI(entry, isGuest);
-        }
-
-        function updateUI(entry, isGuest) {
-            const scanArea = document.getElementById('scanArea');
+        function handleScan(uid, name, mssv) {
             const scanStatus = document.getElementById('scanStatus');
             const uidDisplay = document.getElementById('uidDisplay');
             const totalCount = document.getElementById('totalCount');
             const lastTimeDisplay = document.getElementById('lastTime');
+            const scanArea = document.getElementById('scanArea');
+            const scanIndicator = document.getElementById('scanIndicator');
+            const timeStr = new Date().toLocaleTimeString('vi-VN', { hour12: false });
 
-            // Hiệu ứng và thông tin
-            scanArea.classList.add('scan-active');
-            scanStatus.innerText = entry.name;
-            scanStatus.className = isGuest 
-                ? "text-4xl font-black text-rose-500 tracking-tight text-center px-4 uppercase"
-                : "text-4xl font-black text-indigo-600 tracking-tight text-center px-4 uppercase";
+            uidDisplay.innerText = uid;
             
-            uidDisplay.innerText = entry.uid;
-            totalCount.innerText = logs.length;
-            lastTimeDisplay.innerText = entry.time.substring(0, 5);
+            const isUnknown = (!name || name === "None" || name === "---" || name.includes("lạ"));
 
-            // Reset sau 4 giây
+            if (isUnknown) {
+                scanStatus.innerText = "THẺ LẠ!";
+                scanStatus.className = "text-4xl font-black text-rose-500 uppercase tracking-tight text-center px-6";
+                scanArea.style.borderColor = "#f43f5e";
+                scanIndicator.classList.remove('hidden');
+                openForm();
+            } else {
+                scanStatus.innerText = name.toUpperCase();
+                scanStatus.className = "text-4xl font-black text-indigo-600 uppercase tracking-tight text-center px-6";
+                scanArea.style.borderColor = "#6366f1";
+                scanIndicator.classList.add('hidden');
+                closeForm();
+
+                logs.unshift({ id: logs.length + 1, time: timeStr, name: name, mssv: mssv, uid: uid });
+                totalCount.innerText = logs.length;
+                lastTimeDisplay.innerText = timeStr.substring(0, 5);
+            }
+
             setTimeout(() => {
-                if (lastUID === entry.uid) {
-                    scanArea.classList.remove('scan-active');
+                if (lastUID === uid && !isUnknown) {
                     scanStatus.innerText = "Vui lòng quét thẻ";
-                    scanStatus.className = "text-4xl font-black text-slate-300 tracking-tight text-center px-4 uppercase";
+                    scanStatus.className = "text-4xl font-black text-slate-300 uppercase tracking-tight text-center px-6";
+                    scanArea.style.borderColor = "#e5e7eb";
+                    uidDisplay.innerText = "--- --- ---";
                 }
-            }, 4000);
+            }, 5000);
+        }
+
+        function openForm() {
+            const form = document.getElementById('regForm');
+            form.classList.remove('hidden');
+            form.classList.add('form-open');
+            document.getElementById('regName').focus();
+        }
+
+        function closeForm() {
+            const form = document.getElementById('regForm');
+            form.classList.add('hidden');
+            clearForm();
+        }
+
+        function saveUser() {
+            const name = document.getElementById('regName').value;
+            const mssv = document.getElementById('regMssv').value;
+            const uid = document.getElementById('uidDisplay').innerText;
+            if (!name) { alert("Vui lòng nhập họ tên sinh viên!"); return; }
+            alert(`Đã nhận đăng ký thành công cho:\n- ${name}\n- MSSV: ${mssv}\n- Thẻ: ${uid}`);
+            closeForm();
+        }
+
+        function clearForm() {
+            document.getElementById('regName').value = "";
+            document.getElementById('regMssv').value = "";
         }
 
         function exportExcel() {
-            if (logs.length === 0) return;
+            if (logs.length === 0) { alert("Không có dữ liệu để xuất!"); return; }
             let csv = "\uFEFFSTT,Giờ Quét,Họ và Tên,Mã Số,UID Thẻ\n";
-            logs.forEach((l) => {
-                csv += `${l.id},${l.time},"${l.name}","${l.mssv}","'${l.uid}"\n`;
-            });
+            logs.forEach(l => csv += `${l.id},${l.time},"${l.name}","${l.mssv}","'${l.uid}"\n`);
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement("a");
             link.href = URL.createObjectURL(blob);
-            link.download = `attendance_report_${new Date().getTime()}.csv`;
+            link.download = `diem_danh_${new Date().getTime()}.csv`;
             link.click();
         }
     </script>
