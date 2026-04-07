@@ -19,11 +19,22 @@
   
   <style>
     body { background-color: #f4f7fa; font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden; }
-    .container-main { max-width: 500px; margin: 30px auto; padding: 20px; }
+    
+    /* Viền đen bao quanh toàn bộ hệ thống theo yêu cầu */
+    .system-border-wrapper {
+        max-width: 550px;
+        margin: 20px auto;
+        padding: 10px;
+        border: 4px solid #000000; /* Viền đen */
+        border-radius: 50px;
+        background-color: #f4f7fa;
+    }
+
+    .container-main { padding: 30px; }
     
     .header-section { margin-bottom: 25px; position: relative; }
-    .header-title { font-weight: 800; font-size: 2rem; color: #1a202c; margin-bottom: 0; letter-spacing: -0.02em; }
-    .digital-clock { font-size: 0.8rem; color: #a0aec0; font-weight: 600; margin-top: 2px; }
+    .header-title { font-weight: 800; font-size: 2.2rem; color: #1a202c; margin-bottom: 0; letter-spacing: -0.02em; }
+    .digital-clock { font-size: 0.9rem; color: #a0aec0; font-weight: 600; margin-top: 5px; }
 
     .scan-card {
         background: #ffffff;
@@ -38,29 +49,32 @@
     /* Viền xanh cho sinh viên hợp lệ */
     .scan-card.active-success { border-color: #696cff; background: #f8f9ff; transform: scale(1.02); }
     /* Viền đỏ cho người lạ */
-    .scan-card.active-warning { border-color: #ff3e1d; background: #fff5f4; transform: scale(1.02); animation: shake 0.4s ease-in-out; }
+    .scan-card.active-warning { border-color: #ff3e1d !important; background: #fff5f4 !important; transform: scale(1.02); animation: shake 0.4s ease-in-out; }
 
     .qr-placeholder { font-size: 4.5rem; color: #edf2f7; margin-bottom: 25px; transition: all 0.3s; }
-    .instruction-text { font-weight: 800; font-size: 1.6rem; color: #4a5568; text-transform: uppercase; margin-bottom: 8px; }
-    .sub-text { color: #a0aec0; font-size: 1.1rem; margin-bottom: 25px; font-weight: 500; min-height: 1.5em; }
-    .uid-badge { background: #f1f5f9; color: #94a3b8; padding: 6px 16px; border-radius: 20px; font-family: monospace; font-size: 0.8rem; }
+    .instruction-text { font-weight: 800; font-size: 1.8rem; color: #4a5568; text-transform: uppercase; margin-bottom: 8px; }
+    .sub-text { color: #a0aec0; font-size: 1.2rem; margin-bottom: 25px; font-weight: 500; min-height: 1.5em; }
+    .uid-badge { background: #f1f5f9; color: #94a3b8; padding: 6px 20px; border-radius: 20px; font-family: monospace; font-size: 0.9rem; font-weight: bold; }
 
-    .action-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .action-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
     
     .stat-card {
         background: white;
-        border-radius: 25px;
-        padding: 18px;
+        border-radius: 30px;
+        padding: 20px;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
     }
-    .stat-label { font-size: 0.6rem; font-weight: 800; color: #a0aec0; text-transform: uppercase; display: block; margin-bottom: 4px; }
-    .stat-value { font-size: 2rem; font-weight: 800; color: #1a202c; line-height: 1; }
+    .stat-label { font-size: 0.7rem; font-weight: 800; color: #a0aec0; text-transform: uppercase; display: block; margin-bottom: 4px; }
+    .stat-value { font-size: 2.5rem; font-weight: 800; color: #1a202c; line-height: 1; }
 
     .btn-action {
         background: white;
         border-radius: 20px;
-        padding: 12px;
-        border: none;
+        padding: 15px;
+        border: 2px solid transparent;
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
         display: flex;
         align-items: center;
@@ -69,12 +83,12 @@
         cursor: pointer;
         transition: all 0.2s;
         font-weight: 700;
-        font-size: 0.75rem;
+        font-size: 0.85rem;
         text-transform: uppercase;
     }
     .btn-action:active { transform: scale(0.95); }
-    .btn-export { color: #696cff; border: 1px solid #eef0ff; }
-    .btn-reset-full { color: #ff3e1d; border: 1px solid #fff5f4; }
+    .btn-export { color: #696cff; border-color: #eef0ff; }
+    .btn-reset-full { color: #ff3e1d; border-color: #fff5f4; }
 
     #authModal {
         display: none; position: fixed; z-index: 1000; top: 0; left: 0; width: 100%; height: 100%;
@@ -101,36 +115,38 @@
     </div>
   </div>
 
-  <div class="container-main">
-    <div class="header-section">
-        <h1 class="header-title">RFID Check-in</h1>
-        <div id="liveClock" class="digital-clock">00:00:00 - 01/01/2024</div>
-    </div>
-
-    <div id="statusBox" class="scan-card">
-        <i id="statusIcon" class="bx bx-rfid qr-placeholder status-active"></i>
-        <h3 id="instruction" class="instruction-text">Sẵn sàng quét thẻ</h3>
-        <div id="subText" class="sub-text">Vui lòng chạm thẻ</div>
-        <div class="uid-badge" id="cardUIDDisplay">ID: ---</div>
-    </div>
-
-    <div class="action-row mb-3">
-        <div class="stat-card">
-            <span class="stat-label">Tổng lượt</span>
-            <span id="statTotal" class="stat-value">0</span>
+  <div class="system-border-wrapper">
+    <div class="container-main">
+        <div class="header-section">
+            <h1 class="header-title">RFID Check-in</h1>
+            <div id="liveClock" class="digital-clock">00:00:00 - 01/01/2024</div>
         </div>
-        <div class="d-flex flex-column gap-2">
-            <button onclick="requestExport()" class="btn-action btn-export w-100">
-                <i class="bx bx-download"></i> Xuất CSV
-            </button>
-            <button id="btnResetHistory" class="btn-action btn-reset-full w-100">
-                <i class="bx bx-trash"></i> Xóa dữ liệu
-            </button>
-        </div>
-    </div>
 
-    <div class="text-center opacity-25">
-        <small style="font-size: 0.55rem; font-weight: 800; letter-spacing: 1px;">V4.2.2 | STABLE ENGINE</small>
+        <div id="statusBox" class="scan-card">
+            <i id="statusIcon" class="bx bx-rfid qr-placeholder status-active"></i>
+            <h3 id="instruction" class="instruction-text">Sẵn sàng quét thẻ</h3>
+            <div id="subText" class="sub-text">Vui lòng chạm thẻ</div>
+            <div class="uid-badge" id="cardUIDDisplay">ID: ---</div>
+        </div>
+
+        <div class="action-row mb-3">
+            <div class="stat-card">
+                <span class="stat-label">Tổng lượt</span>
+                <span id="statTotal" class="stat-value">0</span>
+            </div>
+            <div class="d-flex flex-column gap-2">
+                <button onclick="requestExport()" class="btn-action btn-export w-100">
+                    <i class="bx bx-download"></i> Xuất CSV
+                </button>
+                <button id="btnResetHistory" class="btn-action btn-reset-full w-100">
+                    <i class="bx bx-trash"></i> Xóa dữ liệu
+                </button>
+            </div>
+        </div>
+
+        <div class="text-center opacity-25">
+            <small style="font-size: 0.6rem; font-weight: 800; letter-spacing: 1px;">V4.2.3 | STABLE ENGINE</small>
+        </div>
     </div>
   </div>
 
@@ -161,7 +177,6 @@
                 const name = cfg.name.toUpperCase();
                 if (name === "UID") configMap.uid = cfg.id;
                 if (name === "NAME") configMap.name = cfg.id;
-                // Cải thiện việc tìm kiếm chân MSSV (chấp nhận MSSV hoặc các tên chứa cụm từ này)
                 if (name.includes("MSSV")) configMap.mssv = cfg.id;
             });
         },
@@ -169,22 +184,32 @@
             if (!configMap.uid || !values[configMap.uid]) return;
 
             const valUid = values[configMap.uid].value;
-            // Xử lý giá trị name và mssv (đảm bảo lấy được chuỗi hoặc gán mặc định nếu null/undefined)
             const rawName = configMap.name ? values[configMap.name]?.value : "";
             const rawMssv = configMap.mssv ? values[configMap.mssv]?.value : "";
 
-            const valName = (rawName && rawName !== "None" && rawName !== "0") ? rawName : "Người lạ";
-            const valMssv = (rawMssv && rawMssv !== "None" && rawMssv !== "0") ? rawMssv : "Chưa đăng ký";
+            // Xử lý logic người lạ kỹ hơn
+            let isUnknown = false;
+            let valName = rawName;
+            let valMssv = rawMssv;
 
-            // Kiểm tra tính hợp lệ của thẻ
+            if (!rawName || rawName === "None" || rawName === "0" || rawName === "" || rawName.toLowerCase() === "unknown") {
+                valName = "Người lạ";
+                isUnknown = true;
+            }
+            
+            if (!rawMssv || rawMssv === "None" || rawMssv === "0" || rawMssv === "") {
+                valMssv = "Chưa đăng ký";
+                isUnknown = true; // Nếu không có MSSV cũng coi là không xác định
+            }
+
             if (valUid && valUid !== "0" && valUid !== "---" && valUid !== "" && valUid !== lastUid) {
                 lastUid = valUid;
-                handleScanSuccess(valUid, valName, valMssv);
+                handleScanSuccess(valUid, valName, valMssv, isUnknown);
             }
         }
     });
 
-    function handleScanSuccess(uid, name, mssv) {
+    function handleScanSuccess(uid, name, mssv, isUnknown) {
         if (isProcessing) return;
         isProcessing = true;
 
@@ -194,14 +219,10 @@
         const subT = document.getElementById('subText');
         const uidD = document.getElementById('cardUIDDisplay');
 
-        // Hiển thị thông tin
         uidD.innerText = "ID: " + uid;
         instr.innerText = name;
         subT.innerText = "MSSV: " + mssv;
         
-        // Kiểm tra xem có phải người lạ không để đổi màu viền
-        const isUnknown = (name === "Người lạ" || name.toLowerCase().includes("unknown"));
-
         if (isUnknown) {
             box.className = "scan-card active-warning shadow-lg";
             icon.className = "bx bx-error-circle qr-placeholder text-danger";
@@ -214,7 +235,6 @@
         
         icon.classList.remove('status-active');
 
-        // Lưu dữ liệu vào lịch sử
         const timeStr = new Date().toLocaleTimeString('vi-VN', {hour12: false});
         scanCount++;
         document.getElementById('statTotal').innerText = scanCount;
@@ -222,7 +242,6 @@
         localStorage.setItem('attendanceLogs', JSON.stringify(attendanceLogs));
         localStorage.setItem('scanCount', scanCount.toString());
 
-        // Sau 3 giây quay lại trạng thái chờ
         setTimeout(() => {
             box.className = "scan-card";
             icon.className = "bx bx-rfid qr-placeholder status-active";
@@ -235,7 +254,6 @@
         }, 3000);
     }
 
-    // --- HÀM TIỆN ÍCH ---
     function closeAuth() { document.getElementById('authModal').style.display = 'none'; }
     function requestExport() {
         if (attendanceLogs.length === 0) return;
