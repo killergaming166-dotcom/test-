@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>RFID Scanner - Instant Scan</title>
+    <title>RFID Scanner - Instant Scan & Voice</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
@@ -20,19 +20,7 @@
             40%, 60% { transform: translate3d(4px, 0, 0); }
         }
 
-        .cooldown-overlay {
-            background: rgba(255, 255, 255, 0.98);
-            display: none;
-            border-radius: 40px;
-            z-index: 50;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-
         .status-icon-container { transition: all 0.3s ease; }
-        .success-bg { background-color: #ecfdf5; border-color: #10b981; }
-        .error-bg { background-color: #fef2f2; border-color: #ef4444; }
     </style>
 </head>
 <body class="p-4">
@@ -68,13 +56,6 @@
         <!-- Main Scan Area -->
         <div id="scanArea" class="relative aspect-square flex flex-col items-center justify-center border-4 border-dashed border-slate-100 rounded-[48px] bg-slate-50/50 transition-all duration-300">
             
-            <!-- Cooldown Overlay -->
-            <div id="cooldownLayer" class="cooldown-overlay absolute inset-0">
-                <div id="cooldownTimer" class="text-9xl font-black text-slate-800 tabular-nums">8</div>
-                <p class="text-slate-400 font-bold uppercase tracking-[0.2em] text-[10px] mt-4">Đang nghỉ để tránh trùng...</p>
-                <button onclick="resetScanner()" class="mt-8 text-[10px] font-black text-indigo-500 bg-indigo-50 px-6 py-3 rounded-full hover:bg-indigo-100 uppercase">Tiếp tục ngay</button>
-            </div>
-
             <!-- Icon -->
             <div id="statusIcon" class="status-icon-container mb-6 text-slate-200">
                 <svg class="w-24 h-24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -106,15 +87,13 @@
     <script src="https://www.unpkg.com/@eohjsc/era-widget@1.1.3/src/index.js"></script>
     <script>
         const MASTER_PIN = "0909";
-        const COOLDOWN_TIME = 8000;
         
         const eraWidget = new EraWidget();
         let logs = [];
         let configUID, configName, configMSSV;
         
-        let isCooldown = false;
         let lastScannedUID = null; 
-        let countdownInterval = null;
+        let isProcessing = false;
 
         eraWidget.init({
             needRealtimeConfigs: true,
@@ -133,23 +112,42 @@
                 const hasCard = (uid && uid !== "0" && uid !== "---" && uid !== "None" && uid !== "" && uid !== "Sẵn sàng");
 
                 if (hasCard) {
-                    // 1. Nếu đang cooldown thì bỏ qua
-                    if (isCooldown) return;
-
-                    // 2. Nếu thẻ trùng với lần vừa quét (chưa nhấc ra) thì bỏ qua
+                    // Nếu thẻ trùng với lần vừa quét (chưa nhấc ra) thì bỏ qua
                     if (uid === lastScannedUID) return;
 
-                    // 3. Thực hiện quét ngay lập tức
+                    // Thực hiện quét ngay lập tức
                     executeScan(uid, name, mssv);
                 } else {
-                    // Thẻ đã được nhấc ra khỏi đầu đọc -> Reset UID cuối để cho phép quét lại chính thẻ đó
-                    lastScannedUID = null;
+                    // Thẻ đã được nhấc ra khỏi đầu đọc -> Reset và sẵn sàng cho thẻ tiếp theo
+                    if (lastScannedUID !== null) {
+                        lastScannedUID = null;
+                        resetUI();
+                    }
                 }
             }
         });
 
+        function speakData(name, mssv, uid) {
+            // Hủy các lời thoại cũ đang chờ
+            window.speechSynthesis.cancel();
+            
+            // Nếu là người lạ thì đọc khác
+            const isStranger = (name.toUpperCase().includes("NGUOI LA") || mssv === "---" || name === "NGƯỜI LẠ");
+            let textToSpeak = "";
+            
+            if (isStranger) {
+                textToSpeak = `Phát hiện thẻ lạ. Mã thẻ là ${uid.split('').join(' ')}`;
+            } else {
+                textToSpeak = `Xin chào ${name}. Mã số sinh viên ${mssv.split('').join(' ')}.`;
+            }
+
+            const utterance = new SpeechSynthesisUtterance(textToSpeak);
+            utterance.lang = 'vi-VN';
+            utterance.rate = 1.0;
+            window.speechSynthesis.speak(utterance);
+        }
+
         function executeScan(uid, name, mssv) {
-            isCooldown = true;
             lastScannedUID = uid;
 
             const isStranger = (name.toUpperCase().includes("NGUOI LA") || mssv === "---" || name === "NGƯỜI LẠ");
@@ -161,8 +159,8 @@
             // Cập nhật giao diện
             updateUI(uid, name, mssv, isStranger);
             
-            // Bắt đầu nghỉ 8s
-            startCooldown();
+            // Đọc thông tin
+            speakData(name, mssv, uid);
         }
 
         function updateUI(uid, name, mssv, isError) {
@@ -187,29 +185,7 @@
             }
         }
 
-        function startCooldown() {
-            const overlay = document.getElementById('cooldownLayer');
-            const timerText = document.getElementById('cooldownTimer');
-            overlay.style.display = 'flex';
-            
-            let timeLeft = 8;
-            timerText.innerText = timeLeft;
-
-            if (countdownInterval) clearInterval(countdownInterval);
-            countdownInterval = setInterval(() => {
-                timeLeft--;
-                timerText.innerText = timeLeft;
-                if (timeLeft <= 0) {
-                    resetScanner();
-                }
-            }, 1000);
-        }
-
-        function resetScanner() {
-            isCooldown = false;
-            clearInterval(countdownInterval);
-            document.getElementById('cooldownLayer').style.display = 'none';
-            
+        function resetUI() {
             const dn = document.getElementById('displayName');
             const dm = document.getElementById('displayMSSV');
             const du = document.getElementById('displayUID');
@@ -229,7 +205,7 @@
             if (confirm("Bạn có chắc chắn muốn xóa toàn bộ lịch sử quét?")) {
                 logs = [];
                 document.getElementById('totalCount').innerText = "0";
-                resetScanner();
+                resetUI();
             }
         }
 
