@@ -20,12 +20,11 @@
   <style>
     body { background-color: #f4f7fa; font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden; }
     
-    /* Viền đen bao quanh toàn bộ hệ thống theo yêu cầu */
     .system-border-wrapper {
         max-width: 550px;
         margin: 20px auto;
         padding: 10px;
-        border: 4px solid #000000; /* Viền đen */
+        border: 4px solid #000000;
         border-radius: 50px;
         background-color: #f4f7fa;
     }
@@ -46,9 +45,7 @@
         border: 4px solid transparent;
         transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
-    /* Viền xanh cho sinh viên hợp lệ */
     .scan-card.active-success { border-color: #696cff; background: #f8f9ff; transform: scale(1.02); }
-    /* Viền đỏ cho người lạ */
     .scan-card.active-warning { border-color: #ff3e1d !important; background: #fff5f4 !important; transform: scale(1.02); animation: shake 0.4s ease-in-out; }
 
     .qr-placeholder { font-size: 4.5rem; color: #edf2f7; margin-bottom: 25px; transition: all 0.3s; }
@@ -145,7 +142,7 @@
         </div>
 
         <div class="text-center opacity-25">
-            <small style="font-size: 0.6rem; font-weight: 800; letter-spacing: 1px;">V4.2.3 | STABLE ENGINE</small>
+            <small style="font-size: 0.6rem; font-weight: 800; letter-spacing: 1px;">V4.2.4 | SYNC STABLE</small>
         </div>
     </div>
   </div>
@@ -162,6 +159,7 @@
     let configMap = { uid: null, name: null, mssv: null };
     let isProcessing = false;
     let lastUid = "";
+    let currentValues = {}; // Lưu trữ giá trị các Pins mới nhất
 
     function updateClock() {
         const now = new Date();
@@ -181,38 +179,51 @@
             });
         },
         onValues: (values) => {
+            currentValues = values; // Luôn cập nhật bộ đệm giá trị mới nhất từ E-Ra
+            
             if (!configMap.uid || !values[configMap.uid]) return;
 
             const valUid = values[configMap.uid].value;
-            const rawName = configMap.name ? values[configMap.name]?.value : "";
-            const rawMssv = configMap.mssv ? values[configMap.mssv]?.value : "";
 
-            // Xử lý logic người lạ kỹ hơn
-            let isUnknown = false;
-            let valName = rawName;
-            let valMssv = rawMssv;
-
-            if (!rawName || rawName === "None" || rawName === "0" || rawName === "" || rawName.toLowerCase() === "unknown") {
-                valName = "Người lạ";
-                isUnknown = true;
-            }
-            
-            if (!rawMssv || rawMssv === "None" || rawMssv === "0" || rawMssv === "") {
-                valMssv = "Chưa đăng ký";
-                isUnknown = true; // Nếu không có MSSV cũng coi là không xác định
-            }
-
+            // Phát hiện thẻ mới quẹt
             if (valUid && valUid !== "0" && valUid !== "---" && valUid !== "" && valUid !== lastUid) {
                 lastUid = valUid;
-                handleScanSuccess(valUid, valName, valMssv, isUnknown);
+                // Đợi 500ms để Name và MSSV kịp cập nhật tương ứng với UID mới
+                setTimeout(() => {
+                    processScan(valUid);
+                }, 500);
             }
         }
     });
 
-    function handleScanSuccess(uid, name, mssv, isUnknown) {
+    function processScan(uid) {
         if (isProcessing) return;
-        isProcessing = true;
+        
+        // Lấy lại giá trị từ bộ đệm sau khi đã đợi đồng bộ
+        const rawName = configMap.name ? currentValues[configMap.name]?.value : "";
+        const rawMssv = configMap.mssv ? currentValues[configMap.mssv]?.value : "";
 
+        let isUnknown = false;
+        let valName = rawName;
+        let valMssv = rawMssv;
+
+        // Kiểm tra tính hợp lệ của Name
+        if (!rawName || rawName === "None" || rawName === "0" || rawName === "" || rawName.toLowerCase().includes("unknown") || rawName.toUpperCase() === "NGUOI LA") {
+            valName = "Người lạ";
+            isUnknown = true;
+        }
+        
+        // Kiểm tra tính hợp lệ của MSSV
+        if (!rawMssv || rawMssv === "None" || rawMssv === "0" || rawMssv === "" || rawMssv === "---") {
+            valMssv = "---";
+            // Nếu là người lạ thì MSSV chắc chắn không có, không cần ép isUnknown ở đây nữa vì đã check ở Name
+        }
+
+        handleScanUI(uid, valName, valMssv, isUnknown);
+    }
+
+    function handleScanUI(uid, name, mssv, isUnknown) {
+        isProcessing = true;
         const box = document.getElementById('statusBox');
         const icon = document.getElementById('statusIcon');
         const instr = document.getElementById('instruction');
@@ -235,6 +246,7 @@
         
         icon.classList.remove('status-active');
 
+        // Ghi log
         const timeStr = new Date().toLocaleTimeString('vi-VN', {hour12: false});
         scanCount++;
         document.getElementById('statTotal').innerText = scanCount;
