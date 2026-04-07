@@ -1,351 +1,282 @@
 <!DOCTYPE html>
-<html lang="en" class="light-style layout-menu-fixed layout-compact" dir="ltr" data-theme="theme-default">
-
+<html lang="vi">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
-
-  <title>Hệ Thống Điểm Danh RFID</title>
-
-  <!-- Fonts & Icons -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="https://demos.themeselection.com/sneat-bootstrap-html-admin-template-free/assets/vendor/fonts/boxicons.css" />
-  
-  <!-- Core CSS -->
-  <link rel="stylesheet" href="https://demos.themeselection.com/sneat-bootstrap-html-admin-template-free/assets/vendor/css/core.css" />
-  <link rel="stylesheet" href="https://demos.themeselection.com/sneat-bootstrap-html-admin-template-free/assets/vendor/css/theme-default.css" />
-  
-  <style>
-    body { background-color: #f5f5f9; font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden; }
-    .card { border: none; box-shadow: 0 2px 10px 0 rgba(67, 89, 113, 0.1); border-radius: 16px; }
-    
-    .status-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 8px; }
-    .status-dot.online { background-color: #71dd37; box-shadow: 0 0 8px #71dd37; }
-
-    .info-display {
-        background: #fff; border: 1px solid #eceef1; border-radius: 14px; padding: 20px; transition: all 0.3s ease;
-    }
-    .info-label { font-size: 0.7rem; color: #a1acb8; font-weight: 800; text-transform: uppercase; margin-bottom: 5px; }
-    .info-data { font-size: 1.25rem; font-weight: 800; color: #32475c; min-height: 30px; }
-
-    .scan-box {
-        min-height: 280px; display: flex; flex-direction: column; align-items: center; justify-content: center;
-        border-radius: 20px; border: 2px solid #e7eaf0; background: white; transition: all 0.4s ease;
-        position: relative;
-    }
-    .scan-box.active-success { border-color: #696cff; background: rgba(105, 108, 255, 0.04); }
-    .scan-box.active-error { border-color: #ff3e1d; background: rgba(255, 62, 29, 0.04); }
-
-    #regModal, #authModal {
-        display: none; position: fixed; z-index: 1000; top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(15, 20, 31, 0.5); backdrop-filter: blur(8px); align-items: center; justify-content: center;
-    }
-    .modal-content-custom {
-        background: white; padding: 30px; border-radius: 20px; width: 100%; max-width: 400px;
-        box-shadow: 0 20px 50px rgba(0,0,0,0.1);
-    }
-  </style>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hệ Thống Điểm Danh RFID</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+            color: #1f2937;
+        }
+        .card {
+            background: white;
+            border-radius: 16px;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            padding: 1.5rem;
+        }
+        .status-badge {
+            padding: 6px 14px;
+            border-radius: 99px;
+            font-size: 12px;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+        .online {
+            background-color: #ecfdf5;
+            color: #10b981;
+            border: 1px solid #d1fae5;
+        }
+        .online .dot {
+            width: 8px;
+            height: 8px;
+            background-color: #10b981;
+            border-radius: 50%;
+            box-shadow: 0 0 8px #10b981;
+        }
+        .offline {
+            background-color: #fef2f2;
+            color: #ef4444;
+            border: 1px solid #fee2e2;
+        }
+        .offline .dot {
+            width: 8px;
+            height: 8px;
+            background-color: #ef4444;
+            border-radius: 50%;
+        }
+        .btn-export {
+            background-color: #72e128;
+            color: white;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.2s;
+            box-shadow: 0 4px 12px rgba(114, 225, 40, 0.2);
+        }
+        .btn-export:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 15px rgba(114, 225, 40, 0.3);
+        }
+        .scan-container {
+            height: 320px;
+            background-color: #ffffff;
+            border: 2px dashed #e5e7eb;
+            border-radius: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .scan-active {
+            border-color: #6366f1;
+            background-color: #f5f3ff;
+        }
+        .uid-tag {
+            font-family: monospace;
+            background: #f1f5f9;
+            color: #64748b;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            letter-spacing: 1px;
+            margin-top: 1rem;
+        }
+    </style>
 </head>
+<body class="p-6 md:p-10">
 
-<body>
-
-  <!-- Modal Admin PIN -->
-  <div id="authModal">
-    <div class="modal-content-custom text-center">
-        <div class="avatar avatar-xl mb-3 mx-auto">
-            <span class="avatar-initial rounded-circle bg-label-primary"><i class="bx bx-lock-alt fs-2"></i></span>
-        </div>
-        <h4 class="fw-bold mb-1">Xác thực Quản trị</h4>
-        <p class="text-muted mb-4 small" id="authTitle">Vui lòng nhập mã PIN để tiếp tục</p>
-        <input type="password" id="adminPIN" class="form-control text-center fs-3 fw-bold mb-4" placeholder="••••" maxlength="4" style="letter-spacing: 10px;">
-        <div class="d-flex gap-3">
-            <button onclick="closeAuth()" class="btn btn-label-secondary w-50 py-2">Hủy</button>
-            <button onclick="verifyAdmin()" class="btn btn-primary w-50 py-2">Xác minh</button>
-        </div>
-    </div>
-  </div>
-
-  <!-- Modal Register -->
-  <div id="regModal">
-    <div class="modal-content-custom">
-        <h5 class="fw-bold mb-4"><i class="bx bx-user-plus me-2 text-primary"></i>Đăng ký thành viên</h5>
-        <div class="mb-3">
-            <label class="form-label small fw-bold">UID THẺ</label>
-            <input type="text" id="regUID" class="form-control bg-light border-0 fw-bold" readonly>
-        </div>
-        <div class="mb-3">
-            <label class="form-label small fw-bold">HỌ VÀ TÊN</label>
-            <input type="text" id="regName" class="form-control" placeholder="Nhập tên nhân sự...">
-        </div>
-        <div class="mb-4">
-            <label class="form-label small fw-bold">MÃ SỐ / MSSV</label>
-            <input type="text" id="regMSSV" class="form-control" placeholder="Nhập mã định danh...">
-        </div>
-        <button id="btnConfirmReg" class="btn btn-primary w-100 py-2 fw-bold shadow-none">Lưu vào hệ thống</button>
-        <button onclick="closeReg()" class="btn btn-link w-100 text-muted mt-2">Hủy thao tác</button>
-    </div>
-  </div>
-
-  <div class="container-xxl flex-grow-1 container-p-y">
-    <div class="row">
-      <div class="col-lg-8 mb-4">
-        <div class="card h-100">
-          <div class="card-body p-4">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h5 class="m-0 fw-bold text-dark"><i class="bx bx-spreadsheet me-2"></i>TRẠNG THÁI ĐIỂM DANH</h5>
-                <div class="d-flex align-items-center bg-label-success px-3 py-1 rounded">
-                    <span class="status-dot online"></span>
-                    <small class="fw-bold">Cloud Online</small>
-                </div>
-            </div>
+    <div class="max-w-6xl mx-auto">
+        <div class="grid grid-cols-12 gap-8">
             
-            <div class="row g-3 mb-4">
-              <div class="col-md-6">
-                <div class="info-display">
-                  <div class="info-label">Internet</div>
-                  <div class="info-data text-success">Ổn định</div>
+            <!-- Khu vực điều khiển & Trạng thái -->
+            <div class="col-span-12 lg:col-span-8 space-y-6">
+                <div class="card relative">
+                    <div class="flex justify-between items-center mb-8">
+                        <div>
+                            <h2 class="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">Hệ thống giám sát</h2>
+                            <h1 class="text-xl font-bold text-slate-800">Trạng Thái Điểm Danh</h1>
+                        </div>
+                        <div id="cloudStatus" class="status-badge offline">
+                            <div class="dot"></div>
+                            <span>Checking...</span>
+                        </div>
+                    </div>
+
+                    <!-- Chỉ số phụ -->
+                    <div class="grid grid-cols-2 gap-4 mb-8">
+                        <div class="p-5 rounded-2xl bg-slate-50 border border-slate-100">
+                            <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Kết nối Internet</p>
+                            <p class="text-lg font-bold text-emerald-500">Ổn định</p>
+                        </div>
+                        <div class="p-5 rounded-2xl bg-slate-50 border border-slate-100">
+                            <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Thiết bị RFID</p>
+                            <p id="readerText" class="text-lg font-bold text-indigo-500">Đang chờ thẻ...</p>
+                        </div>
+                    </div>
+
+                    <!-- Màn hình chính -->
+                    <div id="scanArea" class="scan-container">
+                        <h1 id="scanStatus" class="text-4xl font-black text-slate-300 tracking-tight text-center px-4 uppercase">
+                            Vui lòng quét thẻ
+                        </h1>
+                        <div id="uidDisplay" class="uid-tag">--- --- ---</div>
+                    </div>
                 </div>
-              </div>
-              <div class="col-md-6">
-                <div class="info-display">
-                  <div class="info-label">RFID Reader</div>
-                  <div class="info-data text-primary">Sẵn sàng</div>
-                </div>
-              </div>
             </div>
 
-            <div id="statusBox" class="scan-box">
-                <i id="statusIcon" class="bx bx-rfid bx-lg mb-3 text-secondary" style="font-size: 6rem; opacity: 0.3;"></i>
-                <h3 id="instruction" class="fw-bold text-dark mb-1">VUI LÒNG QUÉT THẺ</h3>
-                <div class="mt-2 badge bg-label-secondary font-monospace fs-6" id="cardUIDDisplay">READY</div>
-                <button id="btnQuickReg" class="btn btn-primary btn-lg mt-4 px-5 d-none shadow-sm">
-                    <i class="bx bx-plus-circle me-2"></i> Đăng ký thẻ mới
-                </button>
-            </div>
-          </div>
-        </div>
-      </div>
+            <!-- Khu vực Thống kê -->
+            <div class="col-span-12 lg:col-span-4 space-y-6">
+                <!-- Thống kê Card -->
+                <div class="card text-center py-10">
+                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-6">Thống kê phiên này</p>
+                    <div class="flex items-center justify-around">
+                        <div>
+                            <p class="text-slate-400 text-xs mb-1">Tổng lượt</p>
+                            <p id="totalCount" class="text-5xl font-black text-slate-800">0</p>
+                        </div>
+                        <div class="w-[1px] h-12 bg-slate-100"></div>
+                        <div>
+                            <p class="text-slate-400 text-xs mb-1">Giờ cuối</p>
+                            <p id="lastTime" class="text-5xl font-black text-slate-800">--:--</p>
+                        </div>
+                    </div>
+                </div>
 
-      <div class="col-lg-4 mb-4">
-        <div class="card mb-4">
-          <div class="card-body text-center p-4">
-            <h6 class="fw-bold text-primary mb-4 text-uppercase">Thống kê phiên làm việc</h6>
-            <div class="row">
-                <div class="col-6 border-end">
-                    <small class="text-muted d-block mb-1">Tổng lượt</small>
-                    <h2 id="statTotal" class="mb-0 fw-bold">0</h2>
+                <!-- Thao tác Card -->
+                <div class="card space-y-4">
+                    <button onclick="exportExcel()" class="btn-export w-full py-4 rounded-2xl text-sm shadow-md">
+                        Xuất file dữ liệu (CSV)
+                    </button>
+                    
+                    <button onclick="window.location.reload()" class="w-full py-2 text-slate-400 text-xs font-bold uppercase tracking-widest hover:text-indigo-600 transition-colors">
+                        Làm mới hệ thống
+                    </button>
+
+                    <div class="pt-4 border-t border-slate-50">
+                        <div class="flex items-start gap-3 p-3 bg-indigo-50/50 rounded-xl">
+                            <svg class="w-4 h-4 text-indigo-400 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            <p class="text-[10px] text-indigo-500/80 leading-relaxed font-medium">
+                                Dữ liệu được đồng bộ Realtime từ thiết bị. Hãy xuất file trước khi đóng trình duyệt để lưu lại lịch sử.
+                            </p>
+                        </div>
+                    </div>
                 </div>
-                <div class="col-6">
-                    <small class="text-muted d-block mb-1">Giờ cuối</small>
-                    <h2 id="lastTimeDisp" class="mb-0 fw-bold">--:--</h2>
-                </div>
             </div>
-          </div>
+
         </div>
-        
-        <div class="card p-4">
-            <div class="d-grid gap-3">
-                <button onclick="requestExport()" class="btn btn-success btn-lg py-3 fw-bold shadow-none">
-                    <i class="bx bx-export me-2"></i> XUẤT DỮ LIỆU (.CSV)
-                </button>
-                <button id="btnReset" class="btn btn-label-secondary py-2">
-                    <i class="bx bx-refresh me-1"></i> Làm mới trang
-                </button>
-            </div>
-            <div class="mt-4 p-3 bg-light rounded text-center">
-                <small class="text-muted">Lưu ý: Hệ thống chỉ lưu tạm dữ liệu phiên này. Hãy xuất file trước khi đóng trình duyệt.</small>
-            </div>
-        </div>
-      </div>
     </div>
-  </div>
 
-  <script src="https://www.unpkg.com/@eohjsc/era-widget@1.1.3/src/index.js"></script>
-  <script>
-    const MASTER_PIN = "0909";
-    let pendingAction = null; 
+    <script src="https://www.unpkg.com/@eohjsc/era-widget@1.1.3/src/index.js"></script>
+    <script>
+        const eraWidget = new EraWidget();
+        let configUID, configName, configMSSV;
+        let logs = [];
+        let lastUID = "";
+        let lastTime = 0;
 
-    // Biến quản lý trạng thái quét thẻ (Chống nhảy 2 lần)
-    let lastProcessedUID = "";
-    let lastProcessedTime = 0;
-    const DEBOUNCE_TIME = 2000; 
+        eraWidget.init({
+            needRealtimeConfigs: true,
+            maxRealtimeConfigsCount: 3,
+            onConfiguration: (c) => {
+                configUID = c.realtime_configs[0];
+                configName = c.realtime_configs[1];
+                configMSSV = c.realtime_configs[2];
+            },
+            onValues: (v) => {
+                // Kiểm tra trạng thái Cloud thật
+                const cloud = document.getElementById('cloudStatus');
+                const isOnline = configUID && v[configUID.id]?.active;
+                
+                if (isOnline) {
+                    cloud.className = "status-badge online";
+                    cloud.innerHTML = '<div class="dot"></div><span>Cloud Online</span>';
+                } else {
+                    cloud.className = "status-badge offline";
+                    cloud.innerHTML = '<div class="dot"></div><span>Cloud Offline</span>';
+                }
 
-    let attendanceLogs = []; 
-    const eraWidget = new EraWidget();
-    let configs = { uid: null, name: null, mssv: null };
-    let actions = [];
-
-    function closeAuth() { 
-        document.getElementById('authModal').style.display = 'none'; 
-        document.getElementById('adminPIN').value = "";
-    }
-    function closeReg() { document.getElementById('regModal').style.display = 'none'; }
-    
-    function requestExport() {
-        if (attendanceLogs.length === 0) return alert("Không có dữ liệu để xuất!");
-        pendingAction = 'export';
-        document.getElementById('authTitle').innerText = "Nhập mã PIN để xuất File Excel";
-        document.getElementById('authModal').style.display = 'flex';
-        document.getElementById('adminPIN').focus();
-    }
-
-    function verifyAdmin() {
-        const pin = document.getElementById('adminPIN').value;
-        if (pin === MASTER_PIN) {
-            closeAuth();
-            if (pendingAction === 'register') {
-                document.getElementById('regUID').value = document.getElementById('cardUIDDisplay').innerText;
-                document.getElementById('regModal').style.display = 'flex';
-            } else if (pendingAction === 'export') {
-                performExport();
+                // Xử lý dữ liệu thẻ
+                const uid = v[configUID?.id]?.value;
+                if (uid && uid !== "0" && uid !== "---" && uid !== "None") {
+                    const name = v[configName?.id]?.value || "---";
+                    const mssv = v[configMSSV?.id]?.value || "---";
+                    
+                    const now = Date.now();
+                    // Chống lặp trong 2 giây
+                    if (uid !== lastUID || (now - lastTime > 2000)) {
+                        handleNewScan(uid, name, mssv);
+                        lastUID = uid;
+                        lastTime = now;
+                    }
+                }
             }
-        } else {
-            alert("Mã PIN không chính xác!");
-            document.getElementById('adminPIN').value = "";
-        }
-    }
-
-    function performExport() {
-        let csvContent = "\uFEFF"; 
-        csvContent += "STT,Giờ Quét,Họ và Tên,Mã Số,UID Thẻ,Trạng Thái\n";
-        attendanceLogs.forEach((log, index) => {
-            const statusStr = log.status === 'success' ? "Thành công" : "Từ chối";
-            csvContent += `${attendanceLogs.length - index},${log.time},"${log.name}","${log.mssv}",${log.uid},${statusStr}\n`;
         });
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement("a");
-        link.setAttribute("href", URL.createObjectURL(blob));
-        link.setAttribute("download", `Diem_Danh_${new Date().toLocaleDateString('vi-VN').replace(/\//g, '-')}.csv`);
-        link.click();
-    }
 
-    /**
-     * HÀM QUAN TRỌNG: XỬ LÝ DỮ LIỆU TỪ E-RA
-     * Đã lọc bỏ "None", "---" và chống ghi đè lỗi
-     */
-    function processAttendance(uid, name, mssv) {
-        // Kiểm tra tính hợp lệ của dữ liệu đầu vào
-        const invalidValues = ["0", "---", "None", "null", "undefined", ""];
-        if (!uid || invalidValues.includes(uid)) return;
-        
-        // Tránh tình trạng E-Ra cập nhật Tên/MSSV chậm hơn UID
-        // Nếu tên là "None" hoặc "---" nhưng UID hợp lệ, có thể là thẻ lạ (Khách)
-        // Tuy nhiên, nếu vừa quét xong một UID này, không cho phép quét lại ngay lập tức
-        const now = Date.now();
-        if (uid === lastProcessedUID && (now - lastProcessedTime < DEBOUNCE_TIME)) return;
+        function handleNewScan(uid, name, mssv) {
+            const timeStr = new Date().toLocaleTimeString('vi-VN', { hour12: false });
+            const isGuest = (!name || name === "None" || name === "---" || name === "Sẵn sàng" || name.includes("lạ"));
+            
+            const entry = {
+                id: logs.length + 1,
+                time: timeStr,
+                name: isGuest ? "Thẻ chưa đăng ký" : name,
+                mssv: isGuest ? "Unknown" : mssv,
+                uid: uid
+            };
 
-        lastProcessedUID = uid;
-        lastProcessedTime = now;
-
-        const timeStr = new Date().toLocaleTimeString('vi-VN', { hour12: false });
-        
-        // Xác định xem đây là nhân viên hay khách
-        let isStranger = false;
-        let displayName = name;
-        let displayMSSV = mssv;
-
-        if (invalidValues.includes(name) || name.toLowerCase().includes("khách") || name.toLowerCase().includes("lạ")) {
-            isStranger = true;
-            displayName = "Khách (Thẻ lạ)";
-            displayMSSV = "---";
+            logs.unshift(entry);
+            updateUI(entry, isGuest);
         }
 
-        // Cập nhật giao diện quét thẻ
-        updateUIState(isStranger ? 'error' : 'success', isStranger ? "THẺ CHƯA ĐĂNG KÝ" : "XIN CHÀO: " + displayName.toUpperCase(), uid);
-        document.getElementById('lastTimeDisp').innerText = timeStr;
-        
-        // Lưu vào bộ nhớ tạm để xuất CSV
-        const newLog = { 
-            uid: uid, 
-            name: displayName, 
-            mssv: displayMSSV, 
-            time: timeStr,
-            status: isStranger ? "error" : "success"
-        };
-        
-        attendanceLogs.unshift(newLog);
-        document.getElementById('statTotal').innerText = attendanceLogs.length;
-    }
+        function updateUI(entry, isGuest) {
+            const scanArea = document.getElementById('scanArea');
+            const scanStatus = document.getElementById('scanStatus');
+            const uidDisplay = document.getElementById('uidDisplay');
+            const totalCount = document.getElementById('totalCount');
+            const lastTimeDisplay = document.getElementById('lastTime');
 
-    function updateUIState(state, text, uid) {
-        const box = document.getElementById('statusBox');
-        const icon = document.getElementById('statusIcon');
-        const instr = document.getElementById('instruction');
-        const btnReg = document.getElementById('btnQuickReg');
-        const uidDisp = document.getElementById('cardUIDDisplay');
+            // Hiệu ứng và thông tin
+            scanArea.classList.add('scan-active');
+            scanStatus.innerText = entry.name;
+            scanStatus.className = isGuest 
+                ? "text-4xl font-black text-rose-500 tracking-tight text-center px-4 uppercase"
+                : "text-4xl font-black text-indigo-600 tracking-tight text-center px-4 uppercase";
+            
+            uidDisplay.innerText = entry.uid;
+            totalCount.innerText = logs.length;
+            lastTimeDisplay.innerText = entry.time.substring(0, 5);
 
-        uidDisp.innerText = uid;
-        instr.innerText = text;
-
-        if (state === 'success') {
-            box.className = "scan-box active-success";
-            icon.className = "bx bx-check-circle bx-lg mb-3 text-primary";
-            icon.style.opacity = "1";
-            btnReg.classList.add('d-none');
-        } else {
-            box.className = "scan-box active-error";
-            icon.className = "bx bx-error-circle bx-lg mb-3 text-danger";
-            icon.style.opacity = "1";
-            btnReg.classList.remove('d-none');
+            // Reset sau 4 giây
+            setTimeout(() => {
+                if (lastUID === entry.uid) {
+                    scanArea.classList.remove('scan-active');
+                    scanStatus.innerText = "Vui lòng quét thẻ";
+                    scanStatus.className = "text-4xl font-black text-slate-300 tracking-tight text-center px-4 uppercase";
+                }
+            }, 4000);
         }
 
-        // Reset về trạng thái chờ sau 4 giây
-        setTimeout(() => {
-            if(lastProcessedUID === uid) {
-                icon.style.opacity = "0.3";
-                box.className = "scan-box";
-                instr.innerText = "VUI LÒNG QUÉT THẺ";
-                icon.className = "bx bx-rfid bx-lg mb-3 text-secondary";
-            }
-        }, 4000);
-    }
-
-    eraWidget.init({
-      needRealtimeConfigs: true, needActions: true,
-      maxRealtimeConfigsCount: 3, maxActionsCount: 1,
-      onConfiguration: (conf) => {
-        configs.uid = conf.realtime_configs[0];
-        configs.name = conf.realtime_configs[1];
-        configs.mssv = conf.realtime_configs[2];
-        actions = conf.actions || [];
-      },
-      onValues: (values) => {
-        // Lấy giá trị thô từ Widget
-        let rawUID = (configs.uid && values[configs.uid.id]) ? String(values[configs.uid.id].value) : "";
-        let rawName = (configs.name && values[configs.name.id]) ? String(values[configs.name.id].value) : "";
-        let rawMSSV = (configs.mssv && values[configs.mssv.id]) ? String(values[configs.mssv.id].value) : "";
-
-        // Chỉ xử lý nếu UID không rỗng và không phải giá trị mặc định của chip khi chưa quét
-        if (rawUID && rawUID !== "---" && rawUID !== "0" && rawUID !== "None") {
-            processAttendance(rawUID, rawName, rawMSSV);
+        function exportExcel() {
+            if (logs.length === 0) return;
+            let csv = "\uFEFFSTT,Giờ Quét,Họ và Tên,Mã Số,UID Thẻ\n";
+            logs.forEach((l) => {
+                csv += `${l.id},${l.time},"${l.name}","${l.mssv}","'${l.uid}"\n`;
+            });
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = `attendance_report_${new Date().getTime()}.csv`;
+            link.click();
         }
-      }
-    });
-
-    document.getElementById('btnQuickReg').onclick = () => { 
-        pendingAction = 'register';
-        document.getElementById('authTitle').innerText = "Nhập mã PIN để đăng ký nhân sự";
-        document.getElementById('authModal').style.display = 'flex'; 
-        document.getElementById('adminPIN').focus();
-    };
-    
-    document.getElementById('btnReset').onclick = () => { 
-        if(confirm("Bạn muốn làm mới toàn bộ dữ liệu hiện tại?")) location.reload(); 
-    };
-
-    document.getElementById('btnConfirmReg').onclick = () => {
-        const name = document.getElementById('regName').value.trim();
-        const mssv = document.getElementById('regMSSV').value.trim();
-        const uid = document.getElementById('regUID').value;
-        if (!name || !mssv) return alert("Vui lòng nhập đầy đủ thông tin!");
-        if (actions[0]) {
-            eraWidget.triggerAction(actions[0].action, `REG|${uid}|${name}|${mssv}`);
-            alert("Lệnh đăng ký đã được gửi tới thiết bị!");
-            closeReg();
-        }
-    };
-  </script>
+    </script>
 </body>
 </html>
