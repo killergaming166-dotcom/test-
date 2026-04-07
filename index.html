@@ -97,7 +97,7 @@
 
 <body>
 
-  <!-- Modal Xác thực PIN -->
+  <!-- Modal PIN -->
   <div id="authModal">
     <div class="modal-content-custom text-center shadow-lg">
         <h4 class="fw-bold mb-1">Xác thực Admin</h4>
@@ -156,19 +156,16 @@
     </div>
 
     <div class="action-row">
-        <!-- Ô Thống Kê -->
         <div class="stat-card">
             <span class="stat-label">Tổng lượt</span>
             <span id="statTotal" class="stat-value">0</span>
         </div>
 
-        <!-- Nút Xuất -->
         <button onclick="requestExport()" class="btn-action btn-export">
             <i class="bx bx-download"></i>
             <span>Xuất file</span>
         </button>
 
-        <!-- Nút Xóa Lịch Sử (Màu Đỏ) -->
         <button id="btnResetHistory" class="btn-action btn-reset-full">
             <i class="bx bx-trash"></i>
             <span>Xóa Lịch Sử</span>
@@ -185,18 +182,18 @@
     const MASTER_PIN = "0909";
     const eraWidget = new EraWidget();
     
-    // Khởi tạo dữ liệu từ LocalStorage
     let attendanceLogs = JSON.parse(localStorage.getItem('attendanceLogs')) || [];
     let scanCount = parseInt(localStorage.getItem('scanCount')) || 0;
     
     let configs = { uid: null, name: null, mssv: null };
     let actions = [];
     let isInitialLoad = true;
-    let lastProcessedUID = "";
-    let lastProcessedTime = 0;
-    let pendingAction = null;
+    
+    // BIẾN QUAN TRỌNG ĐỂ CHỐNG LẶP
+    let lastUID = "";
+    let lastTime = 0;
+    const COOLDOWN_TIME = 5000; // 5 giây mới cho quét lại cùng 1 thẻ
 
-    // Cập nhật giao diện ban đầu
     document.getElementById('statTotal').innerText = scanCount;
 
     function saveData() {
@@ -233,13 +230,13 @@
         attendanceLogs = [];
         saveData();
         document.getElementById('statTotal').innerText = "0";
-        alert("Đã xóa sạch toàn bộ lịch sử điểm danh và bộ đếm!");
+        alert("Đã xóa sạch lịch sử!");
     }
 
     function requestExport() {
-        if (attendanceLogs.length === 0) return alert("Không có dữ liệu để xuất!");
+        if (attendanceLogs.length === 0) return alert("Không có dữ liệu!");
         pendingAction = 'export';
-        document.getElementById('authTitle').innerText = "Xác nhận để tải file CSV";
+        document.getElementById('authTitle').innerText = "Xác nhận để tải file";
         document.getElementById('authModal').style.display = 'flex';
     }
 
@@ -251,22 +248,41 @@
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement("a");
         link.href = URL.createObjectURL(blob);
-        link.download = `RFID_Log_${new Date().toLocaleDateString('vi-VN').replace(/\//g, '-')}.csv`;
+        link.download = `RFID_Log.csv`;
         link.click();
     }
 
+    // HÀM XỬ LÝ QUÉT THẺ (ĐÃ SỬA LỖI LẶP)
     function handleScan(uid, name, mssv) {
-        if (!uid || uid === "0" || uid === "---") return;
-        if (isInitialLoad) { isInitialLoad = false; lastProcessedUID = uid; return; }
+        // 1. Kiểm tra giá trị rác hoặc giá trị trống
+        if (!uid || uid === "0" || uid === "---" || uid === "") {
+            lastUID = ""; // Reset trạng thái nếu cảm biến trả về rỗng
+            return;
+        }
+
+        // 2. Bỏ qua lượt quét đầu tiên khi vừa load trang (nếu cảm biến đang giữ giá trị cũ)
+        if (isInitialLoad) {
+            isInitialLoad = false;
+            lastUID = uid;
+            lastTime = Date.now();
+            return;
+        }
         
         const now = Date.now();
-        if (uid === lastProcessedUID && (now - lastProcessedTime < 3000)) return;
-        
-        lastProcessedUID = uid;
-        lastProcessedTime = now;
 
+        // 3. LOGIC CHỐNG TRÙNG LẶP:
+        // Nếu UID hiện tại giống UID vừa quét VÀ chưa qua 5 giây -> BỎ QUA
+        if (uid === lastUID && (now - lastTime < COOLDOWN_TIME)) {
+            return; 
+        }
+
+        // Cập nhật mốc thời gian và UID mới nhất để khóa
+        lastUID = uid;
+        lastTime = now;
+
+        // Xử lý dữ liệu
         const timeStr = new Date().toLocaleTimeString('vi-VN', {hour12: false});
-        let isStranger = (!name || name === "---" || name.toLowerCase().includes("lạ") || name.toLowerCase().includes("mới"));
+        let isStranger = (!name || name === "---" || name === "" || name.toLowerCase().includes("lạ") || name.toLowerCase().includes("mới"));
 
         updateUI(isStranger ? 'error' : 'success', isStranger ? "Thẻ chưa đăng ký" : name, isStranger ? "---" : mssv, uid);
         
@@ -301,17 +317,16 @@
             btnG.classList.remove('d-none');
         }
 
+        // Trở về trạng thái chờ sau 3 giây
         setTimeout(() => {
-            if (lastProcessedUID === uid) {
-                box.className = "scan-card";
-                icon.className = "bx bx-qr-scan qr-placeholder";
-                icon.style.color = "";
-                instr.innerText = "Sẵn sàng quét thẻ";
-                instr.style.color = "";
-                subT.innerText = "---";
-                btnG.classList.add('d-none');
-            }
-        }, 4000);
+            box.className = "scan-card";
+            icon.className = "bx bx-qr-scan qr-placeholder";
+            icon.style.color = "";
+            instr.innerText = "Sẵn sàng quét thẻ";
+            instr.style.color = "";
+            subT.innerText = "---";
+            btnG.classList.add('d-none');
+        }, 3000);
     }
 
     eraWidget.init({
@@ -328,10 +343,9 @@
       }
     });
 
-    // Sự kiện Nút Xóa Lịch Sử
     document.getElementById('btnResetHistory').onclick = () => {
         pendingAction = 'reset';
-        document.getElementById('authTitle').innerText = "Nhập PIN để XÓA TOÀN BỘ lịch sử";
+        document.getElementById('authTitle').innerText = "Xác nhận xóa sạch lịch sử";
         document.getElementById('authModal').style.display = 'flex';
     };
 
