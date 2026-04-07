@@ -90,7 +90,6 @@
 
   <div class="container-xxl flex-grow-1 container-p-y">
     <div class="row">
-      <!-- Vùng chính -->
       <div class="col-lg-8 mb-4">
         <div class="card h-100">
           <div class="card-body p-4">
@@ -129,7 +128,6 @@
         </div>
       </div>
 
-      <!-- Vùng điều khiển & Thống kê -->
       <div class="col-lg-4 mb-4">
         <div class="card mb-4">
           <div class="card-body text-center p-4">
@@ -157,7 +155,7 @@
                 </button>
             </div>
             <div class="mt-4 p-3 bg-light rounded text-center">
-                <small class="text-muted">Dữ liệu được lưu tạm trong phiên này. Vui lòng xuất tệp trước khi tải lại trang nếu cần lưu trữ.</small>
+                <small class="text-muted">Lưu ý: Hệ thống chỉ lưu tạm dữ liệu phiên này. Hãy xuất file trước khi đóng trình duyệt.</small>
             </div>
         </div>
       </div>
@@ -169,9 +167,10 @@
     const MASTER_PIN = "0909";
     let pendingAction = null; 
 
+    // Biến quản lý trạng thái quét thẻ (Chống nhảy 2 lần)
     let lastProcessedUID = "";
     let lastProcessedTime = 0;
-    const DEBOUNCE_TIME = 3000; 
+    const DEBOUNCE_TIME = 2000; 
 
     let attendanceLogs = []; 
     const eraWidget = new EraWidget();
@@ -222,9 +221,18 @@
         link.click();
     }
 
+    /**
+     * HÀM QUAN TRỌNG: XỬ LÝ DỮ LIỆU TỪ E-RA
+     * Đã lọc bỏ "None", "---" và chống ghi đè lỗi
+     */
     function processAttendance(uid, name, mssv) {
-        if (!uid || uid === "0" || uid === "---" || name === "Sẵn sàng") return;
-
+        // Kiểm tra tính hợp lệ của dữ liệu đầu vào
+        const invalidValues = ["0", "---", "None", "null", "undefined", ""];
+        if (!uid || invalidValues.includes(uid)) return;
+        
+        // Tránh tình trạng E-Ra cập nhật Tên/MSSV chậm hơn UID
+        // Nếu tên là "None" hoặc "---" nhưng UID hợp lệ, có thể là thẻ lạ (Khách)
+        // Tuy nhiên, nếu vừa quét xong một UID này, không cho phép quét lại ngay lập tức
         const now = Date.now();
         if (uid === lastProcessedUID && (now - lastProcessedTime < DEBOUNCE_TIME)) return;
 
@@ -232,15 +240,27 @@
         lastProcessedTime = now;
 
         const timeStr = new Date().toLocaleTimeString('vi-VN', { hour12: false });
-        const isStranger = (name.toLowerCase().includes("khách") || name.toLowerCase().includes("lạ") || name === "---" || name === "None");
         
-        updateUIState(isStranger ? 'error' : 'success', isStranger ? "THẺ CHƯA ĐĂNG KÝ" : "ĐIỂM DANH THÀNH CÔNG", uid);
+        // Xác định xem đây là nhân viên hay khách
+        let isStranger = false;
+        let displayName = name;
+        let displayMSSV = mssv;
+
+        if (invalidValues.includes(name) || name.toLowerCase().includes("khách") || name.toLowerCase().includes("lạ")) {
+            isStranger = true;
+            displayName = "Khách (Thẻ lạ)";
+            displayMSSV = "---";
+        }
+
+        // Cập nhật giao diện quét thẻ
+        updateUIState(isStranger ? 'error' : 'success', isStranger ? "THẺ CHƯA ĐĂNG KÝ" : "XIN CHÀO: " + displayName.toUpperCase(), uid);
         document.getElementById('lastTimeDisp').innerText = timeStr;
         
+        // Lưu vào bộ nhớ tạm để xuất CSV
         const newLog = { 
-            uid, 
-            name: isStranger ? "Khách (Thẻ lạ)" : name, 
-            mssv: isStranger ? "---" : mssv, 
+            uid: uid, 
+            name: displayName, 
+            mssv: displayMSSV, 
             time: timeStr,
             status: isStranger ? "error" : "success"
         };
@@ -271,6 +291,7 @@
             btnReg.classList.remove('d-none');
         }
 
+        // Reset về trạng thái chờ sau 4 giây
         setTimeout(() => {
             if(lastProcessedUID === uid) {
                 icon.style.opacity = "0.3";
@@ -278,7 +299,7 @@
                 instr.innerText = "VUI LÒNG QUÉT THẺ";
                 icon.className = "bx bx-rfid bx-lg mb-3 text-secondary";
             }
-        }, 5000);
+        }, 4000);
     }
 
     eraWidget.init({
@@ -291,10 +312,15 @@
         actions = conf.actions || [];
       },
       onValues: (values) => {
-        let vUID = (configs.uid && values[configs.uid.id]) ? String(values[configs.uid.id].value) : "";
-        let vName = (configs.name && values[configs.name.id]) ? String(values[configs.name.id].value) : "---";
-        let vMSSV = (configs.mssv && values[configs.mssv.id]) ? String(values[configs.mssv.id].value) : "---";
-        if (vUID && vUID !== "---" && vUID !== "0") processAttendance(vUID, vName, vMSSV);
+        // Lấy giá trị thô từ Widget
+        let rawUID = (configs.uid && values[configs.uid.id]) ? String(values[configs.uid.id].value) : "";
+        let rawName = (configs.name && values[configs.name.id]) ? String(values[configs.name.id].value) : "";
+        let rawMSSV = (configs.mssv && values[configs.mssv.id]) ? String(values[configs.mssv.id].value) : "";
+
+        // Chỉ xử lý nếu UID không rỗng và không phải giá trị mặc định của chip khi chưa quét
+        if (rawUID && rawUID !== "---" && rawUID !== "0" && rawUID !== "None") {
+            processAttendance(rawUID, rawName, rawMSSV);
+        }
       }
     });
 
@@ -304,16 +330,19 @@
         document.getElementById('authModal').style.display = 'flex'; 
         document.getElementById('adminPIN').focus();
     };
-    document.getElementById('btnReset').onclick = () => { location.reload(); };
+    
+    document.getElementById('btnReset').onclick = () => { 
+        if(confirm("Bạn muốn làm mới toàn bộ dữ liệu hiện tại?")) location.reload(); 
+    };
 
     document.getElementById('btnConfirmReg').onclick = () => {
         const name = document.getElementById('regName').value.trim();
         const mssv = document.getElementById('regMSSV').value.trim();
         const uid = document.getElementById('regUID').value;
-        if (!name || !mssv) return alert("Nhập đủ tên và mã số!");
+        if (!name || !mssv) return alert("Vui lòng nhập đầy đủ thông tin!");
         if (actions[0]) {
             eraWidget.triggerAction(actions[0].action, `REG|${uid}|${name}|${mssv}`);
-            alert("Đã gửi yêu cầu đăng ký!");
+            alert("Lệnh đăng ký đã được gửi tới thiết bị!");
             closeReg();
         }
     };
