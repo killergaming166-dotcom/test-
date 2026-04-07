@@ -197,7 +197,7 @@
                 </tr>
               </thead>
               <tbody id="logTableBody">
-                <!-- Data rows -->
+                <!-- Dữ liệu được render ở đây -->
               </tbody>
             </table>
           </div>
@@ -231,7 +231,13 @@
 
     const eraWidget = new EraWidget();
     
+    // Hàm thêm log với bộ lọc dữ liệu rác
     function addLogEntry(name, mssv, uid, type) {
+        // KIỂM TRA: Bỏ qua nếu tên là "Sẵn sàng", rỗng hoặc chỉ toàn dấu gạch
+        if (!name || name.trim() === "" || name === "Sẵn sàng" || name === "---") {
+            return; 
+        }
+
         const now = new Date();
         const timeStr = now.getHours().toString().padStart(2, '0') + ":" + 
                         now.getMinutes().toString().padStart(2, '0') + ":" + 
@@ -277,7 +283,7 @@
       },
 
       onValues: (values) => {
-        // Cập nhật trạng thái Cloud Online
+        // Trạng thái Cloud Online
         cloudDot.className = "status-dot online";
         cloudText.innerText = "Cloud Online";
         cloudText.className = "fw-bold text-success small";
@@ -288,26 +294,32 @@
         let currentName = (configs.name && values[configs.name.id]) ? values[configs.name.id].value : "";
         let currentMSSV = (configs.mssv && values[configs.mssv.id]) ? values[configs.mssv.id].value : "---";
 
+        // Logic xử lý quẹt thẻ thực tế
         if (currentUID !== lastUID && currentUID !== "---" && currentUID !== "0" && currentUID !== "") {
             lastUID = currentUID;
-            cardUIDDisplay.innerText = currentUID;
-            studentNameDisplay.innerText = currentName || "Unknown User";
-            studentIDDisplay.innerText = currentMSSV;
+            
+            // Chỉ xử lý nếu Tên không phải là "Sẵn sàng"
+            if (currentName !== "Sẵn sàng" && currentName !== "") {
+                cardUIDDisplay.innerText = currentUID;
+                studentNameDisplay.innerText = currentName;
+                studentIDDisplay.innerText = currentMSSV;
 
-            const isUnknown = (currentName.toLowerCase().includes("unknown") || currentName.toLowerCase().includes("lạ") || currentName === "Sinh viên mới");
+                const isUnknown = (currentName.toLowerCase().includes("unknown") || currentName.toLowerCase().includes("lạ") || currentName === "Sinh viên mới");
 
-            if (isUnknown) {
-                instruction.innerText = "THẺ CHƯA ĐĂNG KÝ";
-                statusBox.className = "scan-box error";
-                statusIcon.className = "bx bx-shield-x bx-lg mb-3 pulse";
-                addLogEntry("Khách (Thẻ lạ)", "---", currentUID, 'error');
-            } else {
-                instruction.innerText = "ĐIỂM DANH THÀNH CÔNG";
-                statusBox.className = "scan-box success";
-                statusIcon.className = "bx bx-check-double bx-lg mb-3 pulse";
-                addLogEntry(currentName, currentMSSV, currentUID, 'success');
+                if (isUnknown) {
+                    instruction.innerText = "THẺ CHƯA ĐĂNG KÝ";
+                    statusBox.className = "scan-box error";
+                    statusIcon.className = "bx bx-shield-x bx-lg mb-3 pulse";
+                    addLogEntry("Khách (Thẻ lạ)", "---", currentUID, 'error');
+                } else {
+                    instruction.innerText = "ĐIỂM DANH THÀNH CÔNG";
+                    statusBox.className = "scan-box success";
+                    statusIcon.className = "bx bx-check-double bx-lg mb-3 pulse";
+                    addLogEntry(currentName, currentMSSV, currentUID, 'success');
+                }
             }
             
+            // Reset giao diện sau 4s nhưng KHÔNG lưu log "Sẵn sàng"
             setTimeout(() => {
                 if(lastUID === currentUID) {
                   statusBox.className = "scan-box waiting";
