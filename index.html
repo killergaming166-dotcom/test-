@@ -46,7 +46,7 @@
     .sub-text { color: #a0aec0; font-size: 1.2rem; margin-bottom: 30px; font-weight: 500; }
     .uid-badge { background: #f1f5f9; color: #94a3b8; padding: 8px 20px; border-radius: 20px; font-family: monospace; font-size: 0.85rem; display: inline-block; }
 
-    .action-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; }
+    .action-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
     
     .stat-card {
         background: white;
@@ -84,7 +84,7 @@
     .btn-reset-full { color: #ff3e1d; }
     .btn-reset-full:hover { background: #fff5f4; }
 
-    #authModal, #regModal {
+    #authModal {
         display: none; position: fixed; z-index: 1000; top: 0; left: 0; width: 100%; height: 100%;
         background: rgba(26, 32, 44, 0.6); backdrop-filter: blur(8px); align-items: center; justify-content: center;
     }
@@ -110,27 +110,6 @@
     </div>
   </div>
 
-  <!-- Modal Đăng ký -->
-  <div id="regModal">
-    <div class="modal-content-custom shadow-lg">
-        <h5 class="fw-bold mb-4">Đăng ký thẻ mới</h5>
-        <div class="mb-3">
-            <label class="form-label small fw-bold">MÃ UID</label>
-            <input type="text" id="regUID" class="form-control bg-light border-0 fw-bold" readonly style="border-radius: 10px;">
-        </div>
-        <div class="mb-3">
-            <label class="form-label small fw-bold">HỌ TÊN</label>
-            <input type="text" id="regName" class="form-control" placeholder="Nhập tên..." style="border-radius: 10px;">
-        </div>
-        <div class="mb-4">
-            <label class="form-label small fw-bold">MSSV</label>
-            <input type="text" id="regMSSV" class="form-control" placeholder="Nhập mã số..." style="border-radius: 10px;">
-        </div>
-        <button id="btnConfirmReg" class="btn btn-primary w-100 py-3 fw-bold" style="border-radius: 15px;">LƯU THÔNG TIN</button>
-        <button onclick="closeReg()" class="btn btn-link w-100 text-muted mt-2">Hủy</button>
-    </div>
-  </div>
-
   <div class="container-main">
     <div class="header-section">
         <h1 class="header-title">RFID Check-in</h1>
@@ -147,33 +126,29 @@
         <h3 id="instruction" class="instruction-text">Sẵn sàng quét thẻ</h3>
         <div id="subText" class="sub-text">---</div>
         <div class="uid-badge" id="cardUIDDisplay">UID: ---</div>
-        
-        <div id="btnGroup" class="d-none mt-4">
-            <button id="btnQuickReg" class="btn btn-danger btn-sm px-4" style="border-radius: 20px;">
-                <i class="bx bx-plus-circle me-1"></i> Đăng ký ngay
-            </button>
-        </div>
     </div>
 
     <div class="action-row">
         <div class="stat-card">
-            <span class="stat-label">Tổng lượt</span>
+            <span class="stat-label">Tổng lượt quét</span>
             <span id="statTotal" class="stat-value">0</span>
         </div>
 
-        <button onclick="requestExport()" class="btn-action btn-export">
-            <i class="bx bx-download"></i>
-            <span>Xuất file</span>
-        </button>
+        <div style="display: flex; flex-direction: column; gap: 15px;">
+            <button onclick="requestExport()" class="btn-action btn-export" style="flex: 1; width: 100%;">
+                <i class="bx bx-download"></i>
+                <span>Xuất file CSV</span>
+            </button>
 
-        <button id="btnResetHistory" class="btn-action btn-reset-full">
-            <i class="bx bx-trash"></i>
-            <span>Xóa Lịch Sử</span>
-        </button>
+            <button id="btnResetHistory" class="btn-action btn-reset-full" style="flex: 1; width: 100%;">
+                <i class="bx bx-trash"></i>
+                <span>Xóa Lịch Sử</span>
+            </button>
+        </div>
     </div>
     
     <div class="text-center mt-5">
-        <small class="text-muted" style="font-size: 0.6rem; letter-spacing: 0.1em; font-weight: 700; opacity: 0.5;">VERSION 2.3 PRO - DATA SECURED</small>
+        <small class="text-muted" style="font-size: 0.6rem; letter-spacing: 0.1em; font-weight: 700; opacity: 0.5;">VERSION 3.0 - ANTI-DOUBLE SCAN ENABLED</small>
     </div>
   </div>
 
@@ -186,13 +161,14 @@
     let scanCount = parseInt(localStorage.getItem('scanCount')) || 0;
     
     let configs = { uid: null, name: null, mssv: null };
-    let actions = [];
     let isInitialLoad = true;
+    let pendingAction = null;
     
-    // BIẾN QUAN TRỌNG ĐỂ CHỐNG LẶP
+    // LOGIC CHỐNG ĐỌC TRÙNG LẶP
     let lastUID = "";
     let lastTime = 0;
-    const COOLDOWN_TIME = 5000; // 5 giây mới cho quét lại cùng 1 thẻ
+    let isProcessing = false; // Khóa khi đang trong hiệu ứng hiển thị
+    const COOLDOWN_TIME = 3000; // 3 giây chặn quét lại cùng 1 thẻ
 
     document.getElementById('statTotal').innerText = scanCount;
 
@@ -209,15 +185,11 @@
     updateClock();
 
     function closeAuth() { document.getElementById('authModal').style.display = 'none'; document.getElementById('adminPIN').value = ""; }
-    function closeReg() { document.getElementById('regModal').style.display = 'none'; }
     
     function verifyAdmin() {
         if (document.getElementById('adminPIN').value === MASTER_PIN) {
             closeAuth();
-            if (pendingAction === 'register') {
-                document.getElementById('regUID').value = document.getElementById('cardUIDDisplay').innerText.replace("UID: ", "");
-                document.getElementById('regModal').style.display = 'flex';
-            } else if (pendingAction === 'export') {
+            if (pendingAction === 'export') {
                 performExport();
             } else if (pendingAction === 'reset') {
                 performReset();
@@ -248,48 +220,47 @@
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement("a");
         link.href = URL.createObjectURL(blob);
-        link.download = `RFID_Log.csv`;
+        link.download = `RFID_Log_Attendance.csv`;
         link.click();
     }
 
-    // HÀM XỬ LÝ QUÉT THẺ (ĐÃ SỬA LỖI LẶP)
+    // XỬ LÝ QUÉT THẺ
     function handleScan(uid, name, mssv) {
-        // 1. Kiểm tra giá trị rác hoặc giá trị trống
+        // 1. Kiểm tra giá trị rỗng/mặc định
         if (!uid || uid === "0" || uid === "---" || uid === "") {
-            lastUID = ""; // Reset trạng thái nếu cảm biến trả về rỗng
+            lastUID = ""; 
             return;
         }
 
-        // 2. Bỏ qua lượt quét đầu tiên khi vừa load trang (nếu cảm biến đang giữ giá trị cũ)
+        // 2. Chặn lượt quét đầu tiên khi load (tránh lấy dữ liệu cũ từ Cloud)
         if (isInitialLoad) {
             isInitialLoad = false;
             lastUID = uid;
-            lastTime = Date.now();
             return;
         }
-        
-        const now = Date.now();
 
-        // 3. LOGIC CHỐNG TRÙNG LẶP:
-        // Nếu UID hiện tại giống UID vừa quét VÀ chưa qua 5 giây -> BỎ QUA
-        if (uid === lastUID && (now - lastTime < COOLDOWN_TIME)) {
-            return; 
+        // 3. CHỐNG ĐỌC 2 LẦN:
+        const now = Date.now();
+        // Nếu đang trong hiệu ứng hiển thị (isProcessing) HOẶC (UID trùng + chưa đủ cooldown) thì BỎ QUA
+        if (isProcessing || (uid === lastUID && (now - lastTime < COOLDOWN_TIME))) {
+            return;
         }
 
-        // Cập nhật mốc thời gian và UID mới nhất để khóa
+        // Đánh dấu bắt đầu xử lý
+        isProcessing = true;
         lastUID = uid;
         lastTime = now;
 
-        // Xử lý dữ liệu
         const timeStr = new Date().toLocaleTimeString('vi-VN', {hour12: false});
-        let isStranger = (!name || name === "---" || name === "" || name.toLowerCase().includes("lạ") || name.toLowerCase().includes("mới"));
+        let isStranger = (!name || name === "---" || name === "" || name.toUpperCase().includes("LA") || name.toUpperCase().includes("MOI"));
 
-        updateUI(isStranger ? 'error' : 'success', isStranger ? "Thẻ chưa đăng ký" : name, isStranger ? "---" : mssv, uid);
+        // Cập nhật UI
+        updateUI(isStranger ? 'error' : 'success', isStranger ? "Thẻ chưa xác định" : name, isStranger ? "Không có thông tin" : mssv, uid);
         
+        // Lưu Log
         scanCount++;
         document.getElementById('statTotal').innerText = scanCount;
-        attendanceLogs.push({ uid, name: isStranger ? "Chưa đăng ký" : name, mssv: isStranger ? "N/A" : mssv, time: timeStr });
-        
+        attendanceLogs.push({ uid, name: isStranger ? "Người lạ" : name, mssv: isStranger ? "N/A" : mssv, time: timeStr });
         saveData();
     }
 
@@ -298,7 +269,6 @@
         const icon = document.getElementById('statusIcon');
         const instr = document.getElementById('instruction');
         const subT = document.getElementById('subText');
-        const btnG = document.getElementById('btnGroup');
         const uidD = document.getElementById('cardUIDDisplay');
 
         uidD.innerText = "UID: " + uid;
@@ -309,15 +279,13 @@
             box.className = "scan-card active-success shadow-lg";
             icon.className = "bx bx-check-circle qr-placeholder text-primary";
             instr.style.color = "#696cff";
-            btnG.classList.add('d-none');
         } else {
             box.className = "scan-card active-error shadow-lg shake";
             icon.className = "bx bx-error-circle qr-placeholder text-danger";
             instr.style.color = "#ff3e1d";
-            btnG.classList.remove('d-none');
         }
 
-        // Trở về trạng thái chờ sau 3 giây
+        // Reset trạng thái chờ sau 3 giây và mở khóa cho lần quét tiếp theo
         setTimeout(() => {
             box.className = "scan-card";
             icon.className = "bx bx-qr-scan qr-placeholder";
@@ -325,15 +293,16 @@
             instr.innerText = "Sẵn sàng quét thẻ";
             instr.style.color = "";
             subT.innerText = "---";
-            btnG.classList.add('d-none');
+            isProcessing = false; // MỞ KHÓA CHO LẦN QUÉT MỚI
         }, 3000);
     }
 
     eraWidget.init({
-      needRealtimeConfigs: true, needActions: true,
+      needRealtimeConfigs: true,
       onConfiguration: (c) => { 
-          configs.uid = c.realtime_configs[0]; configs.name = c.realtime_configs[1]; configs.mssv = c.realtime_configs[2];
-          actions = c.actions || [];
+          configs.uid = c.realtime_configs[0]; 
+          configs.name = c.realtime_configs[1]; 
+          configs.mssv = c.realtime_configs[2];
       },
       onValues: (v) => {
         const u = configs.uid ? v[configs.uid.id]?.value : "";
@@ -347,21 +316,6 @@
         pendingAction = 'reset';
         document.getElementById('authTitle').innerText = "Xác nhận xóa sạch lịch sử";
         document.getElementById('authModal').style.display = 'flex';
-    };
-
-    document.getElementById('btnQuickReg').onclick = () => {
-        pendingAction = 'register';
-        document.getElementById('authModal').style.display = 'flex';
-    };
-
-    document.getElementById('btnConfirmReg').onclick = () => {
-        const n = document.getElementById('regName').value;
-        const m = document.getElementById('regMSSV').value;
-        const u = document.getElementById('regUID').value;
-        if (n && m && actions[0]) {
-            eraWidget.triggerAction(actions[0].action, `REG|${u}|${n}|${m}`);
-            alert("Đã gửi yêu cầu đăng ký!"); closeReg();
-        }
     };
   </script>
 </body>
