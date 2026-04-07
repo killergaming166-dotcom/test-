@@ -15,8 +15,14 @@
         #pinModal { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(8px); z-index: 50; align-items: center; justify-content: center; }
         .modal-content { background: white; padding: 2.5rem; border-radius: 30px; width: 90%; max-width: 380px; text-align: center; }
         
-        .status-pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        /* Hiệu ứng rung khi có lỗi */
+        .shake { animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both; }
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+            40%, 60% { transform: translate3d(4px, 0, 0); }
+        }
     </style>
 </head>
 <body class="p-4">
@@ -41,7 +47,7 @@
         <!-- Header -->
         <div class="flex flex-col md:flex-row justify-between items-center gap-4 px-2">
             <div>
-                <h1 class="text-3xl font-black text-slate-800 tracking-tight text-center md:text-left">Hệ Thống Điểm Danh</h1>
+                <h1 class="text-3xl font-black text-slate-800 tracking-tight text-center md:text-left uppercase">Hệ Thống RFID</h1>
                 <p class="text-slate-400 text-sm font-medium text-center md:text-left flex items-center gap-2">
                     <span class="w-2 h-2 bg-green-500 rounded-full animate-ping"></span> 
                     Thiết bị đang hoạt động trực tuyến
@@ -62,8 +68,8 @@
 
         <!-- Main Display Card -->
         <div class="card relative overflow-hidden">
-            <div id="scanArea" class="h-[400px] flex flex-col items-center justify-center border-4 border-dashed border-slate-50 rounded-[32px] transition-all duration-700 bg-slate-50/30">
-                <div id="statusIcon" class="mb-8 text-slate-200 transition-transform duration-500">
+            <div id="scanArea" class="h-[400px] flex flex-col items-center justify-center border-4 border-dashed border-slate-100 rounded-[32px] transition-all duration-500 bg-slate-50/30">
+                <div id="statusIcon" class="mb-8 text-slate-200 transition-all duration-500">
                     <svg class="w-32 h-32" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 17h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
                 </div>
                 
@@ -73,23 +79,23 @@
                 </div>
 
                 <div id="displayUID" class="mt-12 px-6 py-2 bg-white border border-slate-100 rounded-full text-xs font-mono text-slate-300 shadow-sm italic">
-                    Chưa nhận diện thẻ
+                    Chờ nhận diện thẻ
                 </div>
             </div>
 
-            <!-- Action Floating Buttons -->
+            <!-- Action Buttons -->
             <div class="grid grid-cols-2 gap-4 mt-8">
-                <button onclick="openPinModal()" class="btn-export py-5 rounded-2xl font-black text-xs tracking-widest flex items-center justify-center gap-3 shadow-xl">
+                <button onclick="openPinModal()" class="btn-export py-5 rounded-2xl font-black text-xs tracking-widest flex items-center justify-center gap-3 shadow-xl uppercase">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                    XUẤT BÁO CÁO CSV
+                    Xuất File Excel
                 </button>
                 <button onclick="location.reload()" class="bg-slate-100 text-slate-500 py-5 rounded-2xl font-black text-xs tracking-widest hover:bg-slate-200 transition-colors uppercase">
-                    Làm mới phiên
+                    Làm mới hệ thống
                 </button>
             </div>
         </div>
 
-        <p class="text-center text-[10px] text-slate-400 font-bold uppercase tracking-[0.3em]">Hệ thống xử lý bảo mật bởi E-Ra Cloud</p>
+        <p class="text-center text-[10px] text-slate-400 font-bold uppercase tracking-[0.3em]">Hệ thống bảo mật bởi E-Ra Cloud</p>
     </div>
 
     <script src="https://www.unpkg.com/@eohjsc/era-widget@1.1.3/src/index.js"></script>
@@ -128,27 +134,45 @@
         function handleScan(uid, name, mssv) {
             const timeStr = new Date().toLocaleTimeString('vi-VN', { hour12: false, minute: '2-digit', second: '2-digit' });
             
-            // Cập nhật giao diện trung tâm
             const displayName = document.getElementById('displayName');
             const displayMSSV = document.getElementById('displayMSSV');
             const displayUID = document.getElementById('displayUID');
             const scanArea = document.getElementById('scanArea');
             const statusIcon = document.getElementById('statusIcon');
             
+            // Kiểm tra xem thẻ có phải người lạ không
+            const isStranger = (name === "Thẻ lạ" || mssv === "Không có dữ liệu" || mssv === "---");
+
             displayName.innerText = name.toUpperCase();
-            displayName.className = "text-5xl font-black text-indigo-600 uppercase tracking-tight transition-all transform scale-110";
             displayMSSV.innerText = mssv;
             displayUID.innerText = `UID: ${uid}`;
-            displayUID.className = "mt-12 px-6 py-2 bg-indigo-50 border border-indigo-100 rounded-full text-xs font-mono text-indigo-400 shadow-sm italic";
-            
-            scanArea.className = "h-[400px] flex flex-col items-center justify-center border-4 border-solid border-indigo-500 rounded-[32px] transition-all duration-500 bg-indigo-50/50";
-            statusIcon.className = "mb-8 text-indigo-500 transform scale-110 transition-all";
-            statusIcon.innerHTML = `<svg class="w-32 h-32" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`;
 
-            // Lưu log ngầm để xuất file
+            // Reset animation
+            scanArea.classList.remove('shake');
+
+            if (isStranger) {
+                // GIAO DIỆN LỖI (NGƯỜI LẠ)
+                displayName.className = "text-5xl font-black text-red-600 uppercase tracking-tight transition-all transform scale-110";
+                displayUID.className = "mt-12 px-6 py-2 bg-red-100 border border-red-200 rounded-full text-xs font-mono text-red-500 shadow-sm italic";
+                scanArea.className = "h-[400px] flex flex-col items-center justify-center border-4 border-solid border-red-500 rounded-[32px] transition-all duration-300 bg-red-50 shake";
+                statusIcon.className = "mb-8 text-red-500 transform scale-110 transition-all";
+                statusIcon.innerHTML = `
+                    <svg class="w-32 h-32" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>`;
+            } else {
+                // GIAO DIỆN THÀNH CÔNG
+                displayName.className = "text-5xl font-black text-indigo-600 uppercase tracking-tight transition-all transform scale-110";
+                displayUID.className = "mt-12 px-6 py-2 bg-indigo-50 border border-indigo-100 rounded-full text-xs font-mono text-indigo-400 shadow-sm italic";
+                scanArea.className = "h-[400px] flex flex-col items-center justify-center border-4 border-solid border-indigo-500 rounded-[32px] transition-all duration-500 bg-indigo-50/50";
+                statusIcon.className = "mb-8 text-indigo-500 transform scale-110 transition-all";
+                statusIcon.innerHTML = `
+                    <svg class="w-32 h-32" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+                    </svg>`;
+            }
+
             logs.unshift({ time: timeStr, name, mssv, uid });
-            
-            // Cập nhật thống kê
             document.getElementById('totalCount').innerText = logs.length;
             document.getElementById('lastTime').innerText = timeStr.substring(0, 5);
 
@@ -160,7 +184,8 @@
                     displayMSSV.innerText = "";
                     displayUID.innerText = "Chờ nhận diện thẻ";
                     displayUID.className = "mt-12 px-6 py-2 bg-white border border-slate-100 rounded-full text-xs font-mono text-slate-300 shadow-sm italic";
-                    scanArea.className = "h-[400px] flex flex-col items-center justify-center border-4 border-dashed border-slate-50 rounded-[32px] transition-all duration-700 bg-slate-50/30";
+                    scanArea.className = "h-[400px] flex flex-col items-center justify-center border-4 border-dashed border-slate-100 rounded-[32px] transition-all duration-700 bg-slate-50/30";
+                    scanArea.classList.remove('shake');
                     statusIcon.className = "mb-8 text-slate-200 transition-all";
                     statusIcon.innerHTML = `<svg class="w-32 h-32" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 17h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>`;
                 }
@@ -189,7 +214,7 @@
                 const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
                 const link = document.createElement("a");
                 link.href = URL.createObjectURL(blob);
-                link.download = `BaoCao_RFID_${new Date().getTime()}.csv`;
+                link.download = `RFID_Report_${new Date().getTime()}.csv`;
                 link.click();
             } else {
                 alert("Mã PIN không đúng!");
