@@ -86,10 +86,52 @@
 
     .pulse { animation: pulse-animation 2s infinite; }
     @keyframes pulse-animation { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+
+    /* Modal Overlay Custom */
+    #regModal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.5);
+        align-items: center;
+        justify-content: center;
+    }
+    .reg-modal-content {
+        background: white;
+        padding: 24px;
+        border-radius: 16px;
+        width: 100%;
+        max-width: 400px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    }
   </style>
 </head>
 
 <body>
+
+  <!-- Modal Đăng ký thẻ mới -->
+  <div id="regModal">
+    <div class="reg-modal-content">
+        <h5 class="fw-bold mb-3">Đăng ký thẻ mới</h5>
+        <div class="mb-3">
+            <label class="form-label small fw-bold">UID THẺ</label>
+            <input type="text" id="regUID" class="form-control bg-light" readonly>
+        </div>
+        <div class="mb-3">
+            <label class="form-label small fw-bold">HỌ VÀ TÊN</label>
+            <input type="text" id="regName" class="form-control" placeholder="Nhập tên sinh viên...">
+        </div>
+        <div class="mb-3">
+            <label class="form-label small fw-bold">MÃ SỐ SINH VIÊN</label>
+            <input type="text" id="regMSSV" class="form-control" placeholder="Nhập MSSV...">
+        </div>
+        <div class="d-flex gap-2 mt-4">
+            <button id="btnCancelReg" class="btn btn-label-secondary w-50">Hủy</button>
+            <button id="btnConfirmReg" class="btn btn-primary w-50">Lưu thông tin</button>
+        </div>
+    </div>
+  </div>
 
   <div class="container-xxl flex-grow-1 container-p-y">
     <div class="row">
@@ -134,6 +176,10 @@
                     <i class="bx bx-hash me-1"></i>
                     <small class="fw-medium">UID: <span id="cardUID" class="font-monospace">---</span></small>
                 </div>
+                <!-- Nút Đăng ký nhanh -->
+                <button id="btnQuickReg" class="btn btn-sm btn-dark mt-3 d-none">
+                    <i class="bx bx-plus-circle me-1"></i> Đăng ký ngay
+                </button>
             </div>
           </div>
         </div>
@@ -173,7 +219,7 @@
                     <i class="bx bx-info-circle text-white me-2"></i>
                     <small class="text-white fw-bold text-uppercase">Hướng dẫn</small>
                 </div>
-                <p class="text-white small mb-0 opacity-75">Dữ liệu được đồng bộ trực tiếp với Era Cloud. Vui lòng đảm bảo đèn báo Cloud màu xanh để hoạt động ổn định.</p>
+                <p class="text-white small mb-0 opacity-75">Dữ liệu được đồng bộ trực tiếp với Era Cloud. Bạn có thể đăng ký thẻ mới bằng cách quét thẻ lạ và nhấn nút đăng ký.</p>
             </div>
         </div>
       </div>
@@ -216,7 +262,15 @@
     const statusBox = document.getElementById('statusBox');
     const statusIcon = document.getElementById('statusIcon');
     const btnReset = document.getElementById('btnReset');
+    const btnQuickReg = document.getElementById('btnQuickReg');
     
+    const regModal = document.getElementById('regModal');
+    const regUID = document.getElementById('regUID');
+    const regName = document.getElementById('regName');
+    const regMSSV = document.getElementById('regMSSV');
+    const btnCancelReg = document.getElementById('btnCancelReg');
+    const btnConfirmReg = document.getElementById('btnConfirmReg');
+
     const cloudDot = document.getElementById('cloudDot');
     const cloudText = document.getElementById('cloudText');
     const netBadge = document.getElementById('netBadge');
@@ -231,12 +285,8 @@
 
     const eraWidget = new EraWidget();
     
-    // Hàm thêm log với bộ lọc dữ liệu rác
     function addLogEntry(name, mssv, uid, type) {
-        // KIỂM TRA: Bỏ qua nếu tên là "Sẵn sàng", rỗng hoặc chỉ toàn dấu gạch
-        if (!name || name.trim() === "" || name === "Sẵn sàng" || name === "---") {
-            return; 
-        }
+        if (!name || name.trim() === "" || name === "Sẵn sàng" || name === "---") return; 
 
         const now = new Date();
         const timeStr = now.getHours().toString().padStart(2, '0') + ":" + 
@@ -283,7 +333,6 @@
       },
 
       onValues: (values) => {
-        // Trạng thái Cloud Online
         cloudDot.className = "status-dot online";
         cloudText.innerText = "Cloud Online";
         cloudText.className = "fw-bold text-success small";
@@ -294,11 +343,9 @@
         let currentName = (configs.name && values[configs.name.id]) ? values[configs.name.id].value : "";
         let currentMSSV = (configs.mssv && values[configs.mssv.id]) ? values[configs.mssv.id].value : "---";
 
-        // Logic xử lý quẹt thẻ thực tế
         if (currentUID !== lastUID && currentUID !== "---" && currentUID !== "0" && currentUID !== "") {
             lastUID = currentUID;
             
-            // Chỉ xử lý nếu Tên không phải là "Sẵn sàng"
             if (currentName !== "Sẵn sàng" && currentName !== "") {
                 cardUIDDisplay.innerText = currentUID;
                 studentNameDisplay.innerText = currentName;
@@ -310,23 +357,25 @@
                     instruction.innerText = "THẺ CHƯA ĐĂNG KÝ";
                     statusBox.className = "scan-box error";
                     statusIcon.className = "bx bx-shield-x bx-lg mb-3 pulse";
+                    btnQuickReg.classList.remove('d-none'); // HIỆN NÚT ĐĂNG KÝ
                     addLogEntry("Khách (Thẻ lạ)", "---", currentUID, 'error');
                 } else {
                     instruction.innerText = "ĐIỂM DANH THÀNH CÔNG";
                     statusBox.className = "scan-box success";
                     statusIcon.className = "bx bx-check-double bx-lg mb-3 pulse";
+                    btnQuickReg.classList.add('d-none');
                     addLogEntry(currentName, currentMSSV, currentUID, 'success');
                 }
             }
             
-            // Reset giao diện sau 4s nhưng KHÔNG lưu log "Sẵn sàng"
             setTimeout(() => {
                 if(lastUID === currentUID) {
                   statusBox.className = "scan-box waiting";
                   statusIcon.className = "bx bx-rfid bx-lg mb-3";
                   instruction.innerText = "VUI LÒNG QUẸT THẺ";
+                  btnQuickReg.classList.add('d-none');
                 }
-            }, 4000);
+            }, 6000); // Tăng thời gian chờ để người dùng kịp nhấn đăng ký
 
         } else if (currentUID === "---" || currentUID === "0" || currentUID === "") {
             instruction.innerText = "VUI LÒNG QUẸT THẺ";
@@ -335,14 +384,57 @@
             studentNameDisplay.innerText = "Sẵn sàng";
             studentIDDisplay.innerText = "---";
             cardUIDDisplay.innerText = "---";
+            btnQuickReg.classList.add('d-none');
             lastUID = "";
         }
       },
     });
 
+    // Mở Modal Đăng ký
+    btnQuickReg.addEventListener('click', () => {
+        regUID.value = cardUIDDisplay.innerText;
+        regName.value = "";
+        regMSSV.value = "";
+        regModal.style.display = 'flex';
+    });
+
+    // Hủy đăng ký
+    btnCancelReg.addEventListener('click', () => {
+        regModal.style.display = 'none';
+    });
+
+    // Xác nhận đăng ký và gửi Action lên Cloud
+    btnConfirmReg.addEventListener('click', () => {
+        const name = regName.value.trim();
+        const mssv = regMSSV.value.trim();
+        const uid = regUID.value;
+
+        if (!name || !mssv) {
+            alert("Vui lòng nhập đầy đủ thông tin!");
+            return;
+        }
+
+        // Gửi lệnh qua Era Action (Dưới dạng chuỗi JSON hoặc CSV)
+        if (actions[0]) {
+            // Định dạng dữ liệu gửi đi: "REG|UID|NAME|MSSV"
+            const payload = `REG|${uid}|${name}|${mssv}`;
+            eraWidget.triggerAction(actions[0].action, payload);
+            
+            regModal.style.display = 'none';
+            instruction.innerText = "ĐANG LƯU THÔNG TIN...";
+            statusBox.className = "scan-box waiting";
+            
+            // Cập nhật giao diện tạm thời
+            studentNameDisplay.innerText = name;
+            studentIDDisplay.innerText = mssv;
+        } else {
+            alert("Hệ thống chưa cấu hình Action để lưu dữ liệu!");
+        }
+    });
+
     btnReset.addEventListener('click', () => {
       if (actions[0]) {
-          eraWidget.triggerAction(actions[0].action, null);
+          eraWidget.triggerAction(actions[0].action, "RESET");
           lastUID = "";
           attendanceLogs = [];
           renderLogs();
