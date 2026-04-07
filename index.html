@@ -63,12 +63,12 @@
                 </svg>
             </div>
             
-            <div class="text-center px-6">
-                <h2 id="displayName" class="text-3xl font-black text-slate-300 uppercase leading-tight">Chạm thẻ</h2>
+            <div class="text-center px-6 w-full">
+                <h2 id="displayName" class="text-3xl font-black text-slate-300 uppercase leading-tight truncate">Chạm thẻ</h2>
                 <p id="displayMSSV" class="text-lg font-bold text-slate-400 mt-2 h-6"></p>
             </div>
 
-            <div id="displayUID" class="absolute bottom-10 px-6 py-2 bg-white border border-slate-100 rounded-full text-[11px] font-mono font-bold text-slate-400">
+            <div id="displayUID" class="absolute bottom-10 px-6 py-2 bg-white border border-slate-100 rounded-full text-[11px] font-mono font-bold text-slate-400 min-w-[140px] text-center">
                 CHỜ DỮ LIỆU...
             </div>
         </div>
@@ -93,7 +93,6 @@
         let configUID, configName, configMSSV;
         
         let lastScannedUID = null; 
-        let isProcessing = false;
 
         eraWidget.init({
             needRealtimeConfigs: true,
@@ -112,13 +111,13 @@
                 const hasCard = (uid && uid !== "0" && uid !== "---" && uid !== "None" && uid !== "" && uid !== "Sẵn sàng");
 
                 if (hasCard) {
-                    // Nếu thẻ trùng với lần vừa quét (chưa nhấc ra) thì bỏ qua
+                    // Nếu thẻ trùng với lần vừa quét thì không xử lý lại logs, nhưng vẫn giữ UI hiển thị
                     if (uid === lastScannedUID) return;
 
-                    // Thực hiện quét ngay lập tức
+                    // Thực hiện quét mới
                     executeScan(uid, name, mssv);
                 } else {
-                    // Thẻ đã được nhấc ra khỏi đầu đọc -> Reset và sẵn sàng cho thẻ tiếp theo
+                    // Thẻ đã được nhấc ra khỏi đầu đọc -> Reset UI về trạng thái chờ
                     if (lastScannedUID !== null) {
                         lastScannedUID = null;
                         resetUI();
@@ -128,17 +127,15 @@
         });
 
         function speakData(name, mssv, uid) {
-            // Hủy các lời thoại cũ đang chờ
             window.speechSynthesis.cancel();
             
-            // Nếu là người lạ thì đọc khác
             const isStranger = (name.toUpperCase().includes("NGUOI LA") || mssv === "---" || name === "NGƯỜI LẠ");
             let textToSpeak = "";
             
             if (isStranger) {
-                textToSpeak = `Phát hiện thẻ lạ. Mã thẻ là ${uid.split('').join(' ')}`;
+                textToSpeak = `Phát hiện thẻ lạ. UID là ${uid.split('').join(' ')}`;
             } else {
-                textToSpeak = `Xin chào ${name}. Mã số sinh viên ${mssv.split('').join(' ')}.`;
+                textToSpeak = `${name}. Mã số sinh viên ${mssv.split('').join(' ')}.`;
             }
 
             const utterance = new SpeechSynthesisUtterance(textToSpeak);
@@ -156,10 +153,10 @@
             logs.unshift({ time: timeStr, name, mssv, uid, type: isStranger ? 'NGƯỜI LẠ' : 'SINH VIÊN' });
             document.getElementById('totalCount').innerText = logs.length;
 
-            // Cập nhật giao diện
+            // Hiển thị thông tin lên màn hình (Họ tên, MSSV, UID)
             updateUI(uid, name, mssv, isStranger);
             
-            // Đọc thông tin
+            // Đọc tên và mssv
             speakData(name, mssv, uid);
         }
 
@@ -171,15 +168,16 @@
             const si = document.getElementById('statusIcon');
 
             dn.innerText = name.toUpperCase();
+            dn.className = "text-3xl font-black text-slate-800 uppercase leading-tight truncate";
             dm.innerText = mssv;
-            du.innerText = `ID: ${uid}`;
+            du.innerText = `UID: ${uid}`;
 
             if (isError) {
-                sa.className = "relative aspect-square flex flex-col items-center justify-center border-4 border-solid border-red-500 rounded-[48px] bg-red-50 shake";
+                sa.className = "relative aspect-square flex flex-col items-center justify-center border-4 border-solid border-red-500 rounded-[48px] bg-red-50 shake transition-all duration-300";
                 si.className = "status-icon-container mb-6 text-red-500 scale-110";
                 si.innerHTML = `<svg class="w-24 h-24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>`;
             } else {
-                sa.className = "relative aspect-square flex flex-col items-center justify-center border-4 border-solid border-emerald-500 rounded-[48px] bg-emerald-50 scale-[1.02]";
+                sa.className = "relative aspect-square flex flex-col items-center justify-center border-4 border-solid border-emerald-500 rounded-[48px] bg-emerald-50 scale-[1.02] transition-all duration-300";
                 si.className = "status-icon-container mb-6 text-emerald-500 scale-110";
                 si.innerHTML = `<svg class="w-24 h-24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>`;
             }
@@ -196,7 +194,7 @@
             dn.className = "text-3xl font-black text-slate-300 uppercase leading-tight";
             dm.innerText = "";
             du.innerText = "CHỜ DỮ LIỆU...";
-            sa.className = "relative aspect-square flex flex-col items-center justify-center border-4 border-dashed border-slate-100 rounded-[48px] bg-slate-50/50";
+            sa.className = "relative aspect-square flex flex-col items-center justify-center border-4 border-dashed border-slate-100 rounded-[48px] bg-slate-50/50 transition-all duration-300";
             si.className = "status-icon-container mb-6 text-slate-200 scale-100";
             si.innerHTML = `<svg class="w-24 h-24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 17h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>`;
         }
