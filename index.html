@@ -20,7 +20,8 @@
     .header-section { margin-bottom: 30px; position: relative; }
     .header-title { font-weight: 800; font-size: 2.2rem; color: #1a202c; margin-bottom: 0; letter-spacing: -0.02em; }
     .status-cloud { position: absolute; right: 0; top: 15px; display: flex; align-items: center; gap: 8px; font-size: 0.7rem; font-weight: 700; color: #a0aec0; text-transform: uppercase; }
-    .dot-online { width: 8px; height: 8px; background: #48bb78; border-radius: 50%; box-shadow: 0 0 8px rgba(72, 187, 120, 0.6); }
+    .dot-online { width: 8px; height: 8px; background: #cbd5e1; border-radius: 50%; transition: all 0.3s; }
+    .dot-online.active { background: #48bb78; box-shadow: 0 0 8px rgba(72, 187, 120, 0.6); }
 
     .scan-card {
         background: #ffffff;
@@ -78,8 +79,8 @@
         <p class="header-subtitle m-0">Hệ thống điểm danh sinh viên</p>
         <div id="liveClock" class="digital-clock" style="font-size: 0.8rem; color: #a0aec0;">00:00:00 - 01/01/2024</div>
         <div class="status-cloud">
-            <div class="dot-online"></div>
-            KẾT NỐI ERA
+            <div id="era-dot" class="dot-online"></div>
+            <span id="era-status-text">ĐANG KẾT NỐI...</span>
         </div>
     </div>
 
@@ -106,11 +107,13 @@
     </div>
     
     <div class="text-center mt-5">
-        <small class="text-muted" style="font-size: 0.6rem; font-weight: 700; opacity: 0.5;">VERSION 4.0 - STABILITY FIX</small>
+        <small class="text-muted" style="font-size: 0.6rem; font-weight: 700; opacity: 0.5;">VERSION 4.1 - ERA LIB RESTORED</small>
     </div>
   </div>
 
+  <!-- THƯ VIỆN E-RA QUAN TRỌNG -->
   <script src="https://www.unpkg.com/@eohjsc/era-widget@1.1.3/src/index.js"></script>
+  
   <script>
     const MASTER_PIN = "0909";
     const eraWidget = new EraWidget();
@@ -120,6 +123,7 @@
     let configs = { uid: null, name: null, mssv: null };
     let isProcessing = false;
     let lastUID = "";
+    let pendingAction = null;
 
     document.getElementById('statTotal').innerText = scanCount;
 
@@ -128,6 +132,7 @@
         document.getElementById('liveClock').innerText = now.toLocaleTimeString('vi-VN') + " - " + now.toLocaleDateString('vi-VN');
     }
     setInterval(updateClock, 1000);
+    updateClock();
 
     function closeAuth() { document.getElementById('authModal').style.display = 'none'; document.getElementById('adminPIN').value = ""; }
     
@@ -136,13 +141,14 @@
             closeAuth();
             if (pendingAction === 'reset') performReset();
             else performExport();
-        } else { alert("PIN sai!"); }
+        } else { alert("PIN không đúng!"); }
     }
 
     function performReset() {
-        attendanceLogs = []; localStorage.setItem('attendanceLogs', "[]");
+        attendanceLogs = []; 
+        localStorage.setItem('attendanceLogs', "[]");
         document.getElementById('statTotal').innerText = "0";
-        alert("Đã xóa!");
+        alert("Đã xóa sạch lịch sử!");
     }
 
     function requestExport() {
@@ -152,19 +158,19 @@
     }
 
     function handleScan(uid, name, mssv) {
-        // Chỉ xử lý nếu UID mới khác UID cũ và không đang trong quá trình hiển thị
-        if (!uid || uid === "---" || uid === "0" || uid === lastUID || isProcessing) return;
+        // Lọc dữ liệu rác
+        if (!uid || uid === "---" || uid === "0" || uid === "" || uid === lastUID || isProcessing) return;
 
         isProcessing = true;
         lastUID = uid;
         const timeStr = new Date().toLocaleTimeString('vi-VN', {hour12: false});
         
-        // Kiểm tra xem đây có phải thẻ lạ không
-        let isStranger = (name === "Nguoi la" || name === "---" || name === "Sinh vien moi");
+        // Kiểm tra thẻ lạ
+        let isStranger = (!name || name === "Nguoi la" || name === "---" || name === "Sinh vien moi");
 
-        updateUI(isStranger ? 'error' : 'success', name, mssv, uid);
+        updateUI(isStranger ? 'error' : 'success', isStranger ? "Người lạ" : name, isStranger ? "Chưa đăng ký" : mssv, uid);
         
-        attendanceLogs.push({ uid, name, mssv, time: timeStr });
+        attendanceLogs.push({ uid, name: isStranger ? "Người lạ" : name, mssv: isStranger ? "N/A" : mssv, time: timeStr });
         localStorage.setItem('attendanceLogs', JSON.stringify(attendanceLogs));
         document.getElementById('statTotal').innerText = attendanceLogs.length;
     }
@@ -188,27 +194,38 @@
             icon.className = "bx bx-error-circle qr-placeholder text-danger";
         }
 
+        // Tự động reset trạng thái sau 4 giây
         setTimeout(() => {
             box.className = "scan-card";
             icon.className = "bx bx-qr-scan qr-placeholder";
             instr.innerText = "Sẵn sàng quét thẻ";
             subT.innerText = "---";
-            lastUID = ""; // Reset để có thể quét lại chính thẻ đó sau khi hết hiệu ứng
+            lastUID = ""; 
             isProcessing = false;
         }, 4000);
     }
 
+    // KẾT NỐI VỚI THƯ VIỆN ERA
     eraWidget.init({
       needRealtimeConfigs: true,
       onConfiguration: (c) => { 
+          // Tìm các chân Pin dựa trên Pin Number (0, 1, 2)
           configs.uid = c.realtime_configs.find(conf => conf.pin === 0);
           configs.name = c.realtime_configs.find(conf => conf.pin === 1);
           configs.mssv = c.realtime_configs.find(conf => conf.pin === 2);
+          
+          if (configs.uid) {
+              document.getElementById('era-dot').classList.add('active');
+              document.getElementById('era-status-text').innerText = "KẾT NỐI ERA OK";
+              document.getElementById('era-status-text').style.color = "#48bb78";
+          }
       },
       onValues: (v) => {
-        const u = configs.uid ? v[configs.uid.id]?.value : "";
-        const n = configs.name ? v[configs.name.id]?.value : "";
-        const m = configs.mssv ? v[configs.mssv.id]?.value : "";
+        // Trích xuất giá trị từ các Pin tương ứng
+        const u = configs.uid ? v[configs.uid.id]?.value : null;
+        const n = configs.name ? v[configs.name.id]?.value : null;
+        const m = configs.mssv ? v[configs.mssv.id]?.value : null;
+        
         if (u) handleScan(u, n, m);
       }
     });
@@ -224,7 +241,7 @@
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement("a");
         link.href = URL.createObjectURL(blob);
-        link.download = `Log_RFID.csv`;
+        link.download = `Log_RFID_Attendance.csv`;
         link.click();
     }
   </script>
