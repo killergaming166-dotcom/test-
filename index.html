@@ -5,7 +5,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
 
-  <title>E-Ra RFID Professional Attendance</title>
+  <title>Hệ Thống Điểm Danh RFID</title>
 
   <!-- Fonts & Icons -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -21,46 +21,31 @@
     body { background-color: #f5f5f9; font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden; }
     .card { border: none; box-shadow: 0 2px 10px 0 rgba(67, 89, 113, 0.1); border-radius: 16px; }
     
-    .status-dot {
-        width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 8px;
-    }
+    .status-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 8px; }
     .status-dot.online { background-color: #71dd37; box-shadow: 0 0 8px #71dd37; }
-    .status-dot.connecting { background-color: #ffab00; box-shadow: 0 0 8px #ffab00; }
 
     .info-display {
-        background: #fff; border: 1px solid #eceef1; border-radius: 14px; padding: 24px; transition: all 0.3s ease;
-        box-shadow: inset 0 0 10px rgba(0,0,0,0.02);
+        background: #fff; border: 1px solid #eceef1; border-radius: 14px; padding: 20px; transition: all 0.3s ease;
     }
-    .info-label { font-size: 0.7rem; color: #a1acb8; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 8px; }
-    .info-data { font-size: 1.5rem; font-weight: 800; color: #32475c; min-height: 36px; }
+    .info-label { font-size: 0.7rem; color: #a1acb8; font-weight: 800; text-transform: uppercase; margin-bottom: 5px; }
+    .info-data { font-size: 1.25rem; font-weight: 800; color: #32475c; min-height: 30px; }
 
     .scan-box {
-        min-height: 220px; display: flex; flex-direction: column; align-items: center; justify-content: center;
-        border-radius: 20px; border: 2px solid #e7eaf0; background: white; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        position: relative; overflow: hidden;
+        min-height: 280px; display: flex; flex-direction: column; align-items: center; justify-content: center;
+        border-radius: 20px; border: 2px solid #e7eaf0; background: white; transition: all 0.4s ease;
+        position: relative;
     }
-    .scan-box.active-success { border-color: #696cff; background: rgba(105, 108, 255, 0.04); transform: scale(1.02); }
+    .scan-box.active-success { border-color: #696cff; background: rgba(105, 108, 255, 0.04); }
     .scan-box.active-error { border-color: #ff3e1d; background: rgba(255, 62, 29, 0.04); }
-
-    .table thead th { background-color: #fcfcfd; text-transform: uppercase; font-size: 0.75rem; font-weight: 700; color: #566a7f; border-top: none; }
-    
-    .badge-checkin { background-color: #e7e7ff; color: #696cff; font-weight: 700; }
 
     #regModal, #authModal {
         display: none; position: fixed; z-index: 1000; top: 0; left: 0; width: 100%; height: 100%;
         background: rgba(15, 20, 31, 0.5); backdrop-filter: blur(8px); align-items: center; justify-content: center;
     }
     .modal-content-custom {
-        background: white; padding: 32px; border-radius: 20px; width: 100%; max-width: 420px;
+        background: white; padding: 30px; border-radius: 20px; width: 100%; max-width: 400px;
         box-shadow: 0 20px 50px rgba(0,0,0,0.1);
     }
-
-    .pulse-effect {
-        position: absolute; width: 100%; height: 100%;
-        background: radial-gradient(circle, rgba(105, 108, 255, 0.1) 0%, transparent 70%);
-        animation: pulse-bg 2s infinite; pointer-events: none; opacity: 0;
-    }
-    @keyframes pulse-bg { 0% { transform: scale(0.8); opacity: 0; } 50% { opacity: 1; } 100% { transform: scale(1.2); opacity: 0; } }
   </style>
 </head>
 
@@ -70,13 +55,13 @@
   <div id="authModal">
     <div class="modal-content-custom text-center">
         <div class="avatar avatar-xl mb-3 mx-auto">
-            <span class="avatar-initial rounded-circle bg-label-primary"><i class="bx bx-lock-open-alt fs-2"></i></span>
+            <span class="avatar-initial rounded-circle bg-label-primary"><i class="bx bx-lock-alt fs-2"></i></span>
         </div>
-        <h4 class="fw-bold mb-1">Xác thực hệ thống</h4>
-        <p class="text-muted mb-4 small">Vui lòng nhập mã PIN quản trị viên</p>
+        <h4 class="fw-bold mb-1">Xác thực Quản trị</h4>
+        <p class="text-muted mb-4 small" id="authTitle">Vui lòng nhập mã PIN để tiếp tục</p>
         <input type="password" id="adminPIN" class="form-control text-center fs-3 fw-bold mb-4" placeholder="••••" maxlength="4" style="letter-spacing: 10px;">
         <div class="d-flex gap-3">
-            <button onclick="closeAuth()" class="btn btn-label-secondary w-50 py-2">Bỏ qua</button>
+            <button onclick="closeAuth()" class="btn btn-label-secondary w-50 py-2">Hủy</button>
             <button onclick="verifyAdmin()" class="btn btn-primary w-50 py-2">Xác minh</button>
         </div>
     </div>
@@ -105,111 +90,75 @@
 
   <div class="container-xxl flex-grow-1 container-p-y">
     <div class="row">
-      <!-- PANEL CHÍNH -->
+      <!-- Vùng chính -->
       <div class="col-lg-8 mb-4">
         <div class="card h-100">
-          <div class="card-body">
-            <div class="d-flex justify-content-between align-items-center mb-5">
-                <div class="d-flex align-items-center">
-                    <img src="https://e-ra.io/wp-content/uploads/2021/11/logo-era.png" height="24" class="me-3">
-                    <h5 class="m-0 fw-extrabold text-dark tracking-tight">ATTENDANCE PRO</h5>
-                </div>
-                <div class="d-flex align-items-center bg-label-primary px-4 py-2 rounded-pill">
-                    <span id="cloudDot" class="status-dot online"></span>
-                    <small id="cloudText" class="fw-bold">CLOUD READY</small>
+          <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h5 class="m-0 fw-bold text-dark"><i class="bx bx-spreadsheet me-2"></i>TRẠNG THÁI ĐIỂM DANH</h5>
+                <div class="d-flex align-items-center bg-label-success px-3 py-1 rounded">
+                    <span class="status-dot online"></span>
+                    <small class="fw-bold">Cloud Online</small>
                 </div>
             </div>
             
-            <div class="row g-4 mb-5">
+            <div class="row g-3 mb-4">
               <div class="col-md-6">
                 <div class="info-display">
-                  <div class="info-label">Nhân sự vừa quét</div>
-                  <div id="studentName" class="info-data text-primary">Hệ thống đang chờ...</div>
+                  <div class="info-label">Internet</div>
+                  <div class="info-data text-success">Ổn định</div>
                 </div>
               </div>
               <div class="col-md-6">
                 <div class="info-display">
-                  <div class="info-label">Mã số định danh</div>
-                  <div id="studentID" class="info-data">---</div>
+                  <div class="info-label">RFID Reader</div>
+                  <div class="info-data text-primary">Sẵn sàng</div>
                 </div>
               </div>
             </div>
 
             <div id="statusBox" class="scan-box">
-                <div class="pulse-effect" id="pulseEffect"></div>
-                <i id="statusIcon" class="bx bx-rfid bx-lg mb-3 text-secondary" style="font-size: 5.5rem; opacity: 0.2;"></i>
-                <h3 id="instruction" class="fw-extrabold text-dark mb-1 text-uppercase">Quét thẻ vào</h3>
-                <p id="subInstruction" class="text-muted mb-0">Đặt thẻ vào vùng cảm biến để bắt đầu</p>
-                <div class="mt-3 badge bg-label-secondary font-monospace" id="cardUIDDisplay">READY</div>
-                <button id="btnQuickReg" class="btn btn-dark btn-sm mt-4 px-4 d-none">
-                    <i class="bx bx-plus-circle me-1"></i> Đăng ký nhân sự mới
+                <i id="statusIcon" class="bx bx-rfid bx-lg mb-3 text-secondary" style="font-size: 6rem; opacity: 0.3;"></i>
+                <h3 id="instruction" class="fw-bold text-dark mb-1">VUI LÒNG QUÉT THẺ</h3>
+                <div class="mt-2 badge bg-label-secondary font-monospace fs-6" id="cardUIDDisplay">READY</div>
+                <button id="btnQuickReg" class="btn btn-primary btn-lg mt-4 px-5 d-none shadow-sm">
+                    <i class="bx bx-plus-circle me-2"></i> Đăng ký thẻ mới
                 </button>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- PANEL PHỤ -->
-      <div class="col-lg-4">
-        <div class="card mb-4 border-primary border-top border-4">
-          <div class="card-body">
-            <h6 class="fw-bold text-primary mb-4">THỐNG KÊ HÔM NAY</h6>
-            <div class="d-flex align-items-center mb-3">
-                <div class="avatar flex-shrink-0 me-3">
-                    <span class="avatar-initial rounded bg-label-primary"><i class="bx bx-user"></i></span>
+      <!-- Vùng điều khiển & Thống kê -->
+      <div class="col-lg-4 mb-4">
+        <div class="card mb-4">
+          <div class="card-body text-center p-4">
+            <h6 class="fw-bold text-primary mb-4 text-uppercase">Thống kê phiên làm việc</h6>
+            <div class="row">
+                <div class="col-6 border-end">
+                    <small class="text-muted d-block mb-1">Tổng lượt</small>
+                    <h2 id="statTotal" class="mb-0 fw-bold">0</h2>
                 </div>
-                <div>
-                    <small class="text-muted d-block">Tổng lượt quét</small>
-                    <h5 id="statTotal" class="mb-0 fw-bold">0</h5>
+                <div class="col-6">
+                    <small class="text-muted d-block mb-1">Giờ cuối</small>
+                    <h2 id="lastTimeDisp" class="mb-0 fw-bold">--:--</h2>
                 </div>
-            </div>
-            <div class="d-flex align-items-center mb-4">
-                <div class="avatar flex-shrink-0 me-3">
-                    <span class="avatar-initial rounded bg-label-info"><i class="bx bx-time"></i></span>
-                </div>
-                <div>
-                    <small class="text-muted d-block">Lần cuối lúc</small>
-                    <h5 id="lastTimeDisp" class="mb-0 fw-bold">--:--</h5>
-                </div>
-            </div>
-            <hr class="mx-n4">
-            <div class="bg-light p-3 rounded-3">
-                <p class="small mb-0 text-muted italic text-center">Tự động đồng bộ hóa với cơ sở dữ liệu Cloud E-Ra theo thời gian thực.</p>
             </div>
           </div>
         </div>
         
-        <button id="btnReset" class="btn btn-outline-secondary w-100 py-3 fw-bold">
-            <i class="bx bx-refresh me-2"></i> LÀM MỚI DANH SÁCH
-        </button>
-      </div>
-
-      <!-- BẢNG LỊCH SỬ -->
-      <div class="col-12 mt-4">
-        <div class="card overflow-hidden">
-          <div class="card-header d-flex justify-content-between align-items-center py-4 bg-white">
-            <h5 class="mb-0 fw-bold"><i class="bx bx-list-ul me-2 text-primary"></i>NHẬT KÝ ĐIỂM DANH CHI TIẾT</h5>
-            <div class="dropdown">
-                <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button">Xuất báo cáo</button>
+        <div class="card p-4">
+            <div class="d-grid gap-3">
+                <button onclick="requestExport()" class="btn btn-success btn-lg py-3 fw-bold shadow-none">
+                    <i class="bx bx-export me-2"></i> XUẤT DỮ LIỆU (.CSV)
+                </button>
+                <button id="btnReset" class="btn btn-label-secondary py-2">
+                    <i class="bx bx-refresh me-1"></i> Làm mới trang
+                </button>
             </div>
-          </div>
-          <div class="table-responsive">
-            <table class="table table-hover mb-0">
-              <thead>
-                <tr>
-                  <th class="ps-4">Thứ tự</th>
-                  <th>Thời gian</th>
-                  <th>Họ và Tên</th>
-                  <th>Mã nhân sự</th>
-                  <th>ID Thẻ</th>
-                  <th class="text-end pe-4">Trạng thái</th>
-                </tr>
-              </thead>
-              <tbody id="logTableBody" class="border-top-0">
-                <!-- Dữ liệu sẽ đổ vào đây -->
-              </tbody>
-            </table>
-          </div>
+            <div class="mt-4 p-3 bg-light rounded text-center">
+                <small class="text-muted">Dữ liệu được lưu tạm trong phiên này. Vui lòng xuất tệp trước khi tải lại trang nếu cần lưu trữ.</small>
+            </div>
         </div>
       </div>
     </div>
@@ -218,60 +167,86 @@
   <script src="https://www.unpkg.com/@eohjsc/era-widget@1.1.3/src/index.js"></script>
   <script>
     const MASTER_PIN = "0909";
+    let pendingAction = null; 
+
     let lastProcessedUID = "";
     let lastProcessedTime = 0;
-    const DEBOUNCE_TIME = 4000; 
+    const DEBOUNCE_TIME = 3000; 
 
-    let attendanceLogs = [];
+    let attendanceLogs = []; 
     const eraWidget = new EraWidget();
     let configs = { uid: null, name: null, mssv: null };
     let actions = [];
 
-    function closeAuth() { document.getElementById('authModal').style.display = 'none'; }
+    function closeAuth() { 
+        document.getElementById('authModal').style.display = 'none'; 
+        document.getElementById('adminPIN').value = "";
+    }
     function closeReg() { document.getElementById('regModal').style.display = 'none'; }
     
+    function requestExport() {
+        if (attendanceLogs.length === 0) return alert("Không có dữ liệu để xuất!");
+        pendingAction = 'export';
+        document.getElementById('authTitle').innerText = "Nhập mã PIN để xuất File Excel";
+        document.getElementById('authModal').style.display = 'flex';
+        document.getElementById('adminPIN').focus();
+    }
+
     function verifyAdmin() {
         const pin = document.getElementById('adminPIN').value;
         if (pin === MASTER_PIN) {
             closeAuth();
-            document.getElementById('regUID').value = document.getElementById('cardUIDDisplay').innerText;
-            document.getElementById('regModal').style.display = 'flex';
+            if (pendingAction === 'register') {
+                document.getElementById('regUID').value = document.getElementById('cardUIDDisplay').innerText;
+                document.getElementById('regModal').style.display = 'flex';
+            } else if (pendingAction === 'export') {
+                performExport();
+            }
         } else {
             alert("Mã PIN không chính xác!");
             document.getElementById('adminPIN').value = "";
         }
     }
 
+    function performExport() {
+        let csvContent = "\uFEFF"; 
+        csvContent += "STT,Giờ Quét,Họ và Tên,Mã Số,UID Thẻ,Trạng Thái\n";
+        attendanceLogs.forEach((log, index) => {
+            const statusStr = log.status === 'success' ? "Thành công" : "Từ chối";
+            csvContent += `${attendanceLogs.length - index},${log.time},"${log.name}","${log.mssv}",${log.uid},${statusStr}\n`;
+        });
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement("a");
+        link.setAttribute("href", URL.createObjectURL(blob));
+        link.setAttribute("download", `Diem_Danh_${new Date().toLocaleDateString('vi-VN').replace(/\//g, '-')}.csv`);
+        link.click();
+    }
+
     function processAttendance(uid, name, mssv) {
+        if (!uid || uid === "0" || uid === "---" || name === "Sẵn sàng") return;
+
         const now = Date.now();
-        
-        // Chống lặp thẻ (4 giây)
         if (uid === lastProcessedUID && (now - lastProcessedTime < DEBOUNCE_TIME)) return;
 
         lastProcessedUID = uid;
         lastProcessedTime = now;
 
-        const timeStr = new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-        const isStranger = (name.toLowerCase().includes("lạ") || name === "---" || name === "Sinh viên mới");
+        const timeStr = new Date().toLocaleTimeString('vi-VN', { hour12: false });
+        const isStranger = (name.toLowerCase().includes("khách") || name.toLowerCase().includes("lạ") || name === "---" || name === "None");
         
-        if (isStranger) {
-            updateUIState('error', "THẺ CHƯA ĐỊNH DANH", uid);
-        } else {
-            updateUIState('success', "GHI NHẬN THÀNH CÔNG", uid);
-            document.getElementById('studentName').innerText = name;
-            document.getElementById('studentID').innerText = mssv;
-        }
-
+        updateUIState(isStranger ? 'error' : 'success', isStranger ? "THẺ CHƯA ĐĂNG KÝ" : "ĐIỂM DANH THÀNH CÔNG", uid);
         document.getElementById('lastTimeDisp').innerText = timeStr;
         
-        attendanceLogs.unshift({ 
+        const newLog = { 
             uid, 
-            name: isStranger ? "Khách / Thẻ mới" : name, 
-            mssv: isStranger ? "N/A" : mssv, 
+            name: isStranger ? "Khách (Thẻ lạ)" : name, 
+            mssv: isStranger ? "---" : mssv, 
             time: timeStr,
             status: isStranger ? "error" : "success"
-        });
-        renderTable();
+        };
+        
+        attendanceLogs.unshift(newLog);
+        document.getElementById('statTotal').innerText = attendanceLogs.length;
     }
 
     function updateUIState(state, text, uid) {
@@ -280,54 +255,30 @@
         const instr = document.getElementById('instruction');
         const btnReg = document.getElementById('btnQuickReg');
         const uidDisp = document.getElementById('cardUIDDisplay');
-        const pulse = document.getElementById('pulseEffect');
 
         uidDisp.innerText = uid;
         instr.innerText = text;
-        pulse.style.opacity = "1";
 
         if (state === 'success') {
-            box.className = "scan-box active-success shadow-lg";
-            icon.className = "bx bx-check-double bx-lg mb-3 text-primary";
+            box.className = "scan-box active-success";
+            icon.className = "bx bx-check-circle bx-lg mb-3 text-primary";
             icon.style.opacity = "1";
             btnReg.classList.add('d-none');
         } else {
-            box.className = "scan-box active-error shadow-lg";
-            icon.className = "bx bx-shield-x bx-lg mb-3 text-danger";
+            box.className = "scan-box active-error";
+            icon.className = "bx bx-error-circle bx-lg mb-3 text-danger";
             icon.style.opacity = "1";
             btnReg.classList.remove('d-none');
         }
 
-        // Tự động reset icon sau 3 giây để giao diện sạch sẽ
         setTimeout(() => {
-            pulse.style.opacity = "0";
             if(lastProcessedUID === uid) {
-                icon.style.opacity = "0.2";
+                icon.style.opacity = "0.3";
                 box.className = "scan-box";
-                instr.innerText = "QUÉT THẺ VÀO"; // Reset text về tiêu đề chính
+                instr.innerText = "VUI LÒNG QUÉT THẺ";
+                icon.className = "bx bx-rfid bx-lg mb-3 text-secondary";
             }
-        }, 3000);
-    }
-
-    function renderTable() {
-        const body = document.getElementById('logTableBody');
-        body.innerHTML = attendanceLogs.map((log, index) => `
-            <tr>
-                <td class="ps-4"><span class="text-muted">#${attendanceLogs.length - index}</span></td>
-                <td class="fw-bold text-dark">${log.time}</td>
-                <td><span class="fw-semibold">${log.name}</span></td>
-                <td>${log.mssv}</td>
-                <td><code class="small">${log.uid}</code></td>
-                <td class="text-end pe-4">
-                    <span class="badge ${log.status === 'success' ? 'badge-checkin' : 'bg-label-danger'}">
-                        ${log.status === 'success' ? 'Đã điểm danh' : 'Chưa đăng ký'}
-                    </span>
-                </td>
-            </tr>
-        `).join('');
-        
-        document.getElementById('logCount').innerText = attendanceLogs.length + " dòng dữ liệu";
-        document.getElementById('statTotal').innerText = attendanceLogs.length;
+        }, 5000);
     }
 
     eraWidget.init({
@@ -340,28 +291,29 @@
         actions = conf.actions || [];
       },
       onValues: (values) => {
-        let vUID = (configs.uid && values[configs.uid.id]) ? values[configs.uid.id].value : "";
-        let vName = (configs.name && values[configs.name.id]) ? values[configs.name.id].value : "---";
-        let vMSSV = (configs.mssv && values[configs.mssv.id]) ? values[configs.mssv.id].value : "---";
-
-        if (vUID && vUID !== "---" && vUID !== "0") {
-            processAttendance(vUID, vName, vMSSV);
-        }
+        let vUID = (configs.uid && values[configs.uid.id]) ? String(values[configs.uid.id].value) : "";
+        let vName = (configs.name && values[configs.name.id]) ? String(values[configs.name.id].value) : "---";
+        let vMSSV = (configs.mssv && values[configs.mssv.id]) ? String(values[configs.mssv.id].value) : "---";
+        if (vUID && vUID !== "---" && vUID !== "0") processAttendance(vUID, vName, vMSSV);
       }
     });
 
-    document.getElementById('btnQuickReg').onclick = () => { document.getElementById('authModal').style.display = 'flex'; };
+    document.getElementById('btnQuickReg').onclick = () => { 
+        pendingAction = 'register';
+        document.getElementById('authTitle').innerText = "Nhập mã PIN để đăng ký nhân sự";
+        document.getElementById('authModal').style.display = 'flex'; 
+        document.getElementById('adminPIN').focus();
+    };
     document.getElementById('btnReset').onclick = () => { location.reload(); };
 
     document.getElementById('btnConfirmReg').onclick = () => {
         const name = document.getElementById('regName').value.trim();
         const mssv = document.getElementById('regMSSV').value.trim();
         const uid = document.getElementById('regUID').value;
-        if (!name || !mssv) return alert("Vui lòng điền đủ họ tên và mã số!");
-
+        if (!name || !mssv) return alert("Nhập đủ tên và mã số!");
         if (actions[0]) {
             eraWidget.triggerAction(actions[0].action, `REG|${uid}|${name}|${mssv}`);
-            alert("Lệnh đăng ký đã được gửi tới Cloud!");
+            alert("Đã gửi yêu cầu đăng ký!");
             closeReg();
         }
     };
