@@ -9,170 +9,193 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;900&display=swap');
         body { 
             font-family: 'Inter', sans-serif; 
-            background-color: #ffffff;
+            background-color: #f8fafc;
             margin: 0;
             display: flex;
             align-items: center;
             justify-content: center;
-            height: 100vh;
-            overflow: hidden;
+            min-height: 100vh;
         }
-        .main-card {
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1);
+            border-radius: 2rem;
             width: 100%;
-            max-width: 480px;
-            padding: 2rem;
-            display: flex;
-            flex-direction: column;
+            max-width: 450px;
+            padding: 2.5rem;
+            margin: 1rem;
         }
-        .field-container {
+        .info-box {
             position: relative;
             margin-bottom: 1.5rem;
         }
-        .field-label {
+        .info-label {
             position: absolute;
-            top: -9px;
-            left: 12px;
+            top: -10px;
+            left: 15px;
             background: white;
-            padding: 0 8px;
-            font-size: 0.75rem;
-            font-weight: 900;
+            padding: 0 10px;
+            font-size: 0.7rem;
+            font-weight: 800;
             text-transform: uppercase;
             letter-spacing: 0.1em;
-            z-index: 10;
+            color: #64748b;
         }
-        .field-content {
+        .info-value {
             width: 100%;
-            border: 2px solid #f1f5f9;
-            border-radius: 16px;
-            padding: 1rem 1.25rem;
-            font-size: 1.2rem;
+            background: #ffffff;
+            border: 2px solid #e2e8f0;
+            border-radius: 1rem;
+            padding: 1.25rem;
+            font-size: 1.25rem;
             font-weight: 700;
-            min-height: 62px;
+            color: #1e293b;
+            min-height: 70px;
             display: flex;
             align-items: center;
-            background: #fafafa;
-            color: #1e293b;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .is-active {
-            border-color: #22c55e !important;
-            background-color: #f0fdf4 !important;
-            color: #15803d !important;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(34, 197, 94, 0.1);
+        .active-value {
+            border-color: #10b981;
+            background-color: #f0fdf4;
+            color: #065f46;
+            transform: scale(1.02);
         }
-        .status-dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background: #cbd5e1;
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
         }
-        .status-dot.online { background: #22c55e; box-shadow: 0 0 10px rgba(34, 197, 94, 0.6); }
-        .status-dot.offline { background: #ef4444; box-shadow: 0 0 10px rgba(239, 68, 68, 0.6); }
-        
-        .pulse-text { animation: pulse-op 2s infinite; }
-        @keyframes pulse-op { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+        .pulse {
+            animation: pulse-animation 2s infinite;
+        }
+        @keyframes pulse-animation {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
     </style>
 </head>
 <body>
 
-    <div class="main-card">
+    <div class="glass-card">
         <div class="text-center mb-8">
-            <h1 class="text-4xl font-black italic tracking-tighter text-blue-600 uppercase">Điểm danh</h1>
-            <div class="flex items-center justify-center gap-2 mt-2">
-                <div id="status-dot" class="status-dot"></div>
-                <p id="connection-text" class="text-[10px] font-bold text-slate-400 tracking-[0.2em] uppercase">Đang kiểm tra Cloud...</p>
+            <h1 class="text-3xl font-black italic text-blue-600 uppercase tracking-tighter">Hệ Thống RFID</h1>
+            <div id="connection-status" class="mt-2 status-badge bg-slate-100 text-slate-500">
+                <span class="w-2 h-2 rounded-full bg-slate-400 mr-2"></span>
+                Đang kết nối Cloud...
             </div>
         </div>
 
-        <div class="field-container">
-            <span class="field-label text-blue-500">Họ và Tên</span>
-            <div id="disp-name" class="field-content">---</div>
+        <!-- Tên sinh viên -->
+        <div class="info-box">
+            <span class="info-label">Tên sinh viên</span>
+            <div id="name" class="info-value">---</div>
         </div>
 
-        <div class="field-container">
-            <span class="field-label text-emerald-500">Mã số sinh viên</span>
-            <div id="disp-mssv" class="field-content">---</div>
+        <!-- MSSV -->
+        <div class="info-box">
+            <span class="info-label">Mã số sinh viên</span>
+            <div id="mssv" class="info-value">---</div>
         </div>
 
-        <div class="field-container">
-            <span class="field-label text-orange-500">Mã Chip RFID</span>
-            <div id="disp-rfid" class="field-content font-mono text-sm italic text-slate-400">---</div>
+        <!-- UID Thẻ -->
+        <div class="info-box">
+            <span class="info-label">ID Chip RFID</span>
+            <div id="uid" class="info-value font-mono text-base text-slate-400">---</div>
         </div>
 
-        <div class="mt-8 pt-6 border-t border-slate-50 flex flex-col items-center">
-            <div id="action-icon" class="mb-2 opacity-20 transition-all duration-500">
-                <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        <!-- Thông báo quẹt thẻ -->
+        <div class="mt-8 text-center">
+            <div id="status-icon" class="flex justify-center mb-2 text-slate-200">
+                <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                 </svg>
             </div>
-            <p id="status-msg" class="text-[11px] font-black uppercase tracking-[0.25em] text-slate-300 pulse-text">Sẵn sàng quẹt thẻ</p>
+            <p id="status-msg" class="text-sm font-bold text-slate-400 uppercase tracking-widest pulse">Vui lòng quẹt thẻ</p>
         </div>
     </div>
 
     <script>
         const TOKEN = "53f7b5a4-c19e-4760-9940-ff280ac07374";
-        const API = `https://vn.e-ra.io/v1/devices/data?token=${TOKEN}`;
+        const ERA_API = `https://vn.e-ra.io/v1/devices/data?token=${TOKEN}`;
+        // Proxy để vượt lỗi CORS
+        const PROXY = "https://api.allorigins.win/raw?url=";
 
-        async function syncData() {
+        async function fetchData() {
             try {
-                // Thêm header để tránh cache tối đa
-                const response = await fetch(`${API}&_t=${Date.now()}`, {
-                    method: 'GET',
-                    headers: { 'Cache-Control': 'no-cache' }
-                });
+                const response = await fetch(`${PROXY}${encodeURIComponent(ERA_API + '&_t=' + Date.now())}`);
+                if (!response.ok) throw new Error("Network error");
                 
-                if (!response.ok) throw new Error("Offline");
+                const data = await response.json();
                 
-                const results = await response.json();
-                
-                const uid = results.find(i => i.pin === 0)?.value || "---";
-                const name = results.find(i => i.pin === 1)?.value || "---";
-                const mssv = results.find(i => i.pin === 2)?.value || "---";
+                if (Array.isArray(data)) {
+                    const v0 = data.find(i => i.pin === 0)?.value || "---"; // UID
+                    const v1 = data.find(i => i.pin === 1)?.value || "---"; // Name
+                    const v2 = data.find(i => i.pin === 2)?.value || "---"; // MSSV
 
-                document.getElementById('disp-name').innerText = name;
-                document.getElementById('disp-mssv').innerText = mssv;
-                document.getElementById('disp-rfid').innerText = uid;
-
-                document.getElementById('status-dot').className = "status-dot online";
-                document.getElementById('connection-text').innerText = "Cloud Việt Nam Online";
-                document.getElementById('connection-text').style.color = "#10b981";
-
-                // Kiểm tra xem có phải dữ liệu thật không
-                const isWaiting = (name === "---" || name === "Sẵn sàng" || name === "Waiting..." || name === "" || uid === "---");
-
-                const nameBox = document.getElementById('disp-name');
-                const mssvBox = document.getElementById('disp-mssv');
-                const rfidBox = document.getElementById('disp-rfid');
-                const msg = document.getElementById('status-msg');
-                const icon = document.getElementById('action-icon');
-
-                if (!isWaiting) {
-                    nameBox.classList.add('is-active');
-                    mssvBox.classList.add('is-active');
-                    rfidBox.classList.add('is-active');
-                    msg.innerText = "Điểm danh thành công";
-                    msg.className = "text-[11px] font-black uppercase tracking-[0.25em] text-emerald-600";
-                    icon.classList.remove('opacity-20');
-                    icon.style.color = "#10b981";
-                } else {
-                    nameBox.classList.remove('is-active');
-                    mssvBox.classList.remove('is-active');
-                    rfidBox.classList.remove('is-active');
-                    msg.innerText = "Sẵn sàng quẹt thẻ";
-                    msg.className = "text-[11px] font-black uppercase tracking-[0.25em] text-slate-300 pulse-text";
-                    icon.classList.add('opacity-20');
-                    icon.style.color = "currentColor";
+                    updateDisplay(v0, v1, v2);
+                    setConnectionState(true);
                 }
-            } catch (err) {
-                document.getElementById('status-dot').className = "status-dot offline";
-                document.getElementById('connection-text').innerText = "Mất kết nối Cloud";
-                document.getElementById('connection-text').style.color = "#ef4444";
+            } catch (error) {
+                console.error("Lỗi:", error);
+                setConnectionState(false);
             }
         }
 
-        setInterval(syncData, 1500);
-        syncData();
+        function setConnectionState(online) {
+            const badge = document.getElementById('connection-status');
+            if (online) {
+                badge.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-500 mr-2 shadow-[0_0_8px_rgba(16,185,129,0.8)]"></span> Cloud Online';
+                badge.className = "mt-2 status-badge bg-emerald-50 text-emerald-600";
+            } else {
+                badge.innerHTML = '<span class="w-2 h-2 rounded-full bg-red-500 mr-2 animate-ping"></span> Mất kết nối';
+                badge.className = "mt-2 status-badge bg-red-50 text-red-600";
+            }
+        }
+
+        function updateDisplay(v0, v1, v2) {
+            const nameEl = document.getElementById('name');
+            const mssvEl = document.getElementById('mssv');
+            const uidEl = document.getElementById('uid');
+            const msgEl = document.getElementById('status-msg');
+            const iconEl = document.getElementById('status-icon');
+
+            nameEl.innerText = v1;
+            mssvEl.innerText = v2;
+            uidEl.innerText = v0;
+
+            // Kiểm tra trạng thái đã quẹt thẻ chưa (dựa trên việc V1 có tên hay không)
+            const hasData = v1 !== "---" && v1 !== "" && v1 !== "Sẵn sàng" && v1 !== "Waiting...";
+
+            if (hasData) {
+                nameEl.classList.add('active-value');
+                mssvEl.classList.add('active-value');
+                msgEl.innerText = "Điểm danh thành công!";
+                msgEl.className = "text-sm font-bold text-emerald-600 uppercase tracking-widest";
+                msgEl.classList.remove('pulse');
+                iconEl.className = "flex justify-center mb-2 text-emerald-500 scale-110 transition-transform";
+                iconEl.innerHTML = '<svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>';
+            } else {
+                nameEl.classList.remove('active-value');
+                mssvEl.classList.remove('active-value');
+                msgEl.innerText = "Vui lòng quẹt thẻ";
+                msgEl.className = "text-sm font-bold text-slate-400 uppercase tracking-widest pulse";
+                iconEl.className = "flex justify-center mb-2 text-slate-200";
+                iconEl.innerHTML = '<svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>';
+            }
+        }
+
+        // Cập nhật mỗi 1.5 giây để đảm bảo tính thời gian thực
+        setInterval(fetchData, 1500);
+        fetchData();
     </script>
 </body>
 </html>
