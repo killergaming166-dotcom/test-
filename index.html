@@ -14,20 +14,13 @@
         .online .dot { width: 8px; height: 8px; background-color: #10b981; border-radius: 50%; box-shadow: 0 0 8px #10b981; }
         .offline { background-color: #fef2f2; color: #ef4444; border: 1px solid #fee2e2; }
         .offline .dot { width: 8px; height: 8px; background-color: #ef4444; border-radius: 50%; }
+        .checking { background-color: #fffbeb; color: #d97706; border: 1px solid #fef3c7; }
+        .checking .dot { width: 8px; height: 8px; background-color: #d97706; border-radius: 50%; animation: pulse 1s infinite; }
         
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
+
         .btn-primary { background-color: #72e128; color: white; font-weight: 700; text-transform: uppercase; transition: all 0.2s; }
         .btn-primary:hover { transform: translateY(-1px); opacity: 0.9; }
-        
-        .input-group label { display: block; font-size: 10px; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 4px; }
-        .input-group input { width: 100%; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px; font-size: 14px; outline: none; transition: border-color 0.2s; }
-        .input-group input:focus { border-color: #6366f1; }
-
-        #regForm { transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); transform-origin: top; }
-        .form-open { animation: slideDown 0.4s ease-out; }
-        @keyframes slideDown {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
     </style>
 </head>
 <body class="p-6 md:p-8">
@@ -35,60 +28,26 @@
     <div class="max-w-6xl mx-auto">
         <div class="grid grid-cols-12 gap-6">
             
-            <!-- Cột Trái: Chính -->
+            <!-- Cột Trái -->
             <div class="col-span-12 lg:col-span-8 space-y-6">
-                <!-- Header -->
                 <div class="card">
                     <div class="flex justify-between items-center mb-6">
                         <div>
                             <h1 class="text-xl font-bold text-slate-800">Hệ Thống Điểm Danh RFID</h1>
-                            <p class="text-xs text-slate-400 font-medium">Tự động nhận diện thành viên & Đăng ký thẻ mới</p>
+                            <p class="text-xs text-slate-400 font-medium">Đã tối ưu kết nối đa tầng Cloud</p>
                         </div>
-                        <div id="cloudStatus" class="status-badge offline">
+                        <div id="cloudStatus" class="status-badge checking">
                             <div class="dot"></div>
-                            <span>Checking...</span>
+                            <span>Đang kiểm tra...</span>
                         </div>
                     </div>
 
-                    <!-- Màn hình quét -->
                     <div id="scanArea" class="h-64 flex flex-col items-center justify-center border-2 border-dashed border-slate-200 rounded-2xl bg-slate-50/30 transition-all duration-500">
                         <div id="scanIndicator" class="mb-2 hidden">
-                            <span class="px-3 py-1 bg-rose-100 text-rose-600 text-[10px] font-bold rounded-full animate-pulse uppercase">Phát hiện thẻ lạ</span>
+                            <span class="px-3 py-1 bg-rose-100 text-rose-600 text-[10px] font-bold rounded-full animate-pulse uppercase">Thẻ chưa xác định</span>
                         </div>
                         <h2 id="scanStatus" class="text-4xl font-black text-slate-300 uppercase tracking-tight text-center px-6">Vui lòng quét thẻ</h2>
                         <div id="uidDisplay" class="mt-4 bg-slate-200 text-slate-500 px-4 py-1 rounded font-mono text-xs italic tracking-widest">--- --- ---</div>
-                    </div>
-                </div>
-
-                <!-- Form Đăng Ký -->
-                <div id="regForm" class="card hidden shadow-xl border-indigo-100">
-                    <div class="flex justify-between items-center mb-4">
-                        <h3 class="font-bold text-slate-700 flex items-center gap-2">
-                            <div class="w-8 h-8 bg-indigo-100 text-indigo-600 rounded-lg flex items-center justify-center">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path></svg>
-                            </div>
-                            Đăng Ký Thành Viên Mới
-                        </h3>
-                        <button onclick="closeForm()" class="text-slate-400 hover:text-slate-600">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                        </button>
-                    </div>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="input-group">
-                            <label>Họ và tên sinh viên</label>
-                            <input type="text" id="regName" placeholder="Ví dụ: Nguyễn Văn A">
-                        </div>
-                        <div class="input-group">
-                            <label>Mã số sinh viên (MSSV)</label>
-                            <input type="text" id="regMssv" placeholder="Ví dụ: PS12345">
-                        </div>
-                    </div>
-
-                    <div class="mt-6 flex gap-3">
-                        <button onclick="saveUser()" class="btn-primary flex-1 py-4 rounded-xl text-sm shadow-lg shadow-green-200">
-                            Xác nhận lưu thông tin
-                        </button>
                     </div>
                 </div>
             </div>
@@ -115,66 +74,62 @@
                         XUẤT DỮ LIỆU ĐIỂM DANH (CSV)
                     </button>
                     <button onclick="window.location.reload()" class="w-full py-2 text-slate-400 text-[10px] font-bold uppercase tracking-widest hover:text-indigo-600 transition-colors">
-                        Làm mới trang
+                        Làm mới kết nối
                     </button>
                 </div>
             </div>
-
         </div>
     </div>
 
-    <script src="https://www.unpkg.com/@eohjsc/era-widget@1.1.3/src/index.js"></script>
     <script>
-        const eraWidget = new EraWidget();
-        let configUID, configName, configMSSV;
+        const TOKEN = "53f7b5a4-c19e-4760-9940-ff280ac07374";
+        const ERA_API = `https://vn.e-ra.io/v1/devices/data?token=${TOKEN}`;
+        const PROXIES = [
+            (url) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+            (url) => `https://corsproxy.io/?${encodeURIComponent(url)}`
+        ];
         
-        // logs lưu lịch sử điểm danh
+        let currentProxyIdx = 0;
         let logs = [];
-        // registeredUsers lưu các thẻ vừa được đăng ký mới trong phiên này
-        let registeredUsers = {}; 
-
         let lastUID = "";
         let lastTime = 0;
 
-        eraWidget.init({
-            needRealtimeConfigs: true,
-            maxRealtimeConfigsCount: 3,
-            onConfiguration: (c) => {
-                configUID = c.realtime_configs[0];
-                configName = c.realtime_configs[1];
-                configMSSV = c.realtime_configs[2];
-            },
-            onValues: (v) => {
-                const cloud = document.getElementById('cloudStatus');
-                const isOnline = configUID && v[configUID.id]?.active;
-                if (isOnline) {
+        async function syncCloudData() {
+            const cloud = document.getElementById('cloudStatus');
+            const target = `${ERA_API}&_t=${Date.now()}`;
+            const finalUrl = PROXIES[currentProxyIdx](target);
+
+            try {
+                const response = await fetch(finalUrl);
+                if (!response.ok) throw new Error("Connection failed");
+                
+                const data = await response.json();
+                
+                if (Array.isArray(data)) {
+                    // Nếu nhận được mảng dữ liệu -> Cloud đang Online
                     cloud.className = "status-badge online";
                     cloud.innerHTML = '<div class="dot"></div><span>Cloud Online</span>';
-                } else {
-                    cloud.className = "status-badge offline";
-                    cloud.innerHTML = '<div class="dot"></div><span>Cloud Offline</span>';
-                }
 
-                const uid = v[configUID?.id]?.value;
-                if (uid && uid !== "0" && uid !== "---" && uid !== "None") {
-                    let name = v[configName?.id]?.value || "---";
-                    let mssv = v[configMSSV?.id]?.value || "---";
-                    
-                    // KIỂM TRA: Nếu thẻ này đã đăng ký trong phiên hiện tại
-                    if (registeredUsers[uid]) {
-                        name = registeredUsers[uid].name;
-                        mssv = registeredUsers[uid].mssv;
-                    }
+                    const uid = data.find(i => i.pin === 0)?.value || "---";
+                    const name = data.find(i => i.pin === 1)?.value || "---";
+                    const mssv = data.find(i => i.pin === 2)?.value || "---";
 
-                    const now = Date.now();
-                    if (uid !== lastUID || (now - lastTime > 2500)) {
-                        handleScan(uid, name, mssv);
-                        lastUID = uid;
-                        lastTime = now;
+                    if (uid && uid !== "0" && uid !== "---" && uid !== "None" && uid !== "Waiting...") {
+                        const now = Date.now();
+                        if (uid !== lastUID || (now - lastTime > 3000)) {
+                            handleScan(uid, name, mssv);
+                            lastUID = uid;
+                            lastTime = now;
+                        }
                     }
                 }
+            } catch (err) {
+                console.warn("Proxy error, switching...");
+                currentProxyIdx = (currentProxyIdx + 1) % PROXIES.length;
+                cloud.className = "status-badge offline";
+                cloud.innerHTML = '<div class="dot"></div><span>Cloud Offline</span>';
             }
-        });
+        }
 
         function handleScan(uid, name, mssv) {
             const scanStatus = document.getElementById('scanStatus');
@@ -187,27 +142,24 @@
 
             uidDisplay.innerText = uid;
             
-            // Một thẻ là lạ nếu Cloud báo là Thẻ lạ VÀ nó chưa có trong danh sách đăng ký tạm
-            const isUnknown = (!name || name === "None" || name === "---" || name.includes("lạ")) && !registeredUsers[uid];
+            const isUnknown = (!name || name === "None" || name === "---" || name.includes("lạ") || name === "Sẵn sàng");
 
             if (isUnknown) {
                 scanStatus.innerText = "THẺ LẠ!";
                 scanStatus.className = "text-4xl font-black text-rose-500 uppercase tracking-tight text-center px-6";
                 scanArea.style.borderColor = "#f43f5e";
                 scanIndicator.classList.remove('hidden');
-                openForm();
+                logs.unshift({ id: logs.length + 1, time: timeStr, name: "Thẻ lạ", mssv: "Chưa đăng ký", uid: uid });
             } else {
                 scanStatus.innerText = name.toUpperCase();
                 scanStatus.className = "text-4xl font-black text-indigo-600 uppercase tracking-tight text-center px-6";
                 scanArea.style.borderColor = "#6366f1";
                 scanIndicator.classList.add('hidden');
-                closeForm();
-
-                // Lưu vào log điểm danh
                 logs.unshift({ id: logs.length + 1, time: timeStr, name: name, mssv: mssv, uid: uid });
-                totalCount.innerText = logs.length;
-                lastTimeDisplay.innerText = timeStr.substring(0, 5);
             }
+
+            totalCount.innerText = logs.length;
+            lastTimeDisplay.innerText = timeStr.substring(0, 5);
 
             setTimeout(() => {
                 if (lastUID === uid) {
@@ -215,63 +167,27 @@
                     scanStatus.className = "text-4xl font-black text-slate-300 uppercase tracking-tight text-center px-6";
                     scanArea.style.borderColor = "#e5e7eb";
                     uidDisplay.innerText = "--- --- ---";
+                    scanIndicator.classList.add('hidden');
                 }
             }, 5000);
         }
 
-        function openForm() {
-            const form = document.getElementById('regForm');
-            form.classList.remove('hidden');
-            form.classList.add('form-open');
-            document.getElementById('regName').focus();
-        }
-
-        function closeForm() {
-            const form = document.getElementById('regForm');
-            form.classList.add('hidden');
-            clearForm();
-        }
-
-        function saveUser() {
-            const name = document.getElementById('regName').value.trim();
-            const mssv = document.getElementById('regMssv').value.trim();
-            const uid = document.getElementById('uidDisplay').innerText;
-
-            if (!name) { alert("Vui lòng nhập họ tên sinh viên!"); return; }
-
-            // 1. Lưu vào danh sách thẻ đã đăng ký (tạm thời trong bộ nhớ trình duyệt)
-            registeredUsers[uid] = { name: name, mssv: mssv };
-
-            // 2. Coi như điểm danh luôn cho thẻ này ngay lúc đăng ký
-            const timeStr = new Date().toLocaleTimeString('vi-VN', { hour12: false });
-            logs.unshift({ id: logs.length + 1, time: timeStr, name: name, mssv: mssv, uid: uid });
-            
-            // Cập nhật UI
-            document.getElementById('totalCount').innerText = logs.length;
-            document.getElementById('lastTime').innerText = timeStr.substring(0, 5);
-            
-            alert(`Đăng ký THÀNH CÔNG cho: ${name}.\nLần sau quẹt thẻ này hệ thống sẽ tự nhận diện.`);
-            
-            // Đóng form và reset trạng thái màn hình
-            closeForm();
-            handleScan(uid, name, mssv); // Gọi lại để đổi màu màn hình sang xanh
-        }
-
-        function clearForm() {
-            document.getElementById('regName').value = "";
-            document.getElementById('regMssv').value = "";
-        }
-
         function exportExcel() {
-            if (logs.length === 0) { alert("Không có dữ liệu để xuất!"); return; }
+            if (logs.length === 0) { alert("Không có dữ liệu!"); return; }
             let csv = "\uFEFFSTT,Giờ Quét,Họ và Tên,Mã Số,UID Thẻ\n";
-            logs.forEach(l => csv += `${l.id},${l.time},"${l.name}","${l.mssv}","'${l.uid}"\n`);
+            [...logs].reverse().forEach((l, idx) => {
+                csv += `${idx + 1},${l.time},"${l.name}","${l.mssv}","'${l.uid}"\n`;
+            });
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement("a");
             link.href = URL.createObjectURL(blob);
             link.download = `diem_danh_${new Date().getTime()}.csv`;
             link.click();
         }
+
+        // Tăng tần suất cập nhật lên 1.5 giây để nhạy hơn
+        setInterval(syncCloudData, 1500);
+        syncCloudData();
     </script>
 </body>
 </html>
