@@ -3,14 +3,14 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>RFID Scanner - Instant Scan & Voice</title>
+    <title>RFID Scanner - 5s Display</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; color: #1e293b; min-height: 100vh; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-        .card { background: white; border-radius: 40px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1); padding: 2.5rem; width: 100%; max-width: 480px; position: relative; }
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #1e293b; min-height: 100vh; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .card { background: white; border-radius: 40px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.08); padding: 2.5rem; width: 100%; max-width: 480px; border: 1px solid rgba(226, 232, 240, 0.8); }
         
-        #pinModal { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(8px); z-index: 100; align-items: center; justify-content: center; }
+        #pinModal { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(10px); z-index: 100; align-items: center; justify-content: center; }
         
         .shake { animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both; }
         @keyframes shake {
@@ -20,7 +20,9 @@
             40%, 60% { transform: translate3d(4px, 0, 0); }
         }
 
-        .status-icon-container { transition: all 0.3s ease; }
+        .timer-bar { position: absolute; bottom: 0; left: 0; height: 6px; background: rgba(0,0,0,0.1); width: 100%; overflow: hidden; border-radius: 0 0 48px 48px; display: none; }
+        .timer-progress { height: 100%; background: currentColor; width: 100%; transform-origin: left; }
+        @keyframes shrink { from { transform: scaleX(1); } to { transform: scaleX(0); } }
     </style>
 </head>
 <body class="p-4">
@@ -28,58 +30,63 @@
     <!-- Modal PIN -->
     <div id="pinModal">
         <div class="bg-white p-8 rounded-[32px] shadow-2xl w-full max-w-xs text-center">
-            <h3 class="text-xl font-black mb-6 text-slate-800">MÃ PIN</h3>
-            <input type="password" id="inputPin" class="w-full text-center text-3xl font-black border-b-2 border-slate-200 focus:border-indigo-500 outline-none mb-8 pb-2" placeholder="••••" maxlength="4">
-            <div class="flex gap-3">
-                <button onclick="closePinModal()" class="flex-1 py-3 text-slate-400 font-bold text-xs uppercase">Hủy</button>
-                <button onclick="verifyAndExport()" class="flex-1 py-3 bg-indigo-600 text-white rounded-xl font-bold text-xs uppercase">Xác nhận</button>
+            <h3 class="text-xl font-black mb-6 text-slate-800 tracking-tight">NHẬP MÃ PIN</h3>
+            <input type="password" id="inputPin" class="w-full text-center text-4xl font-black border-b-4 border-slate-100 focus:border-indigo-500 outline-none mb-8 pb-2 text-indigo-600" placeholder="••••" maxlength="4">
+            <div class="flex gap-4">
+                <button onclick="closePinModal()" class="flex-1 py-4 text-slate-400 font-bold text-xs uppercase tracking-widest">Hủy</button>
+                <button onclick="verifyAndExport()" class="flex-1 py-4 bg-slate-900 text-white rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-black transition-colors">Xác nhận</button>
             </div>
         </div>
     </div>
 
     <div class="card space-y-6">
         <!-- Header -->
-        <div class="flex justify-between items-start">
+        <div class="flex justify-between items-center">
             <div>
-                <h1 class="text-2xl font-black text-slate-900 tracking-tight">RFID SCANNER</h1>
+                <h1 class="text-2xl font-black text-slate-900 tracking-tighter">RFID SYSTEM</h1>
                 <div class="flex items-center mt-1">
-                    <span id="connectionDot" class="w-2 h-2 bg-emerald-500 rounded-full animate-ping mr-2"></span>
-                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Sẵn sàng kết nối</span>
+                    <span id="connectionDot" class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse mr-2"></span>
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Đang hoạt động</span>
                 </div>
             </div>
-            <div class="text-right">
-                <p class="text-[9px] font-black text-slate-300 uppercase tracking-widest">Đã quét</p>
-                <p id="totalCount" class="text-4xl font-black text-indigo-600">0</p>
+            <div class="bg-indigo-50 px-4 py-2 rounded-2xl text-center min-w-[80px]">
+                <p class="text-[9px] font-black text-indigo-400 uppercase tracking-widest">Lượt quét</p>
+                <p id="totalCount" class="text-2xl font-black text-indigo-600">0</p>
             </div>
         </div>
 
         <!-- Main Scan Area -->
-        <div id="scanArea" class="relative aspect-square flex flex-col items-center justify-center border-4 border-dashed border-slate-100 rounded-[48px] bg-slate-50/50 transition-all duration-300">
+        <div id="scanArea" class="relative aspect-square flex flex-col items-center justify-center border-4 border-dashed border-slate-100 rounded-[48px] bg-slate-50/50 transition-all duration-500">
             
-            <!-- Icon -->
-            <div id="statusIcon" class="status-icon-container mb-6 text-slate-200">
+            <!-- Status Icon -->
+            <div id="statusIcon" class="mb-6 text-slate-200 transition-transform duration-500">
                 <svg class="w-24 h-24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 17h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path>
                 </svg>
             </div>
             
-            <div class="text-center px-6 w-full">
-                <h2 id="displayName" class="text-3xl font-black text-slate-300 uppercase leading-tight truncate">Chạm thẻ</h2>
-                <p id="displayMSSV" class="text-lg font-bold text-slate-400 mt-2 h-6"></p>
+            <div class="text-center px-8 w-full z-10">
+                <h2 id="displayName" class="text-3xl font-black text-slate-300 uppercase leading-tight tracking-tight break-words">Sẵn sàng</h2>
+                <p id="displayMSSV" class="text-xl font-bold text-slate-400 mt-2 h-7"></p>
             </div>
 
-            <div id="displayUID" class="absolute bottom-10 px-6 py-2 bg-white border border-slate-100 rounded-full text-[11px] font-mono font-bold text-slate-400 min-w-[140px] text-center">
-                CHỜ DỮ LIỆU...
+            <div id="displayUID" class="absolute bottom-12 px-6 py-2 bg-white/80 border border-slate-100 rounded-full text-[11px] font-mono font-bold text-slate-400 tracking-wider">
+                CHỜ QUÉT THẺ...
+            </div>
+
+            <!-- Timer Bar -->
+            <div id="timerContainer" class="timer-bar">
+                <div id="timerProgress" class="timer-progress"></div>
             </div>
         </div>
 
-        <!-- Action Bar -->
-        <div class="grid grid-cols-2 gap-4">
-            <button onclick="openPinModal()" class="py-4 bg-slate-900 text-white rounded-2xl font-black text-[10px] tracking-widest uppercase shadow-xl active:scale-95 transition-transform">
-                XUẤT FILE CSV
+        <!-- Buttons -->
+        <div class="flex gap-4 pt-2">
+            <button onclick="openPinModal()" class="flex-1 py-5 bg-slate-900 text-white rounded-3xl font-black text-[11px] tracking-[0.2em] uppercase shadow-lg shadow-slate-200 active:scale-95 transition-all">
+                XUẤT DỮ LIỆU
             </button>
-            <button onclick="clearHistory()" class="bg-red-50 text-red-500 py-4 rounded-2xl font-black text-[10px] tracking-widest uppercase hover:bg-red-100 transition-colors">
-                XÓA LỊCH SỬ
+            <button onclick="clearHistory()" class="px-6 bg-slate-100 text-slate-400 rounded-3xl font-black text-[11px] tracking-widest uppercase hover:bg-red-50 hover:text-red-500 transition-all">
+                XÓA
             </button>
         </div>
     </div>
@@ -87,16 +94,16 @@
     <script src="https://www.unpkg.com/@eohjsc/era-widget@1.1.3/src/index.js"></script>
     <script>
         const MASTER_PIN = "0909";
+        const DISPLAY_TIME = 5000; // 5 giây
         
         const eraWidget = new EraWidget();
         let logs = [];
         let configUID, configName, configMSSV;
-        
-        let lastScannedUID = null; 
+        let lastScannedUID = null;
+        let resetTimeout = null;
 
         eraWidget.init({
             needRealtimeConfigs: true,
-            maxRealtimeConfigsCount: 3,
             onConfiguration: (c) => {
                 configUID = c.realtime_configs[0];
                 configName = c.realtime_configs[1];
@@ -107,79 +114,72 @@
                 const name = v[configName?.id]?.value || "NGƯỜI LẠ";
                 const mssv = v[configMSSV?.id]?.value || "---";
 
-                // Kiểm tra xem có thẻ không
-                const hasCard = (uid && uid !== "0" && uid !== "---" && uid !== "None" && uid !== "" && uid !== "Sẵn sàng");
+                const isValidUID = (uid && uid !== "0" && uid !== "---" && uid !== "None" && uid !== "" && uid !== "Sẵn sàng");
 
-                if (hasCard) {
-                    // Nếu thẻ trùng với lần vừa quét thì không xử lý lại logs, nhưng vẫn giữ UI hiển thị
-                    if (uid === lastScannedUID) return;
-
-                    // Thực hiện quét mới
-                    executeScan(uid, name, mssv);
-                } else {
-                    // Thẻ đã được nhấc ra khỏi đầu đọc -> Reset UI về trạng thái chờ
-                    if (lastScannedUID !== null) {
-                        lastScannedUID = null;
-                        resetUI();
+                if (isValidUID) {
+                    // Nếu là thẻ mới hoàn toàn
+                    if (uid !== lastScannedUID) {
+                        processNewScan(uid, name, mssv);
                     }
                 }
             }
         });
 
-        function speakData(name, mssv, uid) {
-            window.speechSynthesis.cancel();
+        function processNewScan(uid, name, mssv) {
+            // Xóa bộ hẹn giờ reset cũ nếu có (để đè thẻ mới lên)
+            if (resetTimeout) clearTimeout(resetTimeout);
             
-            const isStranger = (name.toUpperCase().includes("NGUOI LA") || mssv === "---" || name === "NGƯỜI LẠ");
-            let textToSpeak = "";
-            
-            if (isStranger) {
-                textToSpeak = `Phát hiện thẻ lạ. UID là ${uid.split('').join(' ')}`;
-            } else {
-                textToSpeak = `${name}. Mã số sinh viên ${mssv.split('').join(' ')}.`;
-            }
-
-            const utterance = new SpeechSynthesisUtterance(textToSpeak);
-            utterance.lang = 'vi-VN';
-            utterance.rate = 1.0;
-            window.speechSynthesis.speak(utterance);
-        }
-
-        function executeScan(uid, name, mssv) {
             lastScannedUID = uid;
-
             const isStranger = (name.toUpperCase().includes("NGUOI LA") || mssv === "---" || name === "NGƯỜI LẠ");
             const timeStr = new Date().toLocaleTimeString('vi-VN', { hour12: false });
             
+            // Lưu log
             logs.unshift({ time: timeStr, name, mssv, uid, type: isStranger ? 'NGƯỜI LẠ' : 'SINH VIÊN' });
             document.getElementById('totalCount').innerText = logs.length;
 
-            // Hiển thị thông tin lên màn hình (Họ tên, MSSV, UID)
-            updateUI(uid, name, mssv, isStranger);
+            // Cập nhật UI hiển thị
+            showStudentInfo(uid, name, mssv, isStranger);
             
-            // Đọc tên và mssv
-            speakData(name, mssv, uid);
+            // Giọng nói
+            speak(name, mssv, isStranger);
+
+            // Hẹn giờ reset về trạng thái chờ sau 5 giây
+            resetTimeout = setTimeout(() => {
+                resetUI();
+                lastScannedUID = null;
+            }, DISPLAY_TIME);
         }
 
-        function updateUI(uid, name, mssv, isError) {
+        function showStudentInfo(uid, name, mssv, isError) {
             const dn = document.getElementById('displayName');
             const dm = document.getElementById('displayMSSV');
             const du = document.getElementById('displayUID');
             const sa = document.getElementById('scanArea');
             const si = document.getElementById('statusIcon');
+            const tc = document.getElementById('timerContainer');
+            const tp = document.getElementById('timerProgress');
 
             dn.innerText = name.toUpperCase();
-            dn.className = "text-3xl font-black text-slate-800 uppercase leading-tight truncate";
+            dn.className = "text-3xl font-black text-slate-800 uppercase leading-tight tracking-tight";
             dm.innerText = mssv;
             du.innerText = `UID: ${uid}`;
+            
+            // Thanh đếm ngược 5 giây
+            tc.style.display = 'block';
+            tp.style.animation = 'none';
+            tp.offsetHeight; // trigger reflow
+            tp.style.animation = `shrink ${DISPLAY_TIME}ms linear forwards`;
 
             if (isError) {
                 sa.className = "relative aspect-square flex flex-col items-center justify-center border-4 border-solid border-red-500 rounded-[48px] bg-red-50 shake transition-all duration-300";
-                si.className = "status-icon-container mb-6 text-red-500 scale-110";
+                si.className = "mb-6 text-red-500 scale-110 transition-transform";
                 si.innerHTML = `<svg class="w-24 h-24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>`;
+                tc.style.color = "#ef4444";
             } else {
-                sa.className = "relative aspect-square flex flex-col items-center justify-center border-4 border-solid border-emerald-500 rounded-[48px] bg-emerald-50 scale-[1.02] transition-all duration-300";
-                si.className = "status-icon-container mb-6 text-emerald-500 scale-110";
+                sa.className = "relative aspect-square flex flex-col items-center justify-center border-4 border-solid border-emerald-500 rounded-[48px] bg-emerald-50 transition-all duration-300";
+                si.className = "mb-6 text-emerald-500 scale-110 transition-transform";
                 si.innerHTML = `<svg class="w-24 h-24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>`;
+                tc.style.color = "#10b981";
             }
         }
 
@@ -189,18 +189,29 @@
             const du = document.getElementById('displayUID');
             const sa = document.getElementById('scanArea');
             const si = document.getElementById('statusIcon');
+            const tc = document.getElementById('timerContainer');
 
-            dn.innerText = "Chạm thẻ";
-            dn.className = "text-3xl font-black text-slate-300 uppercase leading-tight";
+            dn.innerText = "Sẵn sàng";
+            dn.className = "text-3xl font-black text-slate-300 uppercase leading-tight tracking-tight";
             dm.innerText = "";
-            du.innerText = "CHỜ DỮ LIỆU...";
-            sa.className = "relative aspect-square flex flex-col items-center justify-center border-4 border-dashed border-slate-100 rounded-[48px] bg-slate-50/50 transition-all duration-300";
-            si.className = "status-icon-container mb-6 text-slate-200 scale-100";
+            du.innerText = "CHỜ QUÉT THẺ...";
+            tc.style.display = 'none';
+            
+            sa.className = "relative aspect-square flex flex-col items-center justify-center border-4 border-dashed border-slate-100 rounded-[48px] bg-slate-50/50 transition-all duration-500";
+            si.className = "mb-6 text-slate-200 scale-100 transition-transform";
             si.innerHTML = `<svg class="w-24 h-24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 17h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>`;
         }
 
+        function speak(name, mssv, isStranger) {
+            window.speechSynthesis.cancel();
+            const text = isStranger ? `Thẻ lạ` : `${name}. Mã số ${mssv.split('').join(' ')}`;
+            const utter = new SpeechSynthesisUtterance(text);
+            utter.lang = 'vi-VN';
+            window.speechSynthesis.speak(utter);
+        }
+
         function clearHistory() {
-            if (confirm("Bạn có chắc chắn muốn xóa toàn bộ lịch sử quét?")) {
+            if (confirm("Xóa toàn bộ lịch sử quét?")) {
                 logs = [];
                 document.getElementById('totalCount').innerText = "0";
                 resetUI();
@@ -219,17 +230,13 @@
         }
 
         function verifyAndExport() {
-            const pin = document.getElementById('inputPin').value;
-            if (pin === MASTER_PIN) {
+            if (document.getElementById('inputPin').value === MASTER_PIN) {
                 closePinModal();
-                let csv = "\uFEFFGiờ,Họ Tên,Mã Số,UID,Phân Loại\n";
-                [...logs].reverse().forEach(l => {
-                    csv += `${l.time},"${l.name}","${l.mssv}","'${l.uid}",${l.type}\n`;
-                });
-                const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+                let csv = "\uFEFFGiờ,Họ Tên,Mã Số,UID,Loại\n";
+                [...logs].reverse().forEach(l => csv += `${l.time},"${l.name}","${l.mssv}","'${l.uid}",${l.type}\n`);
                 const link = document.createElement("a");
-                link.href = URL.createObjectURL(blob);
-                link.download = `RFID_Log_${new Date().toISOString().split('T')[0]}.csv`;
+                link.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
+                link.download = `Checkin_${new Date().toLocaleDateString('vi-VN').replace(/\//g,'-')}.csv`;
                 link.click();
             } else {
                 document.getElementById('inputPin').value = "";
