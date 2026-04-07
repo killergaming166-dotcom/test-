@@ -9,9 +9,9 @@
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; color: #1f2937; }
         .card { background: white; border-radius: 16px; border: 1px solid #e5e7eb; padding: 1.5rem; }
-        
         .btn-primary { background-color: #72e128; color: white; font-weight: 700; text-transform: uppercase; transition: all 0.2s; }
         .btn-primary:hover { transform: translateY(-1px); opacity: 0.9; }
+        .scan-area { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
     </style>
 </head>
 <body class="p-6 md:p-8">
@@ -19,31 +19,31 @@
     <div class="max-w-6xl mx-auto">
         <div class="grid grid-cols-12 gap-6">
             
-            <!-- Cột Trái -->
+            <!-- Khu vực quét thẻ chính -->
             <div class="col-span-12 lg:col-span-8 space-y-6">
                 <div class="card">
                     <div class="mb-6">
-                        <h1 class="text-xl font-bold text-slate-800">Hệ Thống Điểm Danh RFID</h1>
-                        <p class="text-xs text-slate-400 font-medium">Dữ liệu đồng bộ trực tiếp từ thiết bị</p>
+                        <h1 class="text-xl font-bold text-slate-800">Hệ Thống Điểm Danh</h1>
+                        <p class="text-xs text-slate-400 font-medium">Vui lòng đưa thẻ lại gần đầu đọc</p>
                     </div>
 
-                    <div id="scanArea" class="h-64 flex flex-col items-center justify-center border-2 border-dashed border-slate-200 rounded-2xl bg-slate-50/30 transition-all duration-500">
+                    <div id="scanArea" class="scan-area h-64 flex flex-col items-center justify-center border-2 border-dashed border-slate-200 rounded-2xl bg-slate-50/50">
                         <div id="scanIndicator" class="mb-2 hidden">
-                            <span class="px-3 py-1 bg-rose-100 text-rose-600 text-[10px] font-bold rounded-full animate-pulse uppercase">Thẻ chưa xác định</span>
+                            <span class="px-3 py-1 bg-rose-100 text-rose-600 text-[10px] font-bold rounded-full animate-pulse">THẺ CHƯA ĐĂNG KÝ</span>
                         </div>
-                        <h2 id="scanStatus" class="text-4xl font-black text-slate-300 uppercase tracking-tight text-center px-6">Vui lòng quét thẻ</h2>
+                        <h2 id="scanStatus" class="text-4xl font-black text-slate-300 uppercase tracking-tight text-center px-6 transition-colors">Sẵn sàng quét</h2>
                         <div id="uidDisplay" class="mt-4 bg-slate-200 text-slate-500 px-4 py-1 rounded font-mono text-xs italic tracking-widest">--- --- ---</div>
                     </div>
                 </div>
             </div>
 
-            <!-- Cột Phải -->
+            <!-- Khu vực thống kê và chức năng -->
             <div class="col-span-12 lg:col-span-4 space-y-6">
-                <div class="card text-center py-8">
-                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-6">Thống kê phiên này</p>
+                <div class="card text-center py-10">
+                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-6">Thống kê</p>
                     <div class="flex items-center justify-around">
                         <div>
-                            <p class="text-slate-400 text-xs mb-1">Tổng lượt</p>
+                            <p class="text-slate-400 text-xs mb-1">Số lượt</p>
                             <p id="totalCount" class="text-5xl font-black text-slate-800">0</p>
                         </div>
                         <div class="w-[1px] h-12 bg-slate-100"></div>
@@ -56,10 +56,10 @@
 
                 <div class="card space-y-3">
                     <button onclick="exportExcel()" class="btn-primary w-full py-4 rounded-xl text-xs shadow-md">
-                        XUẤT DỮ LIỆU ĐIỂM DANH (CSV)
+                        XUẤT DỮ LIỆU (CSV)
                     </button>
                     <button onclick="window.location.reload()" class="w-full py-2 text-slate-400 text-[10px] font-bold uppercase tracking-widest hover:text-indigo-600 transition-colors">
-                        Làm mới trang
+                        Làm mới hệ thống
                     </button>
                 </div>
             </div>
@@ -70,7 +70,6 @@
     <script>
         const eraWidget = new EraWidget();
         let configUID, configName, configMSSV;
-        
         let logs = [];
         let lastUID = "";
         let lastTime = 0;
@@ -85,14 +84,16 @@
             },
             onValues: (v) => {
                 const uid = v[configUID?.id]?.value;
+                
+                // Chỉ xử lý nếu UID có giá trị thật
                 if (uid && uid !== "0" && uid !== "---" && uid !== "None" && uid !== "Waiting...") {
                     const name = v[configName?.id]?.value || "---";
                     const mssv = v[configMSSV?.id]?.value || "---";
-                    
                     const now = Date.now();
-                    // Chống lặp thẻ trong 3 giây
+
+                    // Chống lặp thẻ (Delay 3 giây cho cùng 1 thẻ)
                     if (uid !== lastUID || (now - lastTime > 3000)) {
-                        handleScan(uid, name, mssv);
+                        processScan(uid, name, mssv);
                         lastUID = uid;
                         lastTime = now;
                     }
@@ -100,7 +101,7 @@
             }
         });
 
-        function handleScan(uid, name, mssv) {
+        function processScan(uid, name, mssv) {
             const scanStatus = document.getElementById('scanStatus');
             const uidDisplay = document.getElementById('uidDisplay');
             const totalCount = document.getElementById('totalCount');
@@ -111,36 +112,32 @@
 
             uidDisplay.innerText = uid;
             
-            // Kiểm tra thẻ lạ
-            const isUnknown = (!name || name === "None" || name === "---" || name.includes("lạ") || name === "Sẵn sàng");
+            // Logic nhận diện thẻ lạ
+            const isStranger = (!name || name === "None" || name === "---" || name.includes("lạ") || name === "Sẵn sàng" || name === "Waiting...");
 
-            if (isUnknown) {
+            if (isStranger) {
                 scanStatus.innerText = "THẺ LẠ!";
                 scanStatus.className = "text-4xl font-black text-rose-500 uppercase tracking-tight text-center px-6";
-                scanArea.style.borderColor = "#f43f5e";
+                scanArea.className = "scan-area h-64 flex flex-col items-center justify-center border-2 border-rose-400 rounded-2xl bg-rose-50/50";
                 scanIndicator.classList.remove('hidden');
-                
-                // Lưu vào lịch sử (Thẻ lạ)
                 logs.unshift({ id: logs.length + 1, time: timeStr, name: "Thẻ lạ", mssv: "N/A", uid: uid });
             } else {
                 scanStatus.innerText = name.toUpperCase();
                 scanStatus.className = "text-4xl font-black text-indigo-600 uppercase tracking-tight text-center px-6";
-                scanArea.style.borderColor = "#6366f1";
+                scanArea.className = "scan-area h-64 flex flex-col items-center justify-center border-2 border-indigo-400 rounded-2xl bg-indigo-50/50";
                 scanIndicator.classList.add('hidden');
-
-                // Lưu vào lịch sử (Hợp lệ)
                 logs.unshift({ id: logs.length + 1, time: timeStr, name: name, mssv: mssv, uid: uid });
             }
 
             totalCount.innerText = logs.length;
             lastTimeDisplay.innerText = timeStr.substring(0, 5);
 
-            // Tự động reset màn hình chờ
+            // Tự động quay về trạng thái chờ sau 5 giây
             setTimeout(() => {
                 if (lastUID === uid) {
-                    scanStatus.innerText = "Vui lòng quét thẻ";
+                    scanStatus.innerText = "Sẵn sàng quét";
                     scanStatus.className = "text-4xl font-black text-slate-300 uppercase tracking-tight text-center px-6";
-                    scanArea.style.borderColor = "#e5e7eb";
+                    scanArea.className = "scan-area h-64 flex flex-col items-center justify-center border-2 border-dashed border-slate-200 rounded-2xl bg-slate-50/50";
                     uidDisplay.innerText = "--- --- ---";
                     scanIndicator.classList.add('hidden');
                 }
@@ -148,7 +145,10 @@
         }
 
         function exportExcel() {
-            if (logs.length === 0) { alert("Chưa có dữ liệu quét thẻ!"); return; }
+            if (logs.length === 0) {
+                alert("Không có dữ liệu trong phiên này.");
+                return;
+            }
             let csv = "\uFEFFSTT,Giờ Quét,Họ và Tên,Mã Số,UID Thẻ\n";
             [...logs].reverse().forEach((l, idx) => {
                 csv += `${idx + 1},${l.time},"${l.name}","${l.mssv}","'${l.uid}"\n`;
@@ -156,7 +156,7 @@
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement("a");
             link.href = URL.createObjectURL(blob);
-            link.download = `diem_danh_${new Date().getTime()}.csv`;
+            link.download = `diem_danh_${new Date().toISOString().slice(0,10)}.csv`;
             link.click();
         }
     </script>
