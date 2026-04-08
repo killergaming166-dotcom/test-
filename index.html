@@ -4,33 +4,20 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
-
-  <title>Hệ Thống Điểm Danh RFID Pro</title>
+  <title>RFID Check-in Pro</title>
 
   <!-- Fonts & Icons -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://demos.themeselection.com/sneat-bootstrap-html-admin-template-free/assets/vendor/fonts/boxicons.css" />
-  
-  <!-- Core CSS -->
   <link rel="stylesheet" href="https://demos.themeselection.com/sneat-bootstrap-html-admin-template-free/assets/vendor/css/core.css" />
   <link rel="stylesheet" href="https://demos.themeselection.com/sneat-bootstrap-html-admin-template-free/assets/vendor/css/theme-default.css" />
   
   <style>
     body { background-color: #f4f7fa; font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden; }
-    
-    .system-border-wrapper {
-        max-width: 550px;
-        margin: 20px auto;
-        padding: 10px;
-        border: 4px solid #000000;
-        border-radius: 50px;
-        background-color: #f4f7fa;
-    }
-
+    .system-border-wrapper { max-width: 550px; margin: 20px auto; padding: 10px; border: 4px solid #000000; border-radius: 50px; background-color: #f4f7fa; }
     .container-main { padding: 30px; }
-    
     .header-section { margin-bottom: 25px; position: relative; }
     .header-title { font-weight: 800; font-size: 2.2rem; color: #1a202c; margin-bottom: 0; letter-spacing: -0.02em; }
     .digital-clock { font-size: 0.9rem; color: #a0aec0; font-weight: 600; margin-top: 5px; }
@@ -46,120 +33,65 @@
         transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
     .scan-card.active-success { border-color: #696cff; background: #f8f9ff; transform: scale(1.02); }
-    .scan-card.active-warning { border-color: #ff3e1d !important; background: #fff5f4 !important; transform: scale(1.02); animation: shake 0.4s ease-in-out; }
+    .scan-card.active-warning { border-color: #ff3e1d !important; background: #fff5f4 !important; transform: scale(1.02); }
 
     .qr-placeholder { font-size: 4.5rem; color: #edf2f7; margin-bottom: 25px; transition: all 0.3s; }
     .instruction-text { font-weight: 800; font-size: 1.8rem; color: #4a5568; text-transform: uppercase; margin-bottom: 8px; }
     .sub-text { color: #a0aec0; font-size: 1.2rem; margin-bottom: 25px; font-weight: 500; min-height: 1.5em; }
     .uid-badge { background: #f1f5f9; color: #94a3b8; padding: 6px 20px; border-radius: 20px; font-family: monospace; font-size: 0.9rem; font-weight: bold; }
 
-    .action-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-    
-    .stat-card {
-        background: white;
-        border-radius: 30px;
-        padding: 20px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-    }
-    .stat-label { font-size: 0.7rem; font-weight: 800; color: #a0aec0; text-transform: uppercase; display: block; margin-bottom: 4px; }
+    .stat-card { background: white; border-radius: 30px; padding: 20px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02); display: flex; flex-direction: column; justify-content: center; }
+    .stat-label { font-size: 0.7rem; font-weight: 800; color: #a0aec0; text-transform: uppercase; margin-bottom: 4px; }
     .stat-value { font-size: 2.5rem; font-weight: 800; color: #1a202c; line-height: 1; }
 
-    .btn-action {
-        background: white;
-        border-radius: 20px;
-        padding: 15px;
-        border: 2px solid transparent;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        cursor: pointer;
-        transition: all 0.2s;
-        font-weight: 700;
-        font-size: 0.85rem;
-        text-transform: uppercase;
-    }
-    .btn-action:active { transform: scale(0.95); }
-    .btn-export { color: #696cff; border-color: #eef0ff; }
-    .btn-reset-full { color: #ff3e1d; border-color: #fff5f4; }
-
-    #authModal {
-        display: none; position: fixed; z-index: 1000; top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(26, 32, 44, 0.4); backdrop-filter: blur(4px); align-items: center; justify-content: center;
-    }
-    .modal-content-custom { background: white; padding: 25px; border-radius: 25px; width: 90%; max-width: 350px; }
-
-    @keyframes pulse-light { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
-    @keyframes shake { 0%, 100% { transform: translateX(0) scale(1.02); } 25% { transform: translateX(-8px) scale(1.02); } 75% { transform: translateX(8px) scale(1.02); } }
-    .status-active { animation: pulse-light 2s infinite; }
+    .btn-action { background: white; border-radius: 20px; padding: 15px; border: 2px solid #f0f0f0; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; font-weight: 700; font-size: 0.85rem; }
+    
+    @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
+    .shake { animation: shake 0.4s ease-in-out; }
+    .status-active { opacity: 0.5; animation: pulse 2s infinite; }
+    @keyframes pulse { 0% { opacity: 0.3; } 50% { opacity: 0.7; } 100% { opacity: 0.3; } }
   </style>
 </head>
 
 <body>
-
-  <div id="authModal">
-    <div class="modal-content-custom text-center shadow-lg">
-        <h5 class="fw-bold mb-3">Xác thực Admin</h5>
-        <input type="password" id="adminPIN" class="form-control text-center fs-3 fw-bold mb-3" placeholder="••••" maxlength="4" style="letter-spacing: 8px; border-radius: 12px;">
-        <div class="d-flex gap-2">
-            <button onclick="closeAuth()" class="btn btn-label-secondary w-50" style="border-radius: 10px;">Hủy</button>
-            <button onclick="verifyAdmin()" class="btn btn-primary w-50" style="border-radius: 10px;">Xác minh</button>
-        </div>
-    </div>
-  </div>
-
   <div class="system-border-wrapper">
     <div class="container-main">
-        <div class="header-section">
-            <h1 class="header-title">RFID Check-in</h1>
-            <div id="liveClock" class="digital-clock">00:00:00 - 01/01/2024</div>
-        </div>
+      <div class="header-section">
+        <h1 class="header-title">RFID Check-in</h1>
+        <div id="liveClock" class="digital-clock">00:00:00 - 01/01/2024</div>
+      </div>
 
-        <div id="statusBox" class="scan-card">
-            <i id="statusIcon" class="bx bx-rfid qr-placeholder status-active"></i>
-            <h3 id="instruction" class="instruction-text">Sẵn sàng quét thẻ</h3>
-            <div id="subText" class="sub-text">Vui lòng chạm thẻ</div>
-            <div class="uid-badge" id="cardUIDDisplay">ID: ---</div>
-        </div>
+      <div id="statusBox" class="scan-card">
+        <i id="statusIcon" class="bx bx-rfid qr-placeholder status-active"></i>
+        <h3 id="instruction" class="instruction-text">Sẵn sàng</h3>
+        <div id="subText" class="sub-text">Vui lòng chạm thẻ</div>
+        <div class="uid-badge" id="cardUIDDisplay">ID: ---</div>
+      </div>
 
-        <div class="action-row mb-3">
-            <div class="stat-card">
-                <span class="stat-label">Tổng lượt</span>
-                <span id="statTotal" class="stat-value">0</span>
-            </div>
-            <div class="d-flex flex-column gap-2">
-                <button onclick="requestExport()" class="btn-action btn-export w-100">
-                    <i class="bx bx-download"></i> Xuất CSV
-                </button>
-                <button id="btnResetHistory" class="btn-action btn-reset-full w-100">
-                    <i class="bx bx-trash"></i> Xóa dữ liệu
-                </button>
-            </div>
+      <div class="row g-3 mb-3">
+        <div class="col-6">
+          <div class="stat-card h-100">
+            <span class="stat-label">Tổng lượt</span>
+            <span id="statTotal" class="stat-value">0</span>
+          </div>
         </div>
-
-        <div class="text-center opacity-25">
-            <small style="font-size: 0.6rem; font-weight: 800; letter-spacing: 1px;">V4.2.4 | SYNC STABLE</small>
+        <div class="col-6 d-flex flex-column gap-2">
+          <button onclick="exportCSV()" class="btn-action w-100 text-primary"><i class="bx bx-download"></i> Xuất CSV</button>
+          <button onclick="clearHistory()" class="btn-action w-100 text-danger"><i class="bx bx-trash"></i> Xóa dữ liệu</button>
         </div>
+      </div>
     </div>
   </div>
 
   <script src="https://www.unpkg.com/@eohjsc/era-widget@1.1.3/src/index.js"></script>
   <script>
-    const MASTER_PIN = "0909";
     const eraWidget = new EraWidget();
-    
-    let attendanceLogs = JSON.parse(localStorage.getItem('attendanceLogs')) || [];
-    let scanCount = parseInt(localStorage.getItem('scanCount')) || 0;
-    document.getElementById('statTotal').innerText = scanCount;
-
     let configMap = { uid: null, name: null, mssv: null };
-    let isProcessing = false;
     let lastUid = "";
-    let currentValues = {}; // Lưu trữ giá trị các Pins mới nhất
+    let isLocked = false;
+    let logs = JSON.parse(localStorage.getItem('attendanceLogs')) || [];
+
+    document.getElementById('statTotal').innerText = logs.length;
 
     function updateClock() {
         const now = new Date();
@@ -169,61 +101,34 @@
 
     eraWidget.init({
         needRealtimeConfigs: true,
-        maxRealtimeConfigsCount: 10,
-        onConfiguration: (configuration) => {
-            configuration.realtime_configs.forEach(cfg => {
-                const name = cfg.name.toUpperCase();
-                if (name === "UID") configMap.uid = cfg.id;
-                if (name === "NAME") configMap.name = cfg.id;
-                if (name.includes("MSSV")) configMap.mssv = cfg.id;
+        onConfiguration: (c) => {
+            c.realtime_configs.forEach(cfg => {
+                if (cfg.name.toUpperCase() === "UID") configMap.uid = cfg.id;
+                if (cfg.name.toUpperCase() === "NAME") configMap.name = cfg.id;
+                if (cfg.name.toUpperCase().includes("MSSV")) configMap.mssv = cfg.id;
             });
         },
-        onValues: (values) => {
-            currentValues = values; // Luôn cập nhật bộ đệm giá trị mới nhất từ E-Ra
-            
-            if (!configMap.uid || !values[configMap.uid]) return;
+        onValues: (v) => {
+            if (!configMap.uid || !v[configMap.uid]) return;
+            const currentUid = v[configMap.uid].value;
 
-            const valUid = values[configMap.uid].value;
-
-            // Phát hiện thẻ mới quẹt
-            if (valUid && valUid !== "0" && valUid !== "---" && valUid !== "" && valUid !== lastUid) {
-                lastUid = valUid;
-                // Đợi 500ms để Name và MSSV kịp cập nhật tương ứng với UID mới
+            // Chỉ xử lý nếu có UID mới và không bị khóa
+            if (currentUid && currentUid !== "0" && currentUid !== "---" && currentUid !== lastUid && !isLocked) {
+                lastUid = currentUid;
+                // Đợi 800ms để đảm bảo Name và MSSV từ ESP32 đã cập nhật xong trên Cloud
                 setTimeout(() => {
-                    processScan(valUid);
-                }, 500);
+                    const name = v[configMap.name]?.value || "Người lạ";
+                    const mssv = v[configMap.mssv]?.value || "---";
+                    processScan(currentUid, name, mssv);
+                }, 800);
             }
         }
     });
 
-    function processScan(uid) {
-        if (isProcessing) return;
+    function processScan(uid, name, mssv) {
+        isLocked = true;
+        const isStranger = (name === "Người lạ" || name.toUpperCase() === "NGUOI LA" || name === "---");
         
-        // Lấy lại giá trị từ bộ đệm sau khi đã đợi đồng bộ
-        const rawName = configMap.name ? currentValues[configMap.name]?.value : "";
-        const rawMssv = configMap.mssv ? currentValues[configMap.mssv]?.value : "";
-
-        let isUnknown = false;
-        let valName = rawName;
-        let valMssv = rawMssv;
-
-        // Kiểm tra tính hợp lệ của Name
-        if (!rawName || rawName === "None" || rawName === "0" || rawName === "" || rawName.toLowerCase().includes("unknown") || rawName.toUpperCase() === "NGUOI LA") {
-            valName = "Người lạ";
-            isUnknown = true;
-        }
-        
-        // Kiểm tra tính hợp lệ của MSSV
-        if (!rawMssv || rawMssv === "None" || rawMssv === "0" || rawMssv === "" || rawMssv === "---") {
-            valMssv = "---";
-            // Nếu là người lạ thì MSSV chắc chắn không có, không cần ép isUnknown ở đây nữa vì đã check ở Name
-        }
-
-        handleScanUI(uid, valName, valMssv, isUnknown);
-    }
-
-    function handleScanUI(uid, name, mssv, isUnknown) {
-        isProcessing = true;
         const box = document.getElementById('statusBox');
         const icon = document.getElementById('statusIcon');
         const instr = document.getElementById('instruction');
@@ -231,72 +136,51 @@
         const uidD = document.getElementById('cardUIDDisplay');
 
         uidD.innerText = "ID: " + uid;
-        instr.innerText = name;
-        subT.innerText = "MSSV: " + mssv;
-        
-        if (isUnknown) {
-            box.className = "scan-card active-warning shadow-lg";
+        instr.innerText = isStranger ? "Người lạ" : name;
+        subT.innerText = isStranger ? "Thẻ chưa đăng ký" : "MSSV: " + mssv;
+
+        if (isStranger) {
+            box.className = "scan-card active-warning shake";
             icon.className = "bx bx-error-circle qr-placeholder text-danger";
-            instr.style.color = "#ff3e1d";
         } else {
-            box.className = "scan-card active-success shadow-lg";
+            box.className = "scan-card active-success";
             icon.className = "bx bxs-check-circle qr-placeholder text-primary";
-            instr.style.color = "#696cff";
         }
-        
-        icon.classList.remove('status-active');
 
-        // Ghi log
-        const timeStr = new Date().toLocaleTimeString('vi-VN', {hour12: false});
-        scanCount++;
-        document.getElementById('statTotal').innerText = scanCount;
-        attendanceLogs.unshift({ uid, name, mssv, time: timeStr });
-        localStorage.setItem('attendanceLogs', JSON.stringify(attendanceLogs));
-        localStorage.setItem('scanCount', scanCount.toString());
+        // Lưu log
+        logs.unshift({ time: new Date().toLocaleTimeString(), name: instr.innerText, mssv, uid });
+        localStorage.setItem('attendanceLogs', JSON.stringify(logs));
+        document.getElementById('statTotal').innerText = logs.length;
 
+        // Reset trạng thái sau 4 giây để sẵn sàng cho thẻ tiếp theo
         setTimeout(() => {
             box.className = "scan-card";
             icon.className = "bx bx-rfid qr-placeholder status-active";
-            icon.style.color = "";
-            instr.innerText = "Sẵn sàng quét thẻ";
-            instr.style.color = "";
+            instr.innerText = "Sẵn sàng";
             subT.innerText = "Vui lòng chạm thẻ";
-            isProcessing = false;
-            lastUid = ""; 
-        }, 3000);
+            isLocked = false;
+            lastUid = ""; // Xóa bộ nhớ UID cũ để có thể quẹt lại chính thẻ đó
+        }, 4000);
     }
 
-    function closeAuth() { document.getElementById('authModal').style.display = 'none'; }
-    function requestExport() {
-        if (attendanceLogs.length === 0) return;
-        document.getElementById('authModal').style.display = 'flex';
+    function exportCSV() {
+        if (logs.length === 0) return alert("Không có dữ liệu");
+        let csv = "\uFEFFGiờ,Tên,MSSV,UID\n";
+        logs.forEach(l => csv += `${l.time},"${l.name}","${l.mssv}","'${l.uid}"\n`);
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = `RFID_Log.csv`;
+        link.click();
     }
 
-    function verifyAdmin() {
-        if (document.getElementById('adminPIN').value === MASTER_PIN) {
-            closeAuth();
-            let csv = "\uFEFFSTT,Giờ,Tên,MSSV,UID\n";
-            attendanceLogs.forEach((l, i) => csv += `${i+1},${l.time},"${l.name}","${l.mssv}","'${l.uid}"\n`);
-            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement("a");
-            link.href = URL.createObjectURL(blob);
-            link.download = `DiemDanh_${new Date().toLocaleDateString('vi-VN').replace(/\//g,'-')}.csv`;
-            link.click();
-            document.getElementById('adminPIN').value = "";
-        } else {
-            document.getElementById('adminPIN').classList.add('is-invalid');
-            setTimeout(() => document.getElementById('adminPIN').classList.remove('is-invalid'), 500);
-        }
-    }
-
-    document.getElementById('btnResetHistory').onclick = () => {
-        if(confirm("Xác nhận xóa toàn bộ lịch sử?")) {
-            scanCount = 0; attendanceLogs = [];
+    function clearHistory() {
+        if (confirm("Xóa toàn bộ?")) {
+            logs = [];
             localStorage.clear();
-            document.getElementById('statTotal').innerText = "0";
-            lastUid = "";
+            location.reload();
         }
-    };
+    }
   </script>
 </body>
 </html>
