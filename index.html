@@ -1,186 +1,367 @@
 <!DOCTYPE html>
-<html lang="vi" class="light-style layout-menu-fixed layout-compact" dir="ltr" data-theme="theme-default">
-
+<html lang="vi">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
-  <title>RFID Check-in Pro</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ Thống Quản Lý Điểm Danh - Giảng Viên</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Thêm thư viện SheetJS để xuất Excel -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
+        
+        :root {
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --primary: #f27024;
+            --secondary: #0ea5e9;
+            --success: #10b981;
+            --danger: #f43f5e;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+        }
 
-  <!-- Fonts & Icons -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="https://demos.themeselection.com/sneat-bootstrap-html-admin-template-free/assets/vendor/fonts/boxicons.css" />
-  <link rel="stylesheet" href="https://demos.themeselection.com/sneat-bootstrap-html-admin-template-free/assets/vendor/css/core.css" />
-  <link rel="stylesheet" href="https://demos.themeselection.com/sneat-bootstrap-html-admin-template-free/assets/vendor/css/theme-default.css" />
-  
-  <style>
-    body { background-color: #f4f7fa; font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden; }
-    .system-border-wrapper { max-width: 550px; margin: 20px auto; padding: 10px; border: 4px solid #000000; border-radius: 50px; background-color: #f4f7fa; }
-    .container-main { padding: 30px; }
-    .header-section { margin-bottom: 25px; position: relative; }
-    .header-title { font-weight: 800; font-size: 2.2rem; color: #1a202c; margin-bottom: 0; letter-spacing: -0.02em; }
-    .digital-clock { font-size: 0.9rem; color: #a0aec0; font-weight: 600; margin-top: 5px; }
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            padding: 1rem;
+        }
 
-    .scan-card {
-        background: #ffffff;
-        border-radius: 40px;
-        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.04);
-        padding: 50px 30px;
-        text-align: center;
-        margin-bottom: 20px;
-        border: 4px solid transparent;
-        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    }
-    .scan-card.active-success { border-color: #696cff; background: #f8f9ff; transform: scale(1.02); }
-    .scan-card.active-warning { border-color: #ff3e1d !important; background: #fff5f4 !important; transform: scale(1.02); }
+        .modern-card {
+            background: var(--card);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
 
-    .qr-placeholder { font-size: 4.5rem; color: #edf2f7; margin-bottom: 25px; transition: all 0.3s; }
-    .instruction-text { font-weight: 800; font-size: 1.8rem; color: #4a5568; text-transform: uppercase; margin-bottom: 8px; }
-    .sub-text { color: #a0aec0; font-size: 1.2rem; margin-bottom: 25px; font-weight: 500; min-height: 1.5em; }
-    .uid-badge { background: #f1f5f9; color: #94a3b8; padding: 6px 20px; border-radius: 20px; font-family: monospace; font-size: 0.9rem; font-weight: bold; }
+        .digital-clock {
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--secondary);
+        }
 
-    .stat-card { background: white; border-radius: 30px; padding: 20px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02); display: flex; flex-direction: column; justify-content: center; }
-    .stat-label { font-size: 0.7rem; font-weight: 800; color: #a0aec0; text-transform: uppercase; margin-bottom: 4px; }
-    .stat-value { font-size: 2.5rem; font-weight: 800; color: #1a202c; line-height: 1; }
+        @keyframes scanSuccess {
+            0% { border-color: transparent; }
+            50% { border-color: var(--success); box-shadow: 0 0 25px rgba(16, 185, 129, 0.1); }
+            100% { border-color: transparent; }
+        }
+        .scan-anim { 
+            animation: scanSuccess 0.8s ease-out;
+            border-width: 2px;
+        }
 
-    .btn-action { background: white; border-radius: 20px; padding: 15px; border: 2px solid #f0f0f0; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; font-weight: 700; font-size: 0.85rem; }
-    
-    @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
-    .shake { animation: shake 0.4s ease-in-out; }
-    .status-active { opacity: 0.5; animation: pulse 2s infinite; }
-    @keyframes pulse { 0% { opacity: 0.3; } 50% { opacity: 0.7; } 100% { opacity: 0.3; } }
-  </style>
+        .sidebar-item {
+            background: #ffffff;
+            border-left: 4px solid var(--secondary);
+        }
+        
+        .btn-register {
+            background: linear-gradient(135deg, #f27024 0%, #ff8c42 100%);
+        }
+
+        .btn-excel {
+            background: #10b981;
+            transition: all 0.2s;
+        }
+        .btn-excel:hover {
+            background: #059669;
+            transform: translateY(-1px);
+        }
+    </style>
 </head>
-
 <body>
-  <div class="system-border-wrapper">
-    <div class="container-main">
-      <div class="header-section">
-        <h1 class="header-title">RFID Check-in</h1>
-        <div id="liveClock" class="digital-clock">00:00:00 - 01/01/2024</div>
-      </div>
 
-      <div id="statusBox" class="scan-card">
-        <i id="statusIcon" class="bx bx-rfid qr-placeholder status-active"></i>
-        <h3 id="instruction" class="instruction-text">Sẵn sàng</h3>
-        <div id="subText" class="sub-text">Vui lòng chạm thẻ</div>
-        <div class="uid-badge" id="cardUIDDisplay">ID: ---</div>
-      </div>
-
-      <div class="row g-3 mb-3">
-        <div class="col-6">
-          <div class="stat-card h-100">
-            <span class="stat-label">Tổng lượt</span>
-            <span id="statTotal" class="stat-value">0</span>
-          </div>
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-4">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-orange-500 rounded-xl flex items-center justify-center shadow-lg shadow-orange-200">
+                <span class="font-black text-white text-xl italic">F</span>
+            </div>
+            <div>
+                <h2 class="font-extrabold text-slate-800 tracking-tight leading-none text-sm">ATTENDANCE</h2>
+                <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Instructor Portal</span>
+            </div>
         </div>
-        <div class="col-6 d-flex flex-column gap-2">
-          <button onclick="exportCSV()" class="btn-action w-100 text-primary"><i class="bx bx-download"></i> Xuất CSV</button>
-          <button onclick="clearHistory()" class="btn-action w-100 text-danger"><i class="bx bx-trash"></i> Xóa dữ liệu</button>
+        <div id="clock" class="digital-clock text-3xl font-bold bg-white px-4 py-1.5 rounded-xl shadow-sm border border-slate-100">
+            00:00:00
         </div>
-      </div>
     </div>
-  </div>
 
-  <script src="https://www.unpkg.com/@eohjsc/era-widget@1.1.3/src/index.js"></script>
-  <script>
-    const eraWidget = new EraWidget();
-    let configMap = { uid: null, name: null, mssv: null };
-    let lastUid = "";
-    let isLocked = false;
-    let logs = JSON.parse(localStorage.getItem('attendanceLogs')) || [];
+    <!-- Layout Chính -->
+    <div class="grid grid-cols-12 gap-4">
+        
+        <!-- CỘT TRÁI -->
+        <div class="col-span-12 lg:col-span-8 space-y-4">
+            
+            <!-- HIỂN THỊ CHÍNH -->
+            <div id="main-card" class="modern-card rounded-[2rem] p-6 h-[320px] flex flex-col items-center justify-center relative">
+                <div class="absolute top-6 left-8 flex items-center gap-2">
+                    <span class="relative flex h-2 w-2">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                    </span>
+                    <span class="text-[9px] font-bold tracking-widest text-slate-400 uppercase">Live Stream</span>
+                </div>
 
-    document.getElementById('statTotal').innerText = logs.length;
+                <div id="shift-label" class="absolute top-6 right-8 px-3 py-1 rounded-full bg-slate-50 text-slate-500 text-[9px] font-black uppercase tracking-widest border border-slate-100">
+                    Đang xác định ca...
+                </div>
 
-    function updateClock() {
-        const now = new Date();
-        document.getElementById('liveClock').innerText = now.toLocaleTimeString('vi-VN') + " - " + now.toLocaleDateString('vi-VN');
-    }
-    setInterval(updateClock, 1000);
+                <div class="flex flex-col items-center">
+                    <div class="mb-4">
+                        <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center text-3xl border border-slate-100">👤</div>
+                    </div>
+                    <h1 id="focus-name" class="text-4xl font-extrabold text-slate-800 mb-1 tracking-tight uppercase text-center">---</h1>
+                    <p id="focus-mssv" class="text-lg text-slate-400 font-semibold mb-2">Hệ thống sẵn sàng</p>
+                    <p id="focus-class" class="text-sm text-blue-500 font-bold mb-4 uppercase">---</p>
+                    <div id="status-badge" class="px-6 py-1.5 rounded-full bg-slate-50 text-slate-500 border border-slate-100 font-bold text-[10px] uppercase tracking-widest">
+                        Đợi quẹt thẻ...
+                    </div>
+                </div>
+            </div>
 
-    eraWidget.init({
-        needRealtimeConfigs: true,
-        onConfiguration: (c) => {
-            c.realtime_configs.forEach(cfg => {
-                if (cfg.name.toUpperCase() === "UID") configMap.uid = cfg.id;
-                if (cfg.name.toUpperCase() === "NAME") configMap.name = cfg.id;
-                if (cfg.name.toUpperCase().includes("MSSV")) configMap.mssv = cfg.id;
+            <!-- BẢNG LỊCH SỬ -->
+            <div class="modern-card rounded-[2rem] p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Lịch sử điểm danh</h3>
+                    <div class="flex gap-2">
+                        <button onclick="exportToExcel()" class="btn-excel text-white text-[9px] font-bold px-3 py-1.5 rounded-lg shadow-sm flex items-center gap-1">
+                            <span>📄</span> XUẤT EXCEL
+                        </button>
+                        <button onclick="clearHistory()" class="text-[9px] text-slate-300 hover:text-rose-500 font-bold uppercase transition-colors">Xóa</button>
+                    </div>
+                </div>
+                <div class="overflow-hidden">
+                    <table class="w-full text-[11px]">
+                        <thead>
+                            <tr class="border-b border-slate-50 text-slate-400 uppercase font-bold">
+                                <th class="pb-3 text-left">Giờ</th>
+                                <th class="pb-3 text-left">Sinh viên</th>
+                                <th class="pb-3 text-left">MSSV</th>
+                                <th class="pb-3 text-left">Lớp</th>
+                                <th class="pb-3 text-right">TT</th>
+                            </tr>
+                        </thead>
+                        <tbody id="history-rows" class="divide-y divide-slate-50"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- SIDEBAR -->
+        <div class="col-span-12 lg:col-span-4 space-y-3">
+            
+            <button onclick="openRegistration('MANUAL')" class="btn-register w-full p-4 rounded-2xl flex items-center justify-between text-white shadow-md">
+                <div class="text-left">
+                    <p class="text-[8px] font-black opacity-80 uppercase">Cấu hình</p>
+                    <h4 class="text-base font-bold uppercase tracking-tight">Đăng ký thẻ mới</h4>
+                </div>
+                <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center text-xl shadow-inner">🪪</div>
+            </button>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div class="modern-card p-4 rounded-2xl sidebar-item" style="border-left-color: #94a3b8;">
+                    <p class="text-[8px] font-black text-slate-400 uppercase mb-1">Sĩ số</p>
+                    <h4 id="stat-total" class="text-xl font-bold text-slate-700">40</h4>
+                </div>
+                <div class="modern-card p-4 rounded-2xl sidebar-item" style="border-left-color: var(--success);">
+                    <p class="text-[8px] font-black text-slate-400 uppercase mb-1">Có mặt</p>
+                    <h4 id="stat-present" class="text-xl font-bold text-emerald-500">0</h4>
+                </div>
+            </div>
+
+            <div class="modern-card p-4 rounded-2xl sidebar-item" style="border-left-color: var(--danger);">
+                <p class="text-[8px] font-black text-slate-400 uppercase mb-1">Vắng</p>
+                <h4 id="stat-absent" class="text-xl font-bold text-rose-500">40</h4>
+            </div>
+
+            <div class="modern-card p-6 rounded-[1.5rem] space-y-4">
+                <p class="text-[9px] font-bold text-slate-400 uppercase mb-2 tracking-widest text-center">Thông tin hệ thống</p>
+                <div class="grid grid-cols-2 gap-2">
+                    <div class="bg-slate-50 p-2 rounded-xl border border-slate-100 text-center">
+                        <div class="text-[7px] font-black text-slate-400 uppercase">Vào</div>
+                        <span id="shift-start" class="text-sm font-bold text-sky-600">--:--</span>
+                    </div>
+                    <div class="bg-slate-50 p-2 rounded-xl border border-slate-100 text-center">
+                        <div class="text-[7px] font-black text-slate-400 uppercase">Ra</div>
+                        <span id="shift-end" class="text-sm font-bold text-sky-600">--:--</span>
+                    </div>
+                </div>
+                <div class="pt-3 border-t border-slate-50 flex items-center justify-center gap-2">
+                    <div class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
+                    <span id="esp-status" class="text-[8px] font-bold text-slate-400 uppercase tracking-widest">ESP32: Online</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL ĐĂNG KÝ -->
+    <div id="reg-modal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-white max-w-xs w-full rounded-[2rem] p-8 shadow-2xl">
+            <h2 class="text-xl font-extrabold text-slate-800 mb-6 tracking-tight">Thẻ mới</h2>
+            <div class="space-y-4">
+                <div id="new-uid" class="bg-slate-50 p-3 rounded-xl border border-slate-100 text-orange-600 font-mono font-bold text-sm">---</div>
+                <input type="text" id="reg-name" placeholder="Họ và tên" class="w-full bg-slate-50 p-3 rounded-xl border border-slate-100 focus:outline-none focus:border-orange-500 font-bold text-slate-700 text-xs">
+                <input type="text" id="reg-mssv" placeholder="MSSV" class="w-full bg-slate-50 p-3 rounded-xl border border-slate-100 focus:outline-none focus:border-orange-500 font-bold text-slate-700 text-xs uppercase">
+            </div>
+            <div class="flex flex-col gap-2 mt-8">
+                <button onclick="saveRegistration()" class="bg-orange-500 text-white font-bold py-3 rounded-xl text-xs">LƯU THÔNG TIN</button>
+                <button onclick="closeModal()" class="text-slate-400 font-bold py-2 text-[10px]">HỦY</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Cần điền thông tin e-Ra của bạn vào đây
+        const TOKEN = "53f7b5a4-c19e-4760-9940-ff280ac07374"; 
+        const DEVICE_ID = "YOUR_DEVICE_ID_HERE"; 
+
+        const SHIFTS = [
+            { id: 1, start: "07:15", end: "09:15" },
+            { id: 2, start: "09:25", end: "11:15" },
+            { id: 3, start: "12:00", end: "14:00" },
+            { id: 4, start: "14:00", end: "16:00" },
+            { id: 5, start: "16:00", end: "18:00" },
+            { id: 6, start: "18:00", end: "20:00" }
+        ];
+
+        let attendanceHistory = [];
+        let lastScannedUID = "";
+        let presentCount = 0;
+
+        function updateTime() {
+            const now = new Date();
+            document.getElementById('clock').innerText = now.toLocaleTimeString('vi-VN', { hour12: false });
+            
+            const currentShift = SHIFTS.find(s => {
+                const [sh, sm] = s.start.split(':').map(Number);
+                const [eh, em] = s.end.split(':').map(Number);
+                const nowTotal = now.getHours() * 60 + now.getMinutes();
+                return nowTotal >= (sh * 60 + sm) && nowTotal < (eh * 60 + em);
             });
-        },
-        onValues: (v) => {
-            if (!configMap.uid || !v[configMap.uid]) return;
-            const currentUid = v[configMap.uid].value;
 
-            // Chỉ xử lý nếu có UID mới và không bị khóa
-            if (currentUid && currentUid !== "0" && currentUid !== "---" && currentUid !== lastUid && !isLocked) {
-                lastUid = currentUid;
-                // Đợi 800ms để đảm bảo Name và MSSV từ ESP32 đã cập nhật xong trên Cloud
-                setTimeout(() => {
-                    const name = v[configMap.name]?.value || "Người lạ";
-                    const mssv = v[configMap.mssv]?.value || "---";
-                    processScan(currentUid, name, mssv);
-                }, 800);
+            const label = document.getElementById('shift-label');
+            if (currentShift) {
+                label.innerText = `CA ${currentShift.id}`;
+                document.getElementById('shift-start').innerText = currentShift.start;
+                document.getElementById('shift-end').innerText = currentShift.end;
+            } else {
+                label.innerText = "Ngoài giờ học";
             }
         }
-    });
 
-    function processScan(uid, name, mssv) {
-        isLocked = true;
-        const isStranger = (name === "Người lạ" || name.toUpperCase() === "NGUOI LA" || name === "---");
-        
-        const box = document.getElementById('statusBox');
-        const icon = document.getElementById('statusIcon');
-        const instr = document.getElementById('instruction');
-        const subT = document.getElementById('subText');
-        const uidD = document.getElementById('cardUIDDisplay');
+        // Logic đồng bộ dữ liệu từ e-Ra (V0, V1, V2, V10, V11)
+        async function syncWithEra() {
+            if (!TOKEN || !DEVICE_ID || DEVICE_ID === "YOUR_DEVICE_ID_HERE") return;
+            try {
+                const res = await fetch(`https://backend.e-ra.io/api/v1/devices/${DEVICE_ID}/latest-data`, {
+                    headers: { 'Authorization': `Bearer ${TOKEN}` }
+                });
+                const data = await res.json();
+                
+                // Trích xuất dữ liệu từ các Pin
+                const uid = data.find(p => p.pin === "V0")?.value || "";
+                const name = data.find(p => p.pin === "V1")?.value || "NGƯỜI LẠ";
+                const mssv = data.find(p => p.pin === "V2")?.value || "---";
+                const className = data.find(p => p.pin === "V10")?.value || "---";
+                const systemInfo = data.find(p => p.pin === "V11")?.value || "";
 
-        uidD.innerText = "ID: " + uid;
-        instr.innerText = isStranger ? "Người lạ" : name;
-        subT.innerText = isStranger ? "Thẻ chưa đăng ký" : "MSSV: " + mssv;
+                // Nếu có UID mới quét (Khác với UID lần trước)
+                if (uid && uid !== lastScannedUID) {
+                    lastScannedUID = uid;
+                    onAttendanceSuccess(name, mssv, className, uid);
+                }
 
-        if (isStranger) {
-            box.className = "scan-card active-warning shake";
-            icon.className = "bx bx-error-circle qr-placeholder text-danger";
-        } else {
-            box.className = "scan-card active-success";
-            icon.className = "bx bxs-check-circle qr-placeholder text-primary";
+                // Cập nhật sĩ số (Nếu bạn có chân V3 tính tổng sĩ số thực tế từ server e-Ra)
+                const totalInClass = 40; // Giả định sĩ số lớp là 40
+                document.getElementById('stat-total').innerText = totalInClass;
+                document.getElementById('stat-present').innerText = presentCount;
+                document.getElementById('stat-absent').innerText = Math.max(0, totalInClass - presentCount);
+
+            } catch (err) { 
+                console.error("Lỗi kết nối e-Ra:", err); 
+            }
         }
 
-        // Lưu log
-        logs.unshift({ time: new Date().toLocaleTimeString(), name: instr.innerText, mssv, uid });
-        localStorage.setItem('attendanceLogs', JSON.stringify(logs));
-        document.getElementById('statTotal').innerText = logs.length;
+        function onAttendanceSuccess(name, mssv, className, uid) {
+            // Cập nhật Card chính
+            document.getElementById('focus-name').innerText = name;
+            document.getElementById('focus-mssv').innerText = mssv;
+            document.getElementById('focus-class').innerText = className;
+            
+            const time = new Date().toLocaleTimeString('vi-VN', { hour12: false });
+            
+            // Tăng đếm có mặt (Chỉ đếm nếu chưa có trong danh sách - tùy logic của bạn)
+            if (!attendanceHistory.some(item => item.MSSV === mssv)) {
+                presentCount++;
+            }
 
-        // Reset trạng thái sau 4 giây để sẵn sàng cho thẻ tiếp theo
-        setTimeout(() => {
-            box.className = "scan-card";
-            icon.className = "bx bx-rfid qr-placeholder status-active";
-            instr.innerText = "Sẵn sàng";
-            subT.innerText = "Vui lòng chạm thẻ";
-            isLocked = false;
-            lastUid = ""; // Xóa bộ nhớ UID cũ để có thể quẹt lại chính thẻ đó
-        }, 4000);
-    }
+            // Thêm vào lịch sử
+            attendanceHistory.unshift({ 
+                "Giờ": time, 
+                "Họ Tên": name, 
+                "MSSV": mssv, 
+                "Lớp": className,
+                "UID": uid
+            });
 
-    function exportCSV() {
-        if (logs.length === 0) return alert("Không có dữ liệu");
-        let csv = "\uFEFFGiờ,Tên,MSSV,UID\n";
-        logs.forEach(l => csv += `${l.time},"${l.name}","${l.mssv}","'${l.uid}"\n`);
-        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement("a");
-        link.href = URL.createObjectURL(blob);
-        link.download = `RFID_Log.csv`;
-        link.click();
-    }
+            if (attendanceHistory.length > 20) attendanceHistory.pop();
+            renderHistory();
 
-    function clearHistory() {
-        if (confirm("Xóa toàn bộ?")) {
-            logs = [];
-            localStorage.clear();
-            location.reload();
+            // Hiệu ứng nháy xanh khi quét thành công
+            document.getElementById('main-card').classList.add('scan-anim');
+            setTimeout(() => document.getElementById('main-card').classList.remove('scan-anim'), 1000);
         }
-    }
-  </script>
+
+        function renderHistory() {
+            const tbody = document.getElementById('history-rows');
+            tbody.innerHTML = attendanceHistory.map(item => `
+                <tr class="hover:bg-slate-50 transition-colors">
+                    <td class="py-3 text-sky-600 font-bold">${item["Giờ"]}</td>
+                    <td class="py-3 font-bold text-slate-700 uppercase">${item["Họ Tên"]}</td>
+                    <td class="py-3 text-slate-400 font-semibold">${item["MSSV"]}</td>
+                    <td class="py-3 text-slate-400 text-[10px] uppercase">${item["Lớp"]}</td>
+                    <td class="py-3 text-right"><span class="bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-full font-bold">OK</span></td>
+                </tr>
+            `).join('');
+        }
+
+        function exportToExcel() {
+            if (attendanceHistory.length === 0) {
+                alert("Không có dữ liệu để xuất!");
+                return;
+            }
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.json_to_sheet(attendanceHistory);
+            XLSX.utils.book_append_sheet(wb, ws, "DiemDanh");
+            const date = new Date().toLocaleDateString('vi-VN').replace(/\//g, '-');
+            XLSX.writeFile(wb, `DiemDanh_${date}.xlsx`);
+        }
+
+        function openRegistration(uid) {
+            document.getElementById('new-uid').innerText = uid;
+            document.getElementById('reg-modal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('reg-modal').style.display = 'none';
+        }
+
+        function saveRegistration() {
+            alert("Đã lưu thông tin đăng ký lên hệ thống!");
+            closeModal();
+        }
+
+        function clearHistory() {
+            if(confirm("Xóa toàn bộ lịch sử hiện tại trên màn hình?")) {
+                attendanceHistory = [];
+                presentCount = 0;
+                renderHistory();
+            }
+        }
+
+        setInterval(updateTime, 1000);
+        setInterval(syncWithEra, 2000); // Đồng bộ mỗi 2 giây
+        updateTime();
+    </script>
 </body>
 </html>
