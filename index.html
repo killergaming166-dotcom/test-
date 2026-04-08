@@ -26,6 +26,8 @@
             color: var(--text-main);
             font-family: 'Plus Jakarta Sans', sans-serif;
             padding: 1rem;
+            min-height: 100vh;
+            position: relative;
         }
 
         .modern-card {
@@ -66,6 +68,18 @@
             background: #059669;
             transform: translateY(-1px);
         }
+
+        .version-tag {
+            position: fixed;
+            bottom: 10px;
+            right: 20px;
+            font-size: 9px;
+            font-weight: 800;
+            color: #cbd5e1;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            pointer-events: none;
+        }
     </style>
 </head>
 <body>
@@ -87,7 +101,7 @@
     </div>
 
     <!-- Layout Chính -->
-    <div class="grid grid-cols-12 gap-4">
+    <div class="grid grid-cols-12 gap-4 pb-8">
         
         <!-- CỘT TRÁI -->
         <div class="col-span-12 lg:col-span-8 space-y-4">
@@ -112,7 +126,7 @@
                     </div>
                     <h1 id="focus-name" class="text-4xl font-extrabold text-slate-800 mb-1 tracking-tight uppercase text-center">---</h1>
                     <p id="focus-mssv" class="text-lg text-slate-400 font-semibold mb-2">Hệ thống sẵn sàng</p>
-                    <p id="focus-class" class="text-sm text-blue-500 font-bold mb-4 uppercase">---</p>
+                    <p id="focus-class" class="text-sm text-blue-500 font-bold mb-4 uppercase tracking-wide">---</p>
                     <div id="status-badge" class="px-6 py-1.5 rounded-full bg-slate-50 text-slate-500 border border-slate-100 font-bold text-[10px] uppercase tracking-widest">
                         Đợi quẹt thẻ...
                     </div>
@@ -175,7 +189,7 @@
             </div>
 
             <div class="modern-card p-6 rounded-[1.5rem] space-y-4">
-                <p class="text-[9px] font-bold text-slate-400 uppercase mb-2 tracking-widest text-center">Thông tin hệ thống</p>
+                <p class="text-[9px] font-bold text-slate-400 uppercase mb-2 tracking-widest text-center">Hệ thống</p>
                 <div class="grid grid-cols-2 gap-2">
                     <div class="bg-slate-50 p-2 rounded-xl border border-slate-100 text-center">
                         <div class="text-[7px] font-black text-slate-400 uppercase">Vào</div>
@@ -188,11 +202,14 @@
                 </div>
                 <div class="pt-3 border-t border-slate-50 flex items-center justify-center gap-2">
                     <div class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
-                    <span id="esp-status" class="text-[8px] font-bold text-slate-400 uppercase tracking-widest">ESP32: Online</span>
+                    <span class="text-[8px] font-bold text-slate-400 uppercase tracking-widest">ESP32: Online</span>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- DÒNG V1 NHỎ DƯỚI CÙNG -->
+    <div class="version-tag">V1.0.0 Beta</div>
 
     <!-- MODAL ĐĂNG KÝ -->
     <div id="reg-modal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
@@ -211,7 +228,6 @@
     </div>
 
     <script>
-        // Cần điền thông tin e-Ra của bạn vào đây
         const TOKEN = "53f7b5a4-c19e-4760-9940-ff280ac07374"; 
         const DEVICE_ID = "YOUR_DEVICE_ID_HERE"; 
 
@@ -245,11 +261,10 @@
                 document.getElementById('shift-start').innerText = currentShift.start;
                 document.getElementById('shift-end').innerText = currentShift.end;
             } else {
-                label.innerText = "Ngoài giờ học";
+                label.innerText = "Ngoài giờ";
             }
         }
 
-        // Logic đồng bộ dữ liệu từ e-Ra (V0, V1, V2, V10, V11)
         async function syncWithEra() {
             if (!TOKEN || !DEVICE_ID || DEVICE_ID === "YOUR_DEVICE_ID_HERE") return;
             try {
@@ -258,56 +273,46 @@
                 });
                 const data = await res.json();
                 
-                // Trích xuất dữ liệu từ các Pin
                 const uid = data.find(p => p.pin === "V0")?.value || "";
-                const name = data.find(p => p.pin === "V1")?.value || "NGƯỜI LẠ";
-                const mssv = data.find(p => p.pin === "V2")?.value || "---";
-                const className = data.find(p => p.pin === "V10")?.value || "---";
-                const systemInfo = data.find(p => p.pin === "V11")?.value || "";
+                const name = data.find(p => p.pin === "V1")?.value || "";
+                const mssv = data.find(p => p.pin === "V2")?.value || "";
+                const className = data.find(p => p.pin === "V10")?.value || "";
 
-                // Nếu có UID mới quét (Khác với UID lần trước)
                 if (uid && uid !== lastScannedUID) {
                     lastScannedUID = uid;
                     onAttendanceSuccess(name, mssv, className, uid);
                 }
 
-                // Cập nhật sĩ số (Nếu bạn có chân V3 tính tổng sĩ số thực tế từ server e-Ra)
-                const totalInClass = 40; // Giả định sĩ số lớp là 40
+                const totalInClass = 40; 
                 document.getElementById('stat-total').innerText = totalInClass;
                 document.getElementById('stat-present').innerText = presentCount;
                 document.getElementById('stat-absent').innerText = Math.max(0, totalInClass - presentCount);
 
-            } catch (err) { 
-                console.error("Lỗi kết nối e-Ra:", err); 
-            }
+            } catch (err) { console.error(err); }
         }
 
         function onAttendanceSuccess(name, mssv, className, uid) {
-            // Cập nhật Card chính
-            document.getElementById('focus-name').innerText = name;
-            document.getElementById('focus-mssv').innerText = mssv;
-            document.getElementById('focus-class').innerText = className;
+            document.getElementById('focus-name').innerText = name || "NGƯỜI LẠ";
+            document.getElementById('focus-mssv').innerText = mssv || "Chưa đăng ký";
+            document.getElementById('focus-class').innerText = className || "---";
             
             const time = new Date().toLocaleTimeString('vi-VN', { hour12: false });
             
-            // Tăng đếm có mặt (Chỉ đếm nếu chưa có trong danh sách - tùy logic của bạn)
-            if (!attendanceHistory.some(item => item.MSSV === mssv)) {
+            if (mssv && !attendanceHistory.some(item => item.MSSV === mssv)) {
                 presentCount++;
             }
 
-            // Thêm vào lịch sử
             attendanceHistory.unshift({ 
                 "Giờ": time, 
-                "Họ Tên": name, 
-                "MSSV": mssv, 
-                "Lớp": className,
+                "Họ Tên": name || "N/A", 
+                "MSSV": mssv || "N/A", 
+                "Lớp": className || "N/A",
                 "UID": uid
             });
 
             if (attendanceHistory.length > 20) attendanceHistory.pop();
             renderHistory();
 
-            // Hiệu ứng nháy xanh khi quét thành công
             document.getElementById('main-card').classList.add('scan-anim');
             setTimeout(() => document.getElementById('main-card').classList.remove('scan-anim'), 1000);
         }
@@ -326,15 +331,11 @@
         }
 
         function exportToExcel() {
-            if (attendanceHistory.length === 0) {
-                alert("Không có dữ liệu để xuất!");
-                return;
-            }
+            if (attendanceHistory.length === 0) return;
             const wb = XLSX.utils.book_new();
             const ws = XLSX.utils.json_to_sheet(attendanceHistory);
             XLSX.utils.book_append_sheet(wb, ws, "DiemDanh");
-            const date = new Date().toLocaleDateString('vi-VN').replace(/\//g, '-');
-            XLSX.writeFile(wb, `DiemDanh_${date}.xlsx`);
+            XLSX.writeFile(wb, `DiemDanh_${new Date().getTime()}.xlsx`);
         }
 
         function openRegistration(uid) {
@@ -347,12 +348,12 @@
         }
 
         function saveRegistration() {
-            alert("Đã lưu thông tin đăng ký lên hệ thống!");
+            alert("Đã gửi yêu cầu đăng ký!");
             closeModal();
         }
 
         function clearHistory() {
-            if(confirm("Xóa toàn bộ lịch sử hiện tại trên màn hình?")) {
+            if(confirm("Xóa lịch sử?")) {
                 attendanceHistory = [];
                 presentCount = 0;
                 renderHistory();
@@ -360,7 +361,7 @@
         }
 
         setInterval(updateTime, 1000);
-        setInterval(syncWithEra, 2000); // Đồng bộ mỗi 2 giây
+        setInterval(syncWithEra, 2000);
         updateTime();
     </script>
 </body>
