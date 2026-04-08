@@ -211,7 +211,7 @@
         </div>
     </div>
 
-    <div class="version-tag">V1.0.1 Beta</div>
+    <div class="version-tag">V1.0.2 Beta</div>
 
     <!-- MODAL ĐĂNG KÝ -->
     <div id="reg-modal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
@@ -275,7 +275,7 @@
             needRealtimeConfigs: true,
             maxRealtimeConfigsCount: 5,
             onConfiguration: (configuration) => {
-                // Giả định V0: UID, V1: Name, V2: MSSV, V10: Class
+                // V0: UID, V1: Name, V2: MSSV, V10: Class
                 configUid = configuration.realtime_configs[0];
                 configName = configuration.realtime_configs[1];
                 configMssv = configuration.realtime_configs[2];
@@ -290,9 +290,6 @@
                 const mssvVal = values[configMssv?.id]?.value;
                 const classVal = values[configClass?.id]?.value;
 
-                // --- LOGIC FIX: KIỂM TRA UID HỢP LỆ ---
-                // 1. Không nhận UID rỗng, null, hoặc bằng "0" (trạng thái chờ của ESP32)
-                // 2. Chỉ thực hiện khi UID thực sự thay đổi so với lần trước
                 if (uidVal && 
                     uidVal !== "" && 
                     uidVal !== "0" && 
@@ -306,11 +303,11 @@
         });
 
         function onAttendanceSuccess(name, mssv, className, uid) {
-            // Chuẩn hóa dữ liệu hiển thị
-            const displayName = (name && name !== "" && name !== "N/A") ? name : "NGƯỜI LẠ";
-            const displayMssv = (mssv && mssv !== "" && mssv !== "N/A") ? mssv : "Chưa đăng ký";
-            const displayClass = (className && className !== "" && className !== "N/A") ? className : "---";
+            const displayName = (name && name !== "" && name !== "N/A" && name !== "None") ? name : "NGƯỜI LẠ";
+            const displayMssv = (mssv && mssv !== "" && mssv !== "N/A" && mssv !== "None") ? mssv : "Chưa đăng ký";
+            const displayClass = (className && className !== "" && className !== "N/A" && className !== "None") ? className : "---";
 
+            // Cập nhật thẻ hiển thị chính
             document.getElementById('focus-name').innerText = displayName;
             document.getElementById('focus-mssv').innerText = displayMssv;
             document.getElementById('focus-class').innerText = displayClass;
@@ -319,30 +316,27 @@
             
             const time = new Date().toLocaleTimeString('vi-VN', { hour12: false });
             
-            // Nếu là thẻ lạ chưa có MSSV, mở modal đăng ký
             if (displayName === "NGƯỜI LẠ" || displayMssv === "Chưa đăng ký") {
                 openRegistration(uid);
             }
 
-            // Cập nhật sĩ số nếu MSSV hợp lệ và chưa có trong danh sách điểm danh hôm nay
             if (displayMssv !== "Chưa đăng ký" && !attendanceHistory.some(item => item.MSSV === displayMssv)) {
                 presentCount++;
                 updateStats();
             }
 
-            // Thêm vào lịch sử (đưa lên đầu)
+            // Thêm vào lịch sử với đầy đủ thông tin Lớp
             attendanceHistory.unshift({ 
                 "Giờ": time, 
                 "Họ Tên": displayName, 
                 "MSSV": displayMssv, 
-                "Lớp": displayClass,
+                "Lớp": displayClass, // Gán dữ liệu lớp ở đây
                 "UID": uid
             });
 
             if (attendanceHistory.length > 50) attendanceHistory.pop();
             renderHistory();
 
-            // Hiệu ứng scan card
             const mainCard = document.getElementById('main-card');
             mainCard.classList.add('scan-anim');
             setTimeout(() => {
@@ -365,7 +359,7 @@
                     <td class="py-3 text-sky-600 font-bold">${item["Giờ"]}</td>
                     <td class="py-3 font-bold text-slate-700 uppercase">${item["Họ Tên"]}</td>
                     <td class="py-3 text-slate-400 font-semibold">${item["MSSV"]}</td>
-                    <td class="py-3 text-slate-400 text-[10px] uppercase">${item["Lớp"]}</td>
+                    <td class="py-3 text-slate-400 text-[10px] font-bold uppercase">${item["Lớp"]}</td>
                     <td class="py-3 text-right"><span class="bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-full font-bold">OK</span></td>
                 </tr>
             `).join('');
@@ -395,11 +389,7 @@
         function saveRegistration() {
             const name = document.getElementById('reg-name').value;
             const mssv = document.getElementById('reg-mssv').value;
-            
             if(!name || !mssv) return;
-            
-            console.log("Đăng ký mới:", { name, mssv, uid: lastScannedUID });
-            
             closeModal();
             document.getElementById('reg-name').value = "";
             document.getElementById('reg-mssv').value = "";
@@ -409,7 +399,7 @@
             if(confirm("Xóa lịch sử điểm danh hiện tại?")) {
                 attendanceHistory = [];
                 presentCount = 0;
-                lastScannedUID = ""; // Reset UID cuối để có thể quẹt lại người vừa xóa
+                lastScannedUID = "";
                 updateStats();
                 renderHistory();
             }
