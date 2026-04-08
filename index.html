@@ -211,7 +211,7 @@
         </div>
     </div>
 
-    <div class="version-tag">V1.0.0 Beta</div>
+    <div class="version-tag">V1.0.1 Beta</div>
 
     <!-- MODAL ĐĂNG KÝ -->
     <div id="reg-modal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
@@ -285,22 +285,31 @@
                 document.getElementById('connection-text').innerText = "Era: Online";
             },
             onValues: (values) => {
-                const uid = values[configUid?.id]?.value;
-                const name = values[configName?.id]?.value;
-                const mssv = values[configMssv?.id]?.value;
-                const className = values[configClass?.id]?.value;
+                const uidVal = values[configUid?.id]?.value;
+                const nameVal = values[configName?.id]?.value;
+                const mssvVal = values[configMssv?.id]?.value;
+                const classVal = values[configClass?.id]?.value;
 
-                if (uid && uid !== lastScannedUID && uid !== "0") {
-                    lastScannedUID = uid;
-                    onAttendanceSuccess(name, mssv, className, uid);
+                // --- LOGIC FIX: KIỂM TRA UID HỢP LỆ ---
+                // 1. Không nhận UID rỗng, null, hoặc bằng "0" (trạng thái chờ của ESP32)
+                // 2. Chỉ thực hiện khi UID thực sự thay đổi so với lần trước
+                if (uidVal && 
+                    uidVal !== "" && 
+                    uidVal !== "0" && 
+                    uidVal !== "00000000" && 
+                    uidVal !== lastScannedUID) {
+                    
+                    lastScannedUID = uidVal;
+                    onAttendanceSuccess(nameVal, mssvVal, classVal, uidVal);
                 }
             },
         });
 
         function onAttendanceSuccess(name, mssv, className, uid) {
-            const displayName = name || "NGƯỜI LẠ";
-            const displayMssv = mssv || "Chưa đăng ký";
-            const displayClass = className || "---";
+            // Chuẩn hóa dữ liệu hiển thị
+            const displayName = (name && name !== "" && name !== "N/A") ? name : "NGƯỜI LẠ";
+            const displayMssv = (mssv && mssv !== "" && mssv !== "N/A") ? mssv : "Chưa đăng ký";
+            const displayClass = (className && className !== "" && className !== "N/A") ? className : "---";
 
             document.getElementById('focus-name').innerText = displayName;
             document.getElementById('focus-mssv').innerText = displayMssv;
@@ -311,17 +320,17 @@
             const time = new Date().toLocaleTimeString('vi-VN', { hour12: false });
             
             // Nếu là thẻ lạ chưa có MSSV, mở modal đăng ký
-            if (!mssv || mssv === "" || mssv === "N/A") {
+            if (displayName === "NGƯỜI LẠ" || displayMssv === "Chưa đăng ký") {
                 openRegistration(uid);
             }
 
-            // Cập nhật sĩ số nếu MSSV hợp lệ và chưa điểm danh
-            if (mssv && mssv !== "N/A" && !attendanceHistory.some(item => item.MSSV === mssv)) {
+            // Cập nhật sĩ số nếu MSSV hợp lệ và chưa có trong danh sách điểm danh hôm nay
+            if (displayMssv !== "Chưa đăng ký" && !attendanceHistory.some(item => item.MSSV === displayMssv)) {
                 presentCount++;
                 updateStats();
             }
 
-            // Thêm vào lịch sử
+            // Thêm vào lịch sử (đưa lên đầu)
             attendanceHistory.unshift({ 
                 "Giờ": time, 
                 "Họ Tên": displayName, 
@@ -333,7 +342,7 @@
             if (attendanceHistory.length > 50) attendanceHistory.pop();
             renderHistory();
 
-            // Hiệu ứng scan
+            // Hiệu ứng scan card
             const mainCard = document.getElementById('main-card');
             mainCard.classList.add('scan-anim');
             setTimeout(() => {
@@ -384,14 +393,12 @@
         }
 
         function saveRegistration() {
-            // Trong thực tế, bạn sẽ gửi lệnh này ngược lại Era thông qua triggerAction hoặc update data
             const name = document.getElementById('reg-name').value;
             const mssv = document.getElementById('reg-mssv').value;
             
             if(!name || !mssv) return;
             
             console.log("Đăng ký mới:", { name, mssv, uid: lastScannedUID });
-            // Ở đây có thể tích hợp eraWidget.triggerAction nếu thiết bị hỗ trợ lưu thẻ
             
             closeModal();
             document.getElementById('reg-name').value = "";
@@ -402,6 +409,7 @@
             if(confirm("Xóa lịch sử điểm danh hiện tại?")) {
                 attendanceHistory = [];
                 presentCount = 0;
+                lastScannedUID = ""; // Reset UID cuối để có thể quẹt lại người vừa xóa
                 updateStats();
                 renderHistory();
             }
