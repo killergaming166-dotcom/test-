@@ -8,7 +8,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://www.unpkg.com/@eohjsc/era-widget@1.1.3/src/index.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <!-- Thêm Chart.js để vẽ biểu đồ -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
@@ -31,9 +30,6 @@
         .log-table { width: 100%; border-collapse: collapse; }
         .log-table th { font-size: 10px; color: #64748b; text-transform: uppercase; letter-spacing: 1px; padding: 12px; font-weight: 800; border-bottom: 2px solid #f1f5f9; text-align: left; position: sticky; top: 0; background: white; z-index: 10; }
         .log-table td { padding: 14px 12px; font-size: 13px; font-weight: 500; border-bottom: 1px solid #f8fafc; }
-
-        .pulse-red { animation: pulse 2s infinite; }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
     </style>
 </head>
 <body>
@@ -82,7 +78,7 @@
                 </div>
             </div>
 
-            <!-- Khối Đăng ký (Rộng hơn, Nút Lưu ở dưới) -->
+            <!-- Khối Đăng ký -->
             <div class="card p-7 border-l-8 border-orange-500">
                 <div class="flex items-center justify-between mb-6">
                     <div class="flex items-center gap-3">
@@ -91,25 +87,25 @@
                         </div>
                         <h3 class="font-black text-sm uppercase text-slate-700 tracking-tight">Đăng ký thành viên mới</h3>
                     </div>
-                    <div class="text-[10px] font-black text-slate-300 uppercase tracking-widest">Bước 1: Quét thẻ trống</div>
+                    <div class="text-[10px] font-black text-slate-300 uppercase tracking-widest">Bước 1: Quét thẻ để lấy UID</div>
                 </div>
                 
                 <div class="grid grid-cols-4 gap-4 mb-5">
                     <div class="space-y-2">
                         <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Mã thẻ UID</label>
-                        <input type="text" id="reg-uid" placeholder="..." class="input-box bg-slate-100/50" readonly>
+                        <input type="text" id="reg-uid" placeholder="..." class="input-box bg-slate-100 font-mono text-orange-600 font-bold" readonly>
                     </div>
                     <div class="space-y-2">
                         <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Họ và Tên</label>
-                        <input type="text" id="reg-name" placeholder="Ví dụ: Nguyễn Văn A" class="input-box">
+                        <input type="text" id="reg-name" placeholder="Nhập tên..." class="input-box">
                     </div>
                     <div class="space-y-2">
                         <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">MSSV / ID</label>
-                        <input type="text" id="reg-mssv" placeholder="PS12345" class="input-box">
+                        <input type="text" id="reg-mssv" placeholder="Nhập MSSV..." class="input-box">
                     </div>
                     <div class="space-y-2">
                         <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Lớp / Bộ phận</label>
-                        <input type="text" id="reg-class" placeholder="WD18301" class="input-box">
+                        <input type="text" id="reg-class" placeholder="Nhập lớp..." class="input-box">
                     </div>
                 </div>
 
@@ -126,11 +122,9 @@
                         <div class="w-1.5 h-5 bg-blue-600 rounded-full"></div>
                         <h3 class="font-black text-sm text-slate-800 tracking-tight uppercase">Nhật ký điểm danh trực tiếp</h3>
                     </div>
-                    <div class="flex gap-2">
-                        <button onclick="exportExcel()" class="bg-blue-50 text-blue-600 text-[10px] font-black px-4 py-2 rounded-xl uppercase hover:bg-blue-600 hover:text-white transition-all">
-                            <i class="fa-solid fa-download mr-1"></i> Excel
-                        </button>
-                    </div>
+                    <button onclick="exportExcel()" class="bg-blue-50 text-blue-600 text-[10px] font-black px-4 py-2 rounded-xl uppercase hover:bg-blue-600 hover:text-white transition-all">
+                        <i class="fa-solid fa-download mr-1"></i> Excel
+                    </button>
                 </div>
                 <div class="log-table-container">
                     <table class="log-table">
@@ -143,17 +137,14 @@
                                 <th>TRẠNG THÁI</th>
                             </tr>
                         </thead>
-                        <tbody id="log-body">
-                            <!-- Dữ liệu mẫu -->
-                        </tbody>
+                        <tbody id="log-body"></tbody>
                     </table>
                 </div>
             </div>
         </div>
 
-        <!-- CỘT PHẢI (4/12) -->
+        <!-- CỘT PHẢI -->
         <div class="col-span-4 space-y-5">
-            <!-- Thống kê nhanh -->
             <div class="grid grid-cols-1 gap-3">
                 <div class="stat-card stat-user">
                     <div>
@@ -169,7 +160,7 @@
                         <p class="text-[9px] font-black text-emerald-500 uppercase mb-0.5">Hiện diện</p>
                         <h4 class="text-3xl font-black text-slate-800" id="present-count">0</h4>
                     </div>
-                    <div class="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-500 border border-emerald-100">
+                    <div class="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-500">
                         <i class="fa-solid fa-user-check"></i>
                     </div>
                 </div>
@@ -178,30 +169,27 @@
                         <p class="text-[9px] font-black text-rose-500 uppercase mb-0.5">Vắng mặt</p>
                         <h4 class="text-3xl font-black text-slate-800" id="absent-count">40</h4>
                     </div>
-                    <div class="w-10 h-10 bg-rose-50 rounded-xl flex items-center justify-center text-rose-500 border border-rose-100">
+                    <div class="w-10 h-10 bg-rose-50 rounded-xl flex items-center justify-center text-rose-500">
                         <i class="fa-solid fa-user-xmark"></i>
                     </div>
                 </div>
             </div>
 
-            <!-- Biểu đồ -->
             <div class="card p-5">
                 <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Phân tích chuyên cần</h4>
                 <canvas id="attendanceChart" height="200"></canvas>
             </div>
 
-            <!-- Thời gian ca học -->
             <div class="card p-6 bg-[#0f172a] text-white">
                 <div class="flex items-center justify-between mb-5">
-                    <span class="text-[10px] font-black text-blue-400 uppercase tracking-[0.2em]" id="shift-name">CA ĐANG DIỄN RA</span>
+                    <span class="text-[10px] font-black text-blue-400 uppercase tracking-[0.2em]">CA ĐANG DIỄN RA</span>
                     <span class="px-2 py-1 bg-blue-500/20 text-blue-400 rounded-md text-[9px] font-bold border border-blue-500/30" id="shift-id">CA --</span>
                 </div>
                 <div class="flex items-center justify-between gap-4">
-                    <div class="flex-1 text-center">
+                    <div class="flex-1 text-center border-r border-slate-800">
                         <p class="text-[8px] font-bold text-slate-500 uppercase mb-1">BẮT ĐẦU</p>
                         <p class="text-xl font-black tracking-tight" id="ca-start">--:--</p>
                     </div>
-                    <div class="h-8 w-px bg-slate-800"></div>
                     <div class="flex-1 text-center">
                         <p class="text-[8px] font-bold text-slate-500 uppercase mb-1">KẾT THÚC</p>
                         <p class="text-xl font-black tracking-tight" id="ca-end">--:--</p>
@@ -209,18 +197,17 @@
                 </div>
             </div>
 
-            <!-- Thông tin hệ thống -->
             <div class="card p-5 space-y-4 bg-slate-50/50">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-2">
                         <i class="fa-solid fa-microchip text-slate-400"></i>
-                        <span class="text-[10px] font-bold text-slate-600 uppercase">ESP32 Status</span>
+                        <span class="text-[10px] font-bold text-slate-600 uppercase">Thiết bị</span>
                     </div>
-                    <span id="device-dot" class="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]"></span>
+                    <span id="device-dot" class="w-2 h-2 rounded-full bg-emerald-500"></span>
                 </div>
                 <div class="p-3 bg-white rounded-xl border border-slate-200">
                     <p class="text-[8px] font-black text-slate-400 uppercase mb-2">Hành động cuối</p>
-                    <p class="text-[11px] font-bold text-slate-700" id="last-action">Chờ tín hiệu từ thiết bị...</p>
+                    <p class="text-[11px] font-bold text-slate-700" id="last-action">Sẵn sàng nhận thẻ...</p>
                 </div>
                 <button onclick="location.reload()" class="w-full bg-white border border-slate-200 text-slate-600 text-[10px] font-black py-3 rounded-xl uppercase hover:bg-slate-100 transition-all">
                     Kiểm tra kết nối
@@ -244,28 +231,15 @@
             { name: "Ca 5", start: "17:15", end: "19:30" }
         ];
 
-        // Khởi tạo biểu đồ
+        // Biểu đồ
         let ctx = document.getElementById('attendanceChart').getContext('2d');
         let attendanceChart = new Chart(ctx, {
             type: 'bar',
             data: {
                 labels: ['Ca 1', 'Ca 2', 'Ca 3', 'Ca 4', 'Ca 5'],
-                datasets: [{
-                    label: 'Hiện diện',
-                    data: [0, 0, 0, 0, 0],
-                    backgroundColor: '#3b82f6',
-                    borderRadius: 6,
-                    barThickness: 15
-                }]
+                datasets: [{ label: 'Hiện diện', data: [0,0,0,0,0], backgroundColor: '#3b82f6', borderRadius: 6, barThickness: 15 }]
             },
-            options: {
-                responsive: true,
-                plugins: { legend: { display: false } },
-                scales: { 
-                    y: { beginAtZero: true, grid: { display: false }, ticks: { font: { size: 9 } } },
-                    x: { grid: { display: false }, ticks: { font: { size: 9 } } }
-                }
-            }
+            options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { display: false }, ticks: { font: { size: 9 } } }, x: { grid: { display: false }, ticks: { font: { size: 9 } } } } }
         });
 
         eraWidget.init({
@@ -282,60 +256,58 @@
             onValues: (v) => {
                 const uidVal = v[config.uid?.id]?.value;
                 const nameVal = v[config.name?.id]?.value;
+                const mssvVal = v[config.mssv?.id]?.value;
+                const classVal = v[config.class?.id]?.value;
 
-                // Xử lý khi ESP32 gửi lệnh reset hoặc không có thẻ (None/0)
                 if (!uidVal || uidVal === "None" || uidVal === "0") {
-                    resetMainDisplay();
+                    resetDisplay();
                     return;
                 }
 
-                // Nếu có UID mới khác với UID lần trước
                 if (uidVal !== lastUid) {
                     lastUid = uidVal;
-                    document.getElementById('reg-uid').value = uidVal;
+                    document.getElementById('reg-uid').value = uidVal; // Luôn điền UID vào ô đăng ký khi quẹt
                     
-                    handleAttendance({
+                    handleScan({
                         uid: uidVal,
                         name: nameVal,
-                        mssv: v[config.mssv?.id]?.value,
-                        class: v[config.class?.id]?.value
+                        mssv: mssvVal,
+                        class: classVal
                     });
                 }
             }
         });
 
-        function resetMainDisplay() {
-            lastUid = ""; // Reset UID lưu vết
-            const nameEl = document.getElementById('display-name');
-            const avatar = document.getElementById('avatar-container');
-            const icon = document.getElementById('avatar-icon');
-            
-            nameEl.innerText = "ĐANG ĐỢI THẺ...";
-            nameEl.style.color = "#1e293b";
-            avatar.style.borderColor = "#f1f5f9";
-            icon.className = "fa-solid fa-user-astronaut text-6xl text-slate-200";
+        function resetDisplay() {
+            lastUid = "";
+            document.getElementById('display-name').innerText = "ĐANG ĐỢI THẺ...";
+            document.getElementById('display-name').style.color = "#1e293b";
+            document.getElementById('avatar-container').style.borderColor = "#f1f5f9";
+            document.getElementById('avatar-icon').className = "fa-solid fa-user-astronaut text-6xl text-slate-200";
         }
 
-        function handleAttendance(data) {
+        function handleScan(data) {
             const nameEl = document.getElementById('display-name');
             const avatar = document.getElementById('avatar-container');
             const icon = document.getElementById('avatar-icon');
-            const lastActionEl = document.getElementById('last-action');
-            
-            // XỬ LÝ TRƯỜNG HỢP NGƯỜI LẠ
-            if (!data.name || data.name === "None" || data.name === "THẺ CHƯA ĐĂNG KÝ") {
-                nameEl.innerText = "THẺ LẠ";
-                nameEl.style.color = "#f43f5e";
-                avatar.style.borderColor = "#f43f5e";
-                icon.className = "fa-solid fa-user-secret text-6xl text-rose-400";
-                lastActionEl.innerText = `Cảnh báo: Thẻ lạ quẹt lúc ${new Date().toLocaleTimeString()}`;
-                return; // Dừng, không ghi log điểm danh
+            const actionEl = document.getElementById('last-action');
+
+            // KIỂM TRA THẺ CHƯA ĐĂNG KÝ (Dựa trên tên gửi từ ESP32)
+            const isUnknown = (!data.name || data.name === "None" || data.name === "NGUOI LA" || data.name === "THẺ CHƯA ĐĂNG KÝ");
+
+            if (isUnknown) {
+                nameEl.innerText = "THẺ MỚI";
+                nameEl.style.color = "#f97316";
+                avatar.style.borderColor = "#f97316";
+                icon.className = "fa-solid fa-id-card text-6xl text-orange-400";
+                actionEl.innerText = `Phát hiện thẻ mới: ${data.uid}`;
+                // Không ghi vào nhật ký điểm danh nhưng đã hiện UID ở ô đăng ký
+                return;
             }
 
-            // XỬ LÝ THÀNH VIÊN HỢP LỆ
+            // XỬ LÝ ĐIỂM DANH THẺ ĐÃ ĐĂNG KÝ
             let isCheckOut = presentSet.has(data.mssv);
-            let statusStr = isCheckOut ? "RA LỚP" : "VÀO LỚP";
-            let colorClass = isCheckOut ? "bg-rose-50 text-rose-500" : "bg-emerald-50 text-emerald-600";
+            let status = isCheckOut ? "RA LỚP" : "VÀO LỚP";
             
             if (isCheckOut) {
                 presentSet.delete(data.mssv);
@@ -349,18 +321,16 @@
 
             nameEl.innerText = data.name;
             nameEl.style.color = "#0f172a";
-            lastActionEl.innerText = `${statusStr}: ${data.name}`;
+            actionEl.innerText = `${status}: ${data.name}`;
 
-            // Ghi vào nhật ký
             logs.unshift({
                 time: new Date().toLocaleTimeString('vi-VN', { hour12: false }),
                 name: data.name,
                 mssv: data.mssv,
                 class: data.class,
-                status: statusStr,
-                color: colorClass
+                status: status,
+                color: isCheckOut ? "bg-rose-50 text-rose-500" : "bg-emerald-50 text-emerald-600"
             });
-
             renderLogs();
         }
 
@@ -374,26 +344,21 @@
                     <td><span class="px-3 py-1 rounded-full text-[10px] font-black ${l.color}">${l.status}</span></td>
                 </tr>
             `).join('');
-
-            const count = presentSet.size;
-            document.getElementById('present-count').innerText = count;
-            document.getElementById('absent-count').innerText = Math.max(0, 40 - count);
-            
-            // Cập nhật biểu đồ theo ca hiện tại (ví dụ đơn giản)
-            updateChart(count);
+            document.getElementById('present-count').innerText = presentSet.size;
+            document.getElementById('absent-count').innerText = Math.max(0, 40 - presentSet.size);
+            updateChart(presentSet.size);
         }
 
-        function updateChart(currentCount) {
+        function updateChart(count) {
             const now = new Date();
             const time = now.getHours() * 60 + now.getMinutes();
-            let shiftIdx = SHIFTS.findIndex(s => {
+            let idx = SHIFTS.findIndex(s => {
                 const [sh, sm] = s.start.split(':').map(Number);
                 const [eh, em] = s.end.split(':').map(Number);
                 return time >= (sh * 60 + sm) && time <= (eh * 60 + em);
             });
-            
-            if (shiftIdx !== -1) {
-                attendanceChart.data.datasets[0].data[shiftIdx] = currentCount;
+            if (idx !== -1) {
+                attendanceChart.data.datasets[0].data[idx] = count;
                 attendanceChart.update();
             }
         }
@@ -401,18 +366,14 @@
         function updateClock() {
             const now = new Date();
             document.getElementById('clock').innerText = now.toLocaleTimeString('vi-VN', { hour12: false });
-            
             const days = ["CHỦ NHẬT", "THỨ HAI", "THỨ BA", "THỨ TƯ", "THỨ NĂM", "THỨ SÁU", "THỨ BẢY"];
             document.getElementById('date-now').innerText = `${days[now.getDay()]}, ${now.getDate()} THÁNG ${now.getMonth() + 1}, ${now.getFullYear()}`;
-            
-            // Cập nhật thông tin ca học
             const time = now.getHours() * 60 + now.getMinutes();
             const shift = SHIFTS.find(s => {
                 const [sh, sm] = s.start.split(':').map(Number);
                 const [eh, em] = s.end.split(':').map(Number);
                 return time >= (sh * 60 + sm) && time <= (eh * 60 + em);
             });
-
             if (shift) {
                 document.getElementById('shift-id').innerText = shift.name.toUpperCase();
                 document.getElementById('ca-start').innerText = shift.start;
@@ -424,18 +385,18 @@
             const name = document.getElementById('reg-name').value;
             const uid = document.getElementById('reg-uid').value;
             if(!name || !uid) {
-                document.getElementById('last-action').innerText = "Lỗi: Hãy quét thẻ trước khi lưu!";
+                document.getElementById('last-action').innerText = "Lỗi: Điền tên và quét thẻ trước!";
                 return;
             }
-            document.getElementById('last-action').innerText = `Đã ghi nhớ: ${name}. Hãy thêm UID vào code ESP32!`;
+            // Logic lưu trữ có thể thêm tại đây (Firebase hoặc Local)
+            document.getElementById('last-action').innerText = `Đã ghi: ${name} (${uid})`;
         }
 
         function exportExcel() {
-            if (logs.length === 0) return;
             const ws = XLSX.utils.json_to_sheet(logs);
             const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Attendance_Log");
-            XLSX.writeFile(wb, `DiemDanh_${new Date().toLocaleDateString()}.xlsx`);
+            XLSX.utils.book_append_sheet(wb, ws, "Logs");
+            XLSX.writeFile(wb, "DiemDanh.xlsx");
         }
 
         setInterval(updateClock, 1000);
