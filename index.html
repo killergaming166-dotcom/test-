@@ -1,578 +1,297 @@
 <!DOCTYPE html>
 <html lang="vi">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hệ Thống Điểm Danh - Era Cloud Premium</title>
+    <title>Attendance System - E-RA Integration</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- Nhúng thư viện E-RA từ CDN (Giả định link CDN của thư viện era-js) -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/era-js/dist/era.min.js"></script>
     <style>
-        :root {
-            --primary: #f27024;
-            --primary-light: #ff8c4a;
-            --bg: #f8fafc;
-            --glass: rgba(255, 255, 255, 0.8);
-            --glass-border: rgba(255, 255, 255, 0.5);
-        }
-
-        body {
-            background-color: var(--bg);
-            background-image: 
-                radial-gradient(at 0% 0%, hsla(20, 90%, 95%, 1) 0, transparent 50%), 
-                radial-gradient(at 100% 100%, hsla(200, 80%, 95%, 1) 0, transparent 50%);
-            color: #1e293b;
-            font-family: 'Inter', sans-serif;
-            min-height: 100vh;
-        }
-
-        .glass-panel {
-            background: var(--glass);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid var(--glass-border);
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05);
-        }
-
-        .digital-clock {
-            font-variant-numeric: tabular-nums;
-            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            font-weight: 900;
-        }
-
-        @keyframes pulse-success {
-            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
-            70% { transform: scale(1.02); box-shadow: 0 0 0 20px rgba(16, 185, 129, 0); }
-            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
-        }
-
-        .success-scan {
-            animation: pulse-success 0.6s ease-out;
-        }
-
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 4px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #e2e8f0;
-            border-radius: 10px;
-        }
-
-        /* Modal Blur */
-        .modal-active {
-            filter: blur(8px);
-            pointer-events: none;
-            transition: all 0.3s ease;
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f0f4f8; color: #334155; }
+        .glass-card { background: rgba(255, 255, 255, 0.95); border-radius: 20px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); }
+        .status-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 8px; }
+        .bg-era-green { background-color: #10b981; }
+        .bg-era-red { background-color: #ef4444; }
+        .bg-era-orange { background-color: #f97316; }
     </style>
 </head>
-
 <body class="p-4 md:p-8">
-    <div id="app-container" class="max-w-7xl mx-auto">
-        <!-- Header -->
-        <header class="flex flex-col md:flex-row justify-between items-center mb-10 gap-6">
-            <div class="flex items-center gap-5">
-                <div class="w-16 h-16 bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl flex items-center justify-center shadow-xl rotate-3">
-                    <span class="font-black text-white text-3xl">E</span>
-                </div>
-                <div>
-                    <h1 class="text-2xl font-black tracking-tighter text-slate-800 uppercase">Era Attendance</h1>
-                    <div class="flex items-center gap-2">
-                        <span id="connection-dot" class="w-2 h-2 rounded-full bg-slate-300"></span>
-                        <p id="connection-text" class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">ESP32 Offline</p>
-                    </div>
-                </div>
+
+    <!-- Header Section -->
+    <div class="flex justify-between items-center mb-8">
+        <div class="flex items-center gap-3">
+            <div class="bg-orange-500 text-white w-10 h-10 flex items-center justify-center rounded-lg font-bold text-xl">F</div>
+            <div>
+                <h1 class="font-bold text-lg leading-none">ATTENDANCE</h1>
+                <p class="text-xs text-slate-400 uppercase tracking-widest">Instructor Portal</p>
             </div>
-
-            <div class="text-center md:text-right">
-                <div id="clock" class="digital-clock text-5xl md:text-7xl leading-none tracking-tighter">00:00:00</div>
-                <p id="current-date" class="text-xs font-bold text-slate-400 uppercase mt-2 tracking-[0.2em]">Wednesday, Oct 25</p>
-            </div>
-        </header>
-
-        <main class="grid grid-cols-12 gap-8">
-            <!-- Left Column: Main Identity -->
-            <div class="col-span-12 lg:col-span-8 space-y-8">
-                <div id="main-card" class="glass-panel rounded-[3rem] p-10 md:p-16 flex flex-col items-center justify-center relative min-h-[500px] transition-all duration-500 overflow-hidden">
-                    <!-- Shift Badge -->
-                    <div id="shift-badge" class="absolute top-8 right-10 px-6 py-2 rounded-full bg-white/50 text-slate-500 text-[11px] font-black uppercase tracking-widest border border-white/50 shadow-sm">
-                        Đang xác định...
-                    </div>
-
-                    <!-- Scan Indicator -->
-                    <div class="absolute top-8 left-10 flex items-center gap-2">
-                        <span class="flex h-3 w-3 relative">
-                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
-                            <span class="relative inline-flex rounded-full h-3 w-3 bg-orange-500"></span>
-                        </span>
-                        <span class="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Waiting for card</span>
-                    </div>
-
-                    <!-- Student Info Display -->
-                    <div class="flex flex-col items-center text-center">
-                        <div id="avatar-container" class="w-40 h-40 bg-white rounded-[2.5rem] flex items-center justify-center text-6xl mb-8 shadow-xl border border-white transition-all duration-300">
-                            <span id="focus-icon">👤</span>
-                        </div>
-                        <h2 id="focus-name" class="text-5xl md:text-7xl font-black text-slate-800 mb-4 uppercase tracking-tighter leading-tight">---</h2>
-                        <div class="flex flex-wrap justify-center gap-3 mb-10">
-                            <span id="focus-mssv" class="px-5 py-2 rounded-xl bg-slate-100 text-slate-500 font-bold text-lg">Hệ thống sẵn sàng</span>
-                            <span id="focus-class" class="px-5 py-2 rounded-xl bg-blue-50 text-blue-600 font-bold text-lg uppercase hidden">---</span>
-                        </div>
-                        
-                        <div id="status-container" class="relative">
-                            <div id="status-pill" class="px-8 py-3 rounded-full bg-slate-800 text-white font-bold text-xs uppercase tracking-[0.2em] shadow-lg">
-                                Ready to Scan
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- History Table -->
-                <div class="glass-panel rounded-[2.5rem] p-8">
-                    <div class="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
-                        <div>
-                            <h3 class="text-xs font-black text-slate-400 uppercase tracking-[0.3em]">Lịch sử hôm nay</h3>
-                            <p class="text-2xl font-black text-slate-700">Attendance Log</p>
-                        </div>
-                        <div class="flex gap-3">
-                            <button onclick="exportToExcel()" class="bg-emerald-500 hover:bg-emerald-600 text-white text-[10px] font-black px-6 py-3 rounded-2xl shadow-lg shadow-emerald-100 transition-all uppercase tracking-widest">
-                                Xuất Excel
-                            </button>
-                            <button onclick="clearHistory()" class="bg-white text-rose-500 text-[10px] font-black px-6 py-3 rounded-2xl border border-rose-100 hover:bg-rose-50 transition-all uppercase tracking-widest">
-                                Xóa dữ liệu
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div class="overflow-x-auto custom-scrollbar max-h-[400px]">
-                        <table class="w-full">
-                            <thead class="sticky top-0 bg-white/80 backdrop-blur-md z-10">
-                                <tr class="text-slate-400 text-[10px] uppercase font-black tracking-widest text-left border-b border-slate-100">
-                                    <th class="pb-4 pl-4">Thời gian</th>
-                                    <th class="pb-4">Sinh viên</th>
-                                    <th class="pb-4">MSSV</th>
-                                    <th class="pb-4">Lớp</th>
-                                    <th class="pb-4 text-right pr-4">Trạng thái</th>
-                                </tr>
-                            </thead>
-                            <tbody id="history-rows" class="divide-y divide-slate-50">
-                                <!-- Data injected here -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Right Column: Stats & Info -->
-            <div class="col-span-12 lg:col-span-4 space-y-8">
-                <!-- Statistics Card -->
-                <div class="glass-panel rounded-[2.5rem] p-8">
-                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-8 text-center">Thống kê lớp học</p>
-                    
-                    <div class="space-y-6">
-                        <div class="flex items-center justify-between p-6 rounded-3xl bg-white/50 border border-white">
-                            <div>
-                                <p class="text-[10px] font-black text-slate-400 uppercase mb-1">Tổng sĩ số</p>
-                                <h4 class="text-4xl font-black text-slate-700">40</h4>
-                            </div>
-                            <div class="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-xl">👥</div>
-                        </div>
-
-                        <div class="flex items-center justify-between p-6 rounded-3xl bg-emerald-50 border border-emerald-100">
-                            <div>
-                                <p class="text-[10px] font-black text-emerald-600/60 uppercase mb-1">Hiện diện</p>
-                                <h4 id="stat-present" class="text-4xl font-black text-emerald-600">0</h4>
-                            </div>
-                            <div class="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-xl">✅</div>
-                        </div>
-
-                        <div class="flex items-center justify-between p-6 rounded-3xl bg-rose-50 border border-rose-100">
-                            <div>
-                                <p class="text-[10px] font-black text-rose-600/60 uppercase mb-1">Vắng mặt</p>
-                                <h4 id="stat-absent" class="text-4xl font-black text-rose-600">40</h4>
-                            </div>
-                            <div class="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-xl">❌</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Shift Details -->
-                <div class="glass-panel rounded-[2.5rem] p-8">
-                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-6 text-center">Thời gian biểu</p>
-                    <div class="grid grid-cols-2 gap-4 mb-6">
-                        <div class="bg-blue-50/50 p-5 rounded-[2rem] text-center border border-blue-100">
-                            <div class="text-[9px] font-black text-blue-400 uppercase mb-2">Bắt đầu</div>
-                            <span id="shift-start" class="text-2xl font-black text-blue-600">--:--</span>
-                        </div>
-                        <div class="bg-indigo-50/50 p-5 rounded-[2rem] text-center border border-indigo-100">
-                            <div class="text-[9px] font-black text-indigo-400 uppercase mb-2">Kết thúc</div>
-                            <span id="shift-end" class="text-2xl font-black text-indigo-600">--:--</span>
-                        </div>
-                    </div>
-                    <div class="p-4 rounded-2xl bg-white/40 border border-white text-center">
-                        <p id="next-event" class="text-[10px] font-bold text-slate-400 uppercase italic">Hệ thống đang hoạt động...</p>
-                    </div>
-                </div>
-
-                <!-- Admin Tool -->
-                <div class="p-6 rounded-[2rem] bg-slate-800 text-white shadow-2xl overflow-hidden relative">
-                    <div class="relative z-10">
-                        <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-4 text-center">System Management</p>
-                        <button onclick="window.location.reload()" class="w-full py-4 rounded-2xl bg-white/10 hover:bg-white/20 text-xs font-bold uppercase tracking-widest transition-all">
-                            Refresh Connection
-                        </button>
-                    </div>
-                    <div class="absolute -bottom-10 -right-10 w-32 h-32 bg-orange-500/20 blur-3xl rounded-full"></div>
-                </div>
-            </div>
-        </main>
+        </div>
+        <div id="current-time" class="text-4xl font-bold text-blue-500">00:00:00</div>
     </div>
 
-    <!-- Registration Modal -->
-    <div id="register-modal" class="fixed inset-0 z-[100] flex items-center justify-center hidden p-6">
-        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-md"></div>
-        <div class="relative bg-white rounded-[3rem] w-full max-w-lg p-10 shadow-2xl overflow-hidden">
-            <div class="absolute top-0 right-0 w-32 h-32 bg-orange-50 rounded-full -mr-16 -mt-16"></div>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <!-- Left Column: Live Stream & Registration (Khoanh Đỏ) -->
+        <div class="lg:col-span-2 space-y-6">
             
-            <div class="relative">
-                <div class="w-16 h-16 bg-orange-100 text-orange-600 rounded-2xl flex items-center justify-center text-3xl mb-6">🪪</div>
-                <h3 class="text-3xl font-black text-slate-800 mb-2 tracking-tight">Thành viên mới</h3>
-                <p id="modal-uid-display" class="inline-block px-3 py-1 bg-blue-50 text-blue-600 rounded-lg text-[10px] font-black uppercase tracking-widest mb-8">UID: 00000000</p>
+            <!-- Main Scanner View -->
+            <div class="glass-card p-8 flex flex-col items-center justify-center min-h-[400px] text-center relative">
+                <div class="absolute top-6 left-6 text-xs text-slate-400 flex items-center">
+                    <span class="status-dot bg-era-green animate-pulse"></span> LIVE STREAM
+                </div>
+                <div class="absolute top-6 right-6 text-xs bg-slate-100 px-3 py-1 rounded-full">CA 5</div>
                 
-                <div class="space-y-5">
-                    <div class="group">
-                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block ml-1">Họ tên sinh viên</label>
-                        <input id="reg-name" type="text" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 font-bold uppercase focus:outline-none focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 transition-all" placeholder="NGUYEN VAN A">
+                <div class="w-32 h-32 bg-slate-100 rounded-full flex items-center justify-center mb-6">
+                    <svg class="w-16 h-16 text-slate-300" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
+                </div>
+                
+                <div class="text-3xl font-bold tracking-tighter mb-2">---</div>
+                <h2 class="text-xl text-slate-500 mb-8">Hệ thống sẵn sàng</h2>
+                
+                <button id="scan-btn" class="bg-slate-800 text-white px-8 py-3 rounded-full font-semibold hover:bg-slate-700 transition shadow-lg">
+                    READY TO SCAN
+                </button>
+            </div>
+
+            <!-- Registration Area (KHU VỰC KHOANH ĐỎ) -->
+            <div class="glass-card p-6 border-2 border-dashed border-orange-200 bg-orange-50/30">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="font-bold text-orange-600 flex items-center gap-2 text-lg">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        ĐĂNG KÝ THẺ MỚI
+                    </h3>
+                    <span id="reg-status" class="text-xs font-medium text-slate-400 italic">Đang chờ tín hiệu...</span>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div class="md:col-span-1">
+                        <label class="block text-[10px] uppercase font-bold text-slate-400 mb-1">Mã Thẻ (UID)</label>
+                        <input type="text" id="reg-uid" placeholder="Quét thẻ để lấy mã..." readonly class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500 outline-none">
                     </div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="group">
-                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block ml-1">Mã số SV</label>
-                            <input id="reg-mssv" type="text" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 font-bold uppercase focus:outline-none focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 transition-all" placeholder="PS12345">
-                        </div>
-                        <div class="group">
-                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block ml-1">Lớp</label>
-                            <input id="reg-class" type="text" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 font-bold uppercase focus:outline-none focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 transition-all" placeholder="UD17301">
-                        </div>
+                    <div class="md:col-span-1">
+                        <label class="block text-[10px] uppercase font-bold text-slate-400 mb-1">Họ Tên</label>
+                        <input type="text" id="reg-name" placeholder="Nhập tên SV..." class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500 outline-none">
+                    </div>
+                    <div class="md:col-span-1">
+                        <label class="block text-[10px] uppercase font-bold text-slate-400 mb-1">MSSV</label>
+                        <input type="text" id="reg-mssv" placeholder="Nhập MSSV..." class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500 outline-none">
+                    </div>
+                    <div class="flex items-end">
+                        <button id="save-card-btn" class="w-full bg-orange-500 text-white font-bold py-2 rounded-lg hover:bg-orange-600 transition shadow-md shadow-orange-200 disabled:opacity-50">
+                            XÁC NHẬN ĐK
+                        </button>
                     </div>
                 </div>
+            </div>
 
-                <div class="grid grid-cols-2 gap-4 mt-10">
-                    <button onclick="closeModal()" class="py-5 rounded-2xl bg-slate-100 text-slate-500 font-bold text-xs uppercase tracking-widest hover:bg-slate-200 transition-all">Hủy bỏ</button>
-                    <button id="btn-save-reg" onclick="saveRegistration()" class="py-5 rounded-2xl bg-slate-800 text-white font-bold text-xs uppercase tracking-widest shadow-xl hover:bg-slate-900 transition-all">Lưu đăng ký</button>
+            <!-- Attendance Log -->
+            <div class="glass-card overflow-hidden">
+                <div class="p-6 flex justify-between items-center border-b border-slate-50">
+                    <div>
+                        <h3 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">LỊCH SỬ HÔM NAY</h3>
+                        <h2 class="text-xl font-bold">Attendance Log</h2>
+                    </div>
+                    <div class="flex gap-2">
+                        <button class="bg-emerald-500 text-white text-xs px-4 py-2 rounded-lg font-bold flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"></path></svg>
+                            XUẤT EXCEL
+                        </button>
+                        <button class="text-rose-500 text-xs px-4 py-2 rounded-lg font-bold hover:bg-rose-50">XÓA DỮ LIỆU</button>
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead>
+                            <tr class="text-[10px] uppercase text-slate-400 bg-slate-50/50">
+                                <th class="px-6 py-4">Thời gian</th>
+                                <th class="px-6 py-4">Sinh Viên</th>
+                                <th class="px-6 py-4">MSSV</th>
+                                <th class="px-6 py-4">Lớp</th>
+                                <th class="px-6 py-4">Trạng Thái</th>
+                            </tr>
+                        </thead>
+                        <tbody id="attendance-body">
+                            <!-- Data will be injected here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Stats & Info -->
+        <div class="space-y-6">
+            <!-- Stats Grid -->
+            <div class="grid grid-cols-1 gap-4">
+                <div class="glass-card p-6 border-l-4 border-slate-400 flex justify-between items-center">
+                    <div>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase">Sĩ Số</p>
+                        <h4 class="text-4xl font-bold">40</h4>
+                    </div>
+                    <div class="bg-slate-100 p-3 rounded-xl"><svg class="w-6 h-6 text-slate-400" fill="currentColor" viewBox="0 0 20 20"><path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z"></path></svg></div>
+                </div>
+                <div class="glass-card p-6 border-l-4 border-emerald-500 flex justify-between items-center bg-emerald-50/30">
+                    <div>
+                        <p class="text-[10px] font-bold text-emerald-600 uppercase">Hiện Diện</p>
+                        <h4 class="text-4xl font-bold text-emerald-600">0</h4>
+                    </div>
+                    <div class="bg-emerald-100 p-3 rounded-xl text-emerald-500">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                    </div>
+                </div>
+                <div class="glass-card p-6 border-l-4 border-rose-500 flex justify-between items-center bg-rose-50/30">
+                    <div>
+                        <p class="text-[10px] font-bold text-rose-600 uppercase">Vắng Mặt</p>
+                        <h4 class="text-4xl font-bold text-rose-600">40</h4>
+                    </div>
+                    <div class="bg-rose-100 p-3 rounded-xl text-rose-500">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Session Info -->
+            <div class="glass-card p-6">
+                <p class="text-[10px] font-bold text-slate-400 uppercase text-center mb-6 tracking-widest">Thời gian biểu</p>
+                <div class="grid grid-cols-2 gap-4 mb-8">
+                    <div class="bg-blue-50/50 p-4 rounded-2xl text-center">
+                        <p class="text-[10px] font-bold text-blue-400 uppercase mb-1">Bắt đầu</p>
+                        <div class="text-xl font-bold text-blue-600">--:--</div>
+                    </div>
+                    <div class="bg-indigo-50/50 p-4 rounded-2xl text-center">
+                        <p class="text-[10px] font-bold text-indigo-400 uppercase mb-1">Kết thúc</p>
+                        <div class="text-xl font-bold text-indigo-600">--:--</div>
+                    </div>
+                </div>
+                <div class="text-center">
+                    <p class="text-[10px] text-slate-400 italic mb-4">Hệ thống đang hoạt động...</p>
+                    <button class="w-full bg-slate-800 text-white py-4 rounded-2xl font-bold uppercase tracking-widest text-xs hover:bg-slate-900 transition shadow-xl">
+                        Refresh Connection
+                    </button>
+                    <div class="mt-4 flex items-center justify-center gap-2">
+                        <span class="status-dot bg-era-green"></span>
+                        <span class="text-[10px] text-slate-400 font-bold">ESP32: ONLINE</span>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Notification Toast -->
-    <div id="toast" class="fixed bottom-10 left-1/2 -translate-x-1/2 z-[200] px-6 py-3 rounded-2xl bg-slate-800 text-white text-xs font-bold uppercase tracking-widest shadow-2xl translate-y-20 opacity-0 transition-all duration-300">
-        Message
-    </div>
+    <script>
+        // Cập nhật đồng hồ hệ thống
+        function updateClock() {
+            const now = new Date();
+            const timeString = now.getHours().toString().padStart(2, '0') + ':' + 
+                               now.getMinutes().toString().padStart(2, '0') + ':' + 
+                               now.getSeconds().toString().padStart(2, '0');
+            document.getElementById('current-time').textContent = timeString;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
 
-    <script src="https://www.unpkg.com/@eohjsc/era-widget@1.1.3/src/index.js"></script>
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
-        import { getFirestore, doc, setDoc, collection, onSnapshot, deleteDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+        // Cấu hình E-RA (Thay bằng Token/ID thực tế của bạn)
+        const era = new Era();
+        const AUTH_TOKEN = "YOUR_ERA_TOKEN"; // Điền token era của bạn ở đây
 
-        // Constants & State
-        let configUid, lastScannedUID = "";
-        let attendanceHistory = [];
-        let studentDirectory = {};
-        const totalInClass = 40;
+        // Khởi tạo kết nối Era
+        era.init({
+            token: AUTH_TOKEN,
+            onConnect: () => {
+                console.log("Era Connected!");
+                document.querySelector('.status-dot.bg-era-green').classList.remove('animate-pulse');
+            },
+            onDisconnect: () => {
+                console.log("Era Disconnected!");
+            }
+        });
 
-        // Firebase Config
-        const firebaseConfig = JSON.parse(__firebase_config);
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'era-attendance-v3';
+        // Giả lập nhận dữ liệu từ Era (Ví dụ Virtual Pin 1 là mã thẻ)
+        era.onPinUpdate(1, (value) => {
+            console.log("Thẻ mới quét:", value);
+            handleNewScan(value);
+        });
 
-        // Shift Data
-        const shiftSchedule = [
-            { name: "Ca 1", start: "07:15", end: "09:30", startMin: 435, endMin: 570, type: 'class' },
-            { name: "Ca 2", start: "09:45", end: "12:00", startMin: 585, endMin: 720, type: 'class' },
-            { name: "Giải Lao", start: "12:00", end: "13:00", startMin: 720, endMin: 780, type: 'break' },
-            { name: "Ca 3", start: "13:00", end: "15:15", startMin: 780, endMin: 915, type: 'class' },
-            { name: "Ca 4", start: "15:30", end: "17:45", startMin: 930, endMin: 1065, type: 'class' }
+        function handleNewScan(uid) {
+            // Hiển thị UID vào khu vực đăng ký
+            document.getElementById('reg-uid').value = uid;
+            document.getElementById('reg-status').textContent = "Đã nhận diện mã thẻ!";
+            document.getElementById('reg-status').className = "text-xs font-bold text-orange-500 animate-bounce";
+            
+            // Tự động kiểm tra nếu thẻ đã có trong database thì thực hiện điểm danh
+            // Nếu chưa có thì để người dùng nhập thông tin và nhấn Đăng ký
+        }
+
+        // Xử lý lưu thẻ mới
+        document.getElementById('save-card-btn').addEventListener('click', () => {
+            const uid = document.getElementById('reg-uid').value;
+            const name = document.getElementById('reg-name').value;
+            const mssv = document.getElementById('reg-mssv').value;
+
+            if(!uid || !name || !mssv) {
+                alert("Vui lòng điền đầy đủ thông tin!");
+                return;
+            }
+
+            // Gửi lệnh qua Era để lưu vào thiết bị (nếu cần) hoặc chỉ lưu trên Web
+            console.log("Đăng ký thành công:", {uid, name, mssv});
+            
+            // Thêm vào bảng (giả lập)
+            addAttendanceRow(name, mssv);
+            
+            // Reset form
+            document.getElementById('reg-uid').value = "";
+            document.getElementById('reg-name').value = "";
+            document.getElementById('reg-mssv').value = "";
+            document.getElementById('reg-status').textContent = "Đăng ký thành công!";
+            setTimeout(() => {
+                document.getElementById('reg-status').textContent = "Đang chờ tín hiệu...";
+                document.getElementById('reg-status').className = "text-xs font-medium text-slate-400 italic";
+            }, 3000);
+        });
+
+        function addAttendanceRow(name, mssv) {
+            const tbody = document.getElementById('attendance-body');
+            const now = new Date();
+            const time = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0') + ':' + now.getSeconds().toString().padStart(2, '0');
+            
+            const tr = document.createElement('tr');
+            tr.className = "border-b border-slate-50 hover:bg-slate-50 transition";
+            tr.innerHTML = `
+                <td class="px-6 py-4 font-bold text-blue-500">${time}</td>
+                <td class="px-6 py-4 font-bold text-slate-700">${name.toUpperCase()}</td>
+                <td class="px-6 py-4 text-slate-400">${mssv}</td>
+                <td class="px-6 py-4 text-slate-400">---</td>
+                <td class="px-6 py-4 text-center">
+                    <span class="bg-emerald-100 text-emerald-600 text-[10px] font-bold px-2 py-1 rounded">OK</span>
+                </td>
+            `;
+            tbody.prepend(tr);
+        }
+
+        // Mock data ban đầu
+        const mockData = [
+            {time: '15:25:53', name: 'NONE', mssv: '---', status: 'OK'},
+            {time: '15:25:37', name: 'NGUOI LA', mssv: '---', status: 'OK'},
+            {time: '15:25:29', name: 'NGUYEN DINH DANH', mssv: 'PS45028', status: 'OK'}
         ];
 
-        // --- Core Functions ---
-
-        async function initAuth() {
-            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                await signInWithCustomToken(auth, __initial_auth_token);
-            } else {
-                await signInAnonymously(auth);
-            }
-        }
-
-        function showToast(msg, duration = 3000) {
-            const toast = document.getElementById('toast');
-            toast.innerText = msg;
-            toast.classList.remove('translate-y-20', 'opacity-0');
-            setTimeout(() => {
-                toast.classList.add('translate-y-20', 'opacity-0');
-            }, duration);
-        }
-
-        function getCurrentShift() {
-            const now = new Date();
-            const minutes = now.getHours() * 60 + now.getMinutes();
-            return shiftSchedule.find(s => minutes >= s.startMin && minutes < s.endMin) || null;
-        }
-
-        function updateShiftUI() {
-            const currentShift = getCurrentShift();
-            const badge = document.getElementById('shift-badge');
-            const startText = document.getElementById('shift-start');
-            const endText = document.getElementById('shift-end');
-
-            if (currentShift) {
-                badge.innerText = currentShift.name;
-                badge.className = `absolute top-8 right-10 px-6 py-2 rounded-full text-[11px] font-black uppercase tracking-widest border shadow-sm transition-all ${
-                    currentShift.type === 'break' 
-                    ? "bg-amber-50 text-amber-500 border-amber-100 animate-pulse" 
-                    : "bg-blue-50 text-blue-500 border-blue-100"
-                }`;
-                startText.innerText = currentShift.start;
-                endText.innerText = currentShift.end;
-            } else {
-                badge.innerText = "Ngoài ca học";
-                badge.className = "absolute top-8 right-10 px-6 py-2 rounded-full bg-slate-50 text-slate-400 text-[11px] font-black uppercase tracking-widest border border-slate-100";
-                startText.innerText = "--:--";
-                endText.innerText = "--:--";
-            }
-        }
-
-        // Firebase Listeners
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                // Public Directory - Collection Group pattern not needed here as path is direct
-                onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'directory'), (snap) => {
-                    studentDirectory = {};
-                    snap.forEach(doc => studentDirectory[doc.id] = doc.data());
-                    updateStats();
-                }, (err) => console.error("Directory sync error:", err));
-
-                // Attendance History
-                onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'history'), (snap) => {
-                    attendanceHistory = snap.docs
-                        .map(d => ({...d.data(), id: d.id}))
-                        .sort((a, b) => b.timestamp - a.timestamp);
-                    renderUI();
-                    updateStats();
-                }, (err) => console.error("History sync error:", err));
-            } else {
-                initAuth();
-            }
+        mockData.forEach(item => {
+            const tbody = document.getElementById('attendance-body');
+            const tr = document.createElement('tr');
+            tr.className = "border-b border-slate-50 hover:bg-slate-50 transition";
+            tr.innerHTML = `
+                <td class="px-6 py-4 font-bold text-blue-500">${item.time}</td>
+                <td class="px-6 py-4 font-bold text-slate-700">${item.name}</td>
+                <td class="px-6 py-4 text-slate-400">${item.mssv}</td>
+                <td class="px-6 py-4 text-slate-400">---</td>
+                <td class="px-6 py-4 text-center">
+                    <span class="bg-emerald-100 text-emerald-600 text-[10px] font-bold px-2 py-1 rounded">OK</span>
+                </td>
+            `;
+            tbody.appendChild(tr);
         });
-
-        // Era Widget Init
-        const eraWidget = new EraWidget();
-        eraWidget.init({
-            needRealtimeConfigs: true,
-            maxRealtimeConfigsCount: 1,
-            onConfiguration: (conf) => {
-                configUid = conf.realtime_configs[0];
-                document.getElementById('connection-dot').className = "w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]";
-                document.getElementById('connection-text').innerText = "ESP32 Online";
-                document.getElementById('connection-text').classList.replace('text-slate-400', 'text-emerald-500');
-            },
-            onValues: (values) => {
-                const uidVal = values[configUid?.id]?.value;
-                if (uidVal && uidVal !== "0" && uidVal !== "" && uidVal !== lastScannedUID) {
-                    lastScannedUID = uidVal;
-                    handleScan(uidVal);
-                }
-            }
-        });
-
-        async function handleScan(uid) {
-            const student = studentDirectory[uid];
-            if (student) {
-                await recordAttendance(student.name, student.mssv, student.class, uid);
-                showToast(`Chào ${student.name}!`);
-            } else {
-                showModal(uid);
-            }
-        }
-
-        async function recordAttendance(name, mssv, className, uid) {
-            // UI Update
-            const mainCard = document.getElementById('main-card');
-            const avatar = document.getElementById('avatar-container');
-            const statusPill = document.getElementById('status-pill');
-
-            document.getElementById('focus-name').innerText = name;
-            document.getElementById('focus-mssv').innerText = mssv;
-            document.getElementById('focus-class').innerText = className;
-            document.getElementById('focus-class').classList.remove('hidden');
-            
-            mainCard.classList.add('success-scan');
-            avatar.classList.add('scale-110', 'border-emerald-500', 'bg-emerald-50');
-            statusPill.innerText = "Check-in Successful";
-            statusPill.className = "px-8 py-3 rounded-full bg-emerald-500 text-white font-bold text-xs uppercase tracking-[0.2em] shadow-lg";
-
-            setTimeout(() => {
-                mainCard.classList.remove('success-scan');
-                avatar.classList.remove('scale-110', 'border-emerald-500', 'bg-emerald-50');
-                statusPill.innerText = "Ready to Scan";
-                statusPill.className = "px-8 py-3 rounded-full bg-slate-800 text-white font-bold text-xs uppercase tracking-[0.2em] shadow-lg";
-                lastScannedUID = ""; // Reset to allow same card check-in again if needed
-            }, 4000);
-
-            // Cloud Save
-            const timestamp = Date.now();
-            const record = {
-                time: new Date().toLocaleTimeString('vi-VN', { hour12: false }),
-                name, mssv, class: className, uid, timestamp
-            };
-            
-            try {
-                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'history', `${timestamp}_${uid}`), record);
-            } catch (e) {
-                console.error("Save error", e);
-                showToast("Lỗi lưu dữ liệu!");
-            }
-        }
-
-        // Global Window Methods
-        window.showModal = (uid) => {
-            document.getElementById('modal-uid-display').innerText = `UID: ${uid}`;
-            document.getElementById('register-modal').classList.remove('hidden');
-            document.getElementById('app-container').classList.add('modal-active');
-            document.getElementById('reg-name').focus();
-        };
-
-        window.closeModal = () => {
-            document.getElementById('register-modal').classList.add('hidden');
-            document.getElementById('app-container').classList.remove('modal-active');
-            lastScannedUID = "";
-        };
-
-        window.saveRegistration = async () => {
-            const uid = document.getElementById('modal-uid-display').innerText.replace('UID: ', '');
-            const name = document.getElementById('reg-name').value.trim().toUpperCase();
-            const mssv = document.getElementById('reg-mssv').value.trim().toUpperCase();
-            const className = document.getElementById('reg-class').value.trim().toUpperCase();
-
-            if (!name || !mssv) {
-                showToast("Vui lòng điền đủ thông tin!");
-                return;
-            }
-
-            const btn = document.getElementById('btn-save-reg');
-            btn.disabled = true;
-            btn.innerText = "Đang lưu...";
-
-            try {
-                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'directory', uid), { name, mssv, class: className });
-                await recordAttendance(name, mssv, className, uid);
-                closeModal();
-                // Clear fields
-                ['reg-name', 'reg-mssv', 'reg-class'].forEach(id => document.getElementById(id).value = "");
-            } catch (e) {
-                showToast("Lỗi đăng ký!");
-            } finally {
-                btn.disabled = false;
-                btn.innerText = "Lưu đăng ký";
-            }
-        };
-
-        window.renderUI = () => {
-            const tbody = document.getElementById('history-rows');
-            if (attendanceHistory.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="py-10 text-center text-slate-400 font-medium italic">Chưa có dữ liệu hôm nay</td></tr>`;
-                return;
-            }
-
-            tbody.innerHTML = attendanceHistory.map(item => `
-                <tr class="hover:bg-slate-50/50 transition-colors group">
-                    <td class="py-5 pl-4">
-                        <span class="text-blue-500 font-black text-sm tabular-nums">${item.time}</span>
-                    </td>
-                    <td class="py-5">
-                        <div class="flex items-center gap-3">
-                            <div class="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-[10px] group-hover:bg-white transition-all">👤</div>
-                            <span class="font-bold text-slate-700 uppercase text-xs">${item.name}</span>
-                        </div>
-                    </td>
-                    <td class="py-5">
-                        <span class="text-slate-400 font-bold text-xs tracking-tight">${item.mssv}</span>
-                    </td>
-                    <td class="py-5">
-                        <span class="px-2 py-1 rounded bg-slate-100 text-slate-500 font-black text-[9px] uppercase">${item.class || 'N/A'}</span>
-                    </td>
-                    <td class="py-5 text-right pr-4">
-                        <span class="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-600 px-3 py-1.5 rounded-xl font-black text-[9px] uppercase tracking-tighter">
-                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                            Verified
-                        </span>
-                    </td>
-                </tr>
-            `).join('');
-        };
-
-        window.updateStats = () => {
-            const uniquePresent = new Set(attendanceHistory.map(h => h.mssv)).size;
-            document.getElementById('stat-present').innerText = uniquePresent;
-            document.getElementById('stat-absent').innerText = Math.max(0, totalInClass - uniquePresent);
-        };
-
-        window.exportToExcel = () => {
-            if (attendanceHistory.length === 0) {
-                showToast("Không có dữ liệu để xuất!");
-                return;
-            }
-            const data = attendanceHistory.map(h => ({
-                'Thời gian': h.time,
-                'Họ Tên': h.name,
-                'MSSV': h.mssv,
-                'Lớp': h.class,
-                'UID Thẻ': h.uid
-            }));
-            const ws = XLSX.utils.json_to_sheet(data);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "DiemDanh");
-            XLSX.writeFile(wb, `DiemDanh_${new Date().toISOString().split('T')[0]}.xlsx`);
-            showToast("Đã tải xuống file Excel");
-        };
-
-        window.clearHistory = async () => {
-            if (confirm("Xác nhận xóa toàn bộ lịch sử điểm danh? Hành động này không thể hoàn tác.")) {
-                try {
-                    for (const h of attendanceHistory) {
-                        await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'history', h.id));
-                    }
-                    showToast("Đã xóa lịch sử thành công");
-                } catch (e) {
-                    showToast("Lỗi khi xóa dữ liệu");
-                }
-            }
-        };
-
-        // Initialize
-        function tick() {
-            const now = new Date();
-            document.getElementById('clock').innerText = now.toLocaleTimeString('vi-VN', { hour12: false });
-            document.getElementById('current-date').innerText = now.toLocaleDateString('en-US', { 
-                weekday: 'long', month: 'short', day: 'numeric' 
-            });
-            updateShiftUI();
-        }
-
-        setInterval(tick, 1000);
-        tick();
-        initAuth();
-
     </script>
 </body>
-
 </html>
