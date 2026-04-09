@@ -24,10 +24,15 @@
         
         .btn-save { background: linear-gradient(135deg, #f97316, #ea580c); color: white; border-radius: 12px; font-weight: 800; padding: 12px; transition: 0.3s; cursor: pointer; text-transform: uppercase; font-size: 11px; }
         .btn-save:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3); }
-        .btn-delete { background: #fef2f2; color: #ef4444; border: 1px solid #fecdd3; border-radius: 12px; font-weight: 800; padding: 12px; transition: 0.3s; cursor: pointer; text-transform: uppercase; font-size: 11px; }
-        .btn-delete:hover { background: #fee2e2; transform: translateY(-2px); }
+        .btn-manage { background: #f0fdfa; color: #0d9488; border: 1px solid #ccfbf1; border-radius: 12px; font-weight: 800; padding: 12px; transition: 0.3s; cursor: pointer; text-transform: uppercase; font-size: 11px; }
+        .btn-manage:hover { background: #ccfbf1; transform: translateY(-2px); }
 
         .log-table-container { max-height: 400px; overflow-y: auto; overflow-x: auto; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
         .log-table { width: 100%; border-collapse: collapse; min-width: 600px; }
         .log-table th { font-size: 10px; color: #64748b; text-transform: uppercase; padding: 12px; border-bottom: 2px solid #f1f5f9; text-align: left; position: sticky; top: 0; background: white; z-index: 10; }
         .log-table td { padding: 14px 12px; font-size: 13px; border-bottom: 1px solid #f8fafc; }
@@ -124,8 +129,8 @@
                     <button class="btn-save flex-1 flex items-center justify-center gap-2" onclick="window.saveNewMember()">
                         <i class="fa-solid fa-cloud-arrow-up"></i> Lưu thông tin sinh viên
                     </button>
-                    <button class="btn-delete flex items-center justify-center gap-2 px-6" onclick="window.deleteMember()">
-                        <i class="fa-solid fa-trash"></i> Xóa thẻ
+                    <button class="btn-manage flex items-center justify-center gap-2 px-6" onclick="window.openManageMembersModal()">
+                        <i class="fa-solid fa-list"></i> Quản lý thẻ đã lưu
                     </button>
                 </div>
             </div>
@@ -146,7 +151,7 @@
                         </button>
                     </div>
                 </div>
-                <div class="log-table-container pb-2">
+                <div class="log-table-container pb-2 custom-scrollbar">
                     <table class="log-table">
                         <thead>
                             <tr>
@@ -203,15 +208,44 @@
     
     <!-- Footer V1.x.x -->
     <div class="mt-8 mb-4 border-t border-slate-200 pt-6 pb-2 text-center max-w-7xl mx-auto">
-        <p class="text-sm font-black text-slate-500 uppercase tracking-widest mb-2"><i class="fa-solid fa-code-merge mr-1"></i> Phiên bản V1.4.1 (ESP32 V9 Shift Integration)</p>
+        <p class="text-sm font-black text-slate-500 uppercase tracking-widest mb-2"><i class="fa-solid fa-code-merge mr-1"></i> Phiên bản V1.5.0 (Advanced Management)</p>
         <div class="inline-block text-left text-[11px] text-slate-400 bg-white px-6 py-4 rounded-xl border border-slate-100 shadow-sm max-w-2xl mx-2">
             <p class="font-bold text-slate-500 mb-2">Lỗi đã Fix / Tính năng mới cập nhật:</p>
             <ul class="list-disc pl-4 space-y-1.5">
-                <li><span class="font-semibold text-slate-600">Đồng bộ Ca học ESP32:</span> Nhận trực tiếp dữ liệu V9 từ ESP32 để gán ca tự động cho các thẻ gốc (như bạn Danh - Ca 2).</li>
+                <li><span class="font-semibold text-slate-600">Popup Quản lý thẻ:</span> Thay thế chức năng Xóa thẻ mù quáng bằng cửa sổ Popup hiển thị toàn bộ danh sách thẻ đã đăng ký để dễ dàng chọn và Xóa từng thẻ cụ thể.</li>
+                <li><span class="font-semibold text-slate-600">Đồng bộ Ca học ESP32:</span> Nhận trực tiếp dữ liệu V9 từ ESP32 để gán ca tự động cho các thẻ gốc.</li>
                 <li><span class="font-semibold text-slate-600">Sĩ số linh hoạt theo Ca:</span> Tự động đếm thẻ gốc trong ESP32 + thẻ được đăng ký trên Web thuộc đúng Ca đang diễn ra.</li>
-                <li><span class="font-semibold text-slate-600">Nhận diện Vào/Ra lớp:</span> Khi quét VÀO hiện màu Xanh ngọc (Check-in), quét RA hiện màu Đỏ (Check-out) với biểu tượng hoàn toàn khác biệt.</li>
-                <li><span class="font-semibold text-slate-600">Giao diện điện thoại:</span> Responsive hoàn hảo, tự xếp chồng và thêm thanh cuộn ngang để tránh vỡ giao diện.</li>
+                <li><span class="font-semibold text-slate-600">Nhận diện Vào/Ra lớp:</span> Quét VÀO hiện Xanh ngọc, quét RA hiện Đỏ với icon khác biệt. Thẻ lạ cảnh báo Cam.</li>
             </ul>
+        </div>
+    </div>
+
+    <!-- MODAL QUẢN LÝ THẺ -->
+    <div id="manage-members-modal" class="fixed inset-0 bg-slate-900/60 z-50 hidden flex items-center justify-center p-4 backdrop-blur-sm transition-opacity">
+        <div class="bg-white rounded-3xl w-full max-w-3xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
+            <div class="px-6 py-5 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                <h3 class="font-black text-slate-800 uppercase flex items-center gap-2"><i class="fa-solid fa-list-check text-teal-600"></i> Danh sách Thẻ đã đăng ký</h3>
+                <button onclick="window.closeManageMembersModal()" class="text-slate-400 hover:text-rose-500 transition-colors"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            <div class="p-6 overflow-y-auto custom-scrollbar flex-grow bg-white">
+                <table class="w-full text-left border-collapse min-w-[500px]">
+                    <thead>
+                        <tr>
+                            <th class="text-[10px] font-bold text-slate-400 uppercase pb-3 border-b border-slate-100 pl-2">Mã Thẻ (UID)</th>
+                            <th class="text-[10px] font-bold text-slate-400 uppercase pb-3 border-b border-slate-100">Họ và Tên</th>
+                            <th class="text-[10px] font-bold text-slate-400 uppercase pb-3 border-b border-slate-100">MSSV</th>
+                            <th class="text-[10px] font-bold text-slate-400 uppercase pb-3 border-b border-slate-100">Ca Học</th>
+                            <th class="text-[10px] font-bold text-slate-400 uppercase pb-3 border-b border-slate-100 text-right pr-2">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody id="modal-members-list">
+                        <!-- JS sẽ render danh sách vào đây -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="px-6 py-4 bg-slate-50 border-t border-slate-100 text-right">
+                <button onclick="window.closeManageMembersModal()" class="bg-slate-800 text-white text-xs font-bold uppercase tracking-wider px-6 py-2.5 rounded-xl hover:bg-slate-900 transition-colors">Đóng</button>
+            </div>
         </div>
     </div>
 
@@ -221,7 +255,8 @@
         import { getAuth, onAuthStateChanged, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // --- CẤU HÌNH THỜI GIAN CA HỌC & SĨ SỐ ---
+        // --- CẤU HÌNH THỜI GIAN CA HỌC & SĨ SỐ GỐC ---
+        const BASE_STUDENTS_ESP = 15; // Số sinh viên gốc mặc định nếu không có trong DB gốc
         const SHIFTS = [
             { id: "ca1", name: "Ca 1", start: "07:00", end: "09:15", index: 0 },
             { id: "ca2", name: "Ca 2", start: "09:30", end: "11:45", index: 1 },
@@ -229,11 +264,10 @@
             { id: "ca4", name: "Ca 4", start: "15:00", end: "17:00", index: 3 },
             { id: "ca5", name: "Ca 5", start: "17:15", end: "19:30", index: 4 }
         ];
-
-        // DANH SÁCH SINH VIÊN GỐC TRÊN ESP32 (Khai báo để Web tính sĩ số)
+        
         const ESP32_STUDENTS = [
-            { uid: "96576E05", shift: "Ca 2" }, // Danh học Ca 2
-            { uid: "A1B2C3D4", shift: "Ca 1" }  // (Ví dụ) Thẻ khác học Ca 1
+            { uid: "96576E05", shift: "Ca 2" },
+            { uid: "A1B2C3D4", shift: "Ca 1" }
         ];
 
         // Khởi tạo Chart
@@ -340,6 +374,11 @@
                 snapshot.forEach(doc => { membersDb[doc.id] = doc.data(); });
                 document.getElementById('registered-count-badge').innerText = `ĐÃ LƯU: ${Object.keys(membersDb).length} THẺ WEB`;
                 processLogsAndRender();
+                
+                // Nếu modal đang mở, cập nhật lại danh sách ngay lập tức
+                if(!document.getElementById('manage-members-modal').classList.contains('hidden')) {
+                    window.renderManageMembersList();
+                }
             });
 
             const logsRef = collection(db, 'artifacts', appId, 'public', 'data', 'attendance_logs');
@@ -370,14 +409,13 @@
             
             document.getElementById('current-shift-badge').innerText = currentShift ? currentShift.name.toUpperCase() : "NGOÀI CA";
             
-            // TÍNH SĨ SỐ LỚP THÔNG MINH CHO CA NÀY
+            // Tính sĩ số
             let baseEspForThisShift = 0;
             let webRegisteredForThisShift = 0;
 
             if (currentShift) {
-                // Đếm số lượng sinh viên gốc ESP32 của Ca hiện tại
                 baseEspForThisShift = ESP32_STUDENTS.filter(s => s.shift === currentShift.name).length;
-                // Đếm số lượng sinh viên đăng ký trên Web của Ca hiện tại
+                if(baseEspForThisShift === 0) baseEspForThisShift = BASE_STUDENTS_ESP; // Fallback
                 webRegisteredForThisShift = Object.values(membersDb).filter(m => m.shift === currentShift.name).length;
             }
             
@@ -430,13 +468,13 @@
 
         eraWidgetConfig.init({
             needRealtimeConfigs: true,
-            maxRealtimeConfigsCount: 5, // Đã cập nhật lên 5 để nhận V9
+            maxRealtimeConfigsCount: 5,
             onConfiguration: (c) => {
                 eConfig.uid = c.realtime_configs[0];
                 eConfig.name = c.realtime_configs[1];
                 eConfig.mssv = c.realtime_configs[2];
                 eConfig.class = c.realtime_configs[3];
-                eConfig.shift = c.realtime_configs[4]; // Nhận V9
+                eConfig.shift = c.realtime_configs[4];
                 document.getElementById('era-status-dot').className = "w-2 h-2 rounded-full bg-emerald-500";
                 document.getElementById('era-status-text').innerText = "HỆ THỐNG TRỰC TUYẾN";
             },
@@ -472,7 +510,6 @@
             let finalName = cloudMember ? cloudMember.name : (espNameValid ? data.name : null);
             let finalMssv = cloudMember ? cloudMember.mssv : (espNameValid ? data.mssv : "---");
             let finalClass = cloudMember ? cloudMember.class : (espNameValid ? data.class : "---");
-            // Lấy ca học (Từ Web DB ưu tiên trước, nếu không có thì lấy từ ESP32 V9)
             let finalShiftReg = cloudMember ? cloudMember.shift : (espNameValid && data.shift && data.shift !== "---" && data.shift !== "None" ? data.shift : ""); 
 
             const now = new Date();
@@ -481,12 +518,11 @@
 
             document.getElementById('reg-uid').value = uid;
 
-            // Xóa tất cả các class màu cũ để chuẩn bị thêm class mới
             nameEl.classList.remove('text-orange-500', 'text-slate-800', 'text-rose-600', 'text-emerald-600');
             avatar.classList.remove('pulse-orange');
 
             if (!finalName) {
-                // TÌNH HUỐNG 1: THẺ LẠ
+                // THẺ LẠ
                 nameEl.innerText = "THẺ CHƯA ĐĂNG KÝ";
                 nameEl.classList.add('text-orange-500');
                 subEl.innerText = "UID: " + uid;
@@ -501,7 +537,7 @@
                 document.getElementById('reg-class').value = "";
 
             } else {
-                // TÌNH HUỐNG 2: THÀNH VIÊN ĐÃ ĐĂNG KÝ (Kiểm tra Vào/Ra)
+                // THÀNH VIÊN ĐÃ ĐĂNG KÝ
                 nameEl.innerText = finalName;
                 
                 let isCheckOut = false;
@@ -516,13 +552,11 @@
                 let colorClass = isCheckOut ? "bg-rose-50 text-rose-500" : "bg-emerald-50 text-emerald-600";
 
                 if (isCheckOut) {
-                    // UI Điểm danh RA (Màu Hồng/Đỏ)
                     nameEl.classList.add('text-rose-600');
                     subEl.innerText = "TẠM BIỆT! ĐÃ ĐIỂM DANH RA LỚP";
                     avatar.style.borderColor = "#f43f5e";
                     avatarIcon.className = "fa-solid fa-person-walking-arrow-right text-7xl text-rose-500";
                 } else {
-                    // UI Điểm danh VÀO (Màu Xanh Ngọc)
                     nameEl.classList.add('text-emerald-600');
                     subEl.innerText = "XIN CHÀO! ĐÃ ĐIỂM DANH VÀO LỚP";
                     avatar.style.borderColor = "#10b981";
@@ -601,25 +635,65 @@
             lastUid = ""; 
         };
 
-        window.deleteMember = async function() {
-            const uid = document.getElementById('reg-uid').value;
-            if(!uid || uid === "Đang chờ thẻ...") return window.showToast("Quét thẻ cần xóa trước!", "warning");
+        // Mở Modal Quản Lý Thẻ
+        window.openManageMembersModal = function() {
+            window.renderManageMembersList();
+            document.getElementById('manage-members-modal').classList.remove('hidden');
+        };
 
-            if(confirm("Bạn có chắc chắn muốn xóa thẻ này khỏi hệ thống?")) {
-                if (isCloudActive && currentUser) {
-                    try {
-                        await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'members', uid));
-                        window.showToast("Đã xóa thẻ khỏi Cloud!");
-                    } catch (error) {
-                        window.showToast("Lỗi khi xóa thẻ!", "error");
-                    }
-                } else {
-                    delete membersDb[uid];
-                    saveToLocal();
-                    window.showToast("Đã xóa thẻ cục bộ!");
-                    processLogsAndRender();
+        // Đóng Modal Quản Lý Thẻ
+        window.closeManageMembersModal = function() {
+            document.getElementById('manage-members-modal').classList.add('hidden');
+        };
+
+        // Render Danh sách Thẻ trong Modal
+        window.renderManageMembersList = function() {
+            const tbody = document.getElementById('modal-members-list');
+            const membersList = Object.keys(membersDb).map(uid => ({ uid, ...membersDb[uid] }));
+            
+            if (membersList.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="py-12 text-center text-slate-400 text-xs font-bold uppercase"><i class="fa-solid fa-folder-open text-4xl mb-3 block text-slate-300"></i>Chưa có sinh viên nào được lưu trên Web</td></tr>`;
+                return;
+            }
+            
+            tbody.innerHTML = membersList.map(m => `
+                <tr class="hover:bg-slate-50 transition-colors border-b border-slate-100">
+                    <td class="py-4 font-mono text-[11px] font-bold text-orange-500 pl-2">${m.uid}</td>
+                    <td class="py-4 text-xs font-black text-slate-700 uppercase">${m.name}</td>
+                    <td class="py-4 text-[11px] font-bold text-slate-500">${m.mssv}</td>
+                    <td class="py-4 text-[11px] font-bold text-slate-500">
+                        <span class="bg-blue-50 text-blue-500 px-2 py-1 rounded text-[9px] whitespace-nowrap">${m.shift || '---'}</span>
+                    </td>
+                    <td class="py-4 text-right pr-2">
+                        <button onclick="window.deleteMember('${m.uid}')" class="bg-rose-50 text-rose-500 hover:bg-rose-500 hover:text-white px-3 py-1.5 rounded-lg text-[10px] font-black transition-colors whitespace-nowrap">
+                            <i class="fa-solid fa-trash-can"></i> XÓA
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        };
+
+        // Xóa một thẻ cụ thể (Hỗ trợ từ Modal)
+        window.deleteMember = async function(uidToDelete) {
+            if(!confirm("Bạn có chắc chắn muốn xóa sinh viên này khỏi hệ thống?")) return;
+
+            if (isCloudActive && currentUser) {
+                try {
+                    await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'members', uidToDelete));
+                    window.showToast("Đã xóa thẻ khỏi Cloud!");
+                } catch (error) {
+                    window.showToast("Lỗi khi xóa thẻ!", "error");
                 }
+            } else {
+                delete membersDb[uidToDelete];
+                saveToLocal();
+                window.showToast("Đã xóa thẻ cục bộ!");
+                processLogsAndRender();
+                window.renderManageMembersList(); // Update modal list
+            }
 
+            // Nếu thẻ vừa xóa đang nằm chờ trong ô đăng ký thì reset ô đó
+            if (document.getElementById('reg-uid').value === uidToDelete) {
                 document.getElementById('reg-uid').value = "Đang chờ thẻ...";
                 document.getElementById('reg-name').value = "";
                 document.getElementById('reg-mssv').value = "";
