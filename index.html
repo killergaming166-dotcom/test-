@@ -184,7 +184,7 @@
                 </div>
             </div>
 
-            <!-- Biểu đồ (Thành phần mới - Lấp khoảng trống) -->
+            <!-- Biểu đồ -->
             <div class="card p-5">
                 <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Phân tích chuyên cần</h4>
                 <canvas id="attendanceChart" height="200"></canvas>
@@ -216,13 +216,13 @@
                         <i class="fa-solid fa-microchip text-slate-400"></i>
                         <span class="text-[10px] font-bold text-slate-600 uppercase">ESP32 Status</span>
                     </div>
-                    <span class="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]"></span>
+                    <span id="device-dot" class="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]"></span>
                 </div>
                 <div class="p-3 bg-white rounded-xl border border-slate-200">
                     <p class="text-[8px] font-black text-slate-400 uppercase mb-2">Hành động cuối</p>
                     <p class="text-[11px] font-bold text-slate-700" id="last-action">Chờ tín hiệu từ thiết bị...</p>
                 </div>
-                <button class="w-full bg-white border border-slate-200 text-slate-600 text-[10px] font-black py-3 rounded-xl uppercase hover:bg-slate-100 transition-all">
+                <button onclick="location.reload()" class="w-full bg-white border border-slate-200 text-slate-600 text-[10px] font-black py-3 rounded-xl uppercase hover:bg-slate-100 transition-all">
                     Kiểm tra kết nối
                 </button>
             </div>
@@ -235,7 +235,6 @@
         const logs = [];
         const presentSet = new Set();
         let lastUid = "";
-        let lastTime = 0;
 
         const SHIFTS = [
             { name: "Ca 1", start: "07:00", end: "09:15" },
@@ -253,7 +252,7 @@
                 labels: ['Ca 1', 'Ca 2', 'Ca 3', 'Ca 4', 'Ca 5'],
                 datasets: [{
                     label: 'Hiện diện',
-                    data: [12, 19, 3, 5, 2],
+                    data: [0, 0, 0, 0, 0],
                     backgroundColor: '#3b82f6',
                     borderRadius: 6,
                     barThickness: 15
@@ -282,21 +281,40 @@
             },
             onValues: (v) => {
                 const uidVal = v[config.uid?.id]?.value;
-                if (uidVal && uidVal !== "0" && uidVal !== "None") {
+                const nameVal = v[config.name?.id]?.value;
+
+                // Xử lý khi ESP32 gửi lệnh reset hoặc không có thẻ (None/0)
+                if (!uidVal || uidVal === "None" || uidVal === "0") {
+                    resetMainDisplay();
+                    return;
+                }
+
+                // Nếu có UID mới khác với UID lần trước
+                if (uidVal !== lastUid) {
+                    lastUid = uidVal;
                     document.getElementById('reg-uid').value = uidVal;
-                    const now = Date.now();
-                    if (uidVal !== lastUid || (now - lastTime > 3000)) {
-                        lastUid = uidVal; lastTime = now;
-                        handleAttendance({
-                            uid: uidVal,
-                            name: v[config.name?.id]?.value,
-                            mssv: v[config.mssv?.id]?.value,
-                            class: v[config.class?.id]?.value
-                        });
-                    }
+                    
+                    handleAttendance({
+                        uid: uidVal,
+                        name: nameVal,
+                        mssv: v[config.mssv?.id]?.value,
+                        class: v[config.class?.id]?.value
+                    });
                 }
             }
         });
+
+        function resetMainDisplay() {
+            lastUid = ""; // Reset UID lưu vết
+            const nameEl = document.getElementById('display-name');
+            const avatar = document.getElementById('avatar-container');
+            const icon = document.getElementById('avatar-icon');
+            
+            nameEl.innerText = "ĐANG ĐỢI THẺ...";
+            nameEl.style.color = "#1e293b";
+            avatar.style.borderColor = "#f1f5f9";
+            icon.className = "fa-solid fa-user-astronaut text-6xl text-slate-200";
+        }
 
         function handleAttendance(data) {
             const nameEl = document.getElementById('display-name');
@@ -304,21 +322,22 @@
             const icon = document.getElementById('avatar-icon');
             const lastActionEl = document.getElementById('last-action');
             
-            const isValid = data.name && data.name !== "None";
-
-            if (!isValid) {
+            // XỬ LÝ TRƯỜNG HỢP NGƯỜI LẠ
+            if (!data.name || data.name === "None" || data.name === "THẺ CHƯA ĐĂNG KÝ") {
                 nameEl.innerText = "THẺ LẠ";
                 nameEl.style.color = "#f43f5e";
                 avatar.style.borderColor = "#f43f5e";
                 icon.className = "fa-solid fa-user-secret text-6xl text-rose-400";
-                lastActionEl.innerText = `Quét thẻ lạ: ${data.uid}`;
-                return;
+                lastActionEl.innerText = `Cảnh báo: Thẻ lạ quẹt lúc ${new Date().toLocaleTimeString()}`;
+                return; // Dừng, không ghi log điểm danh
             }
 
-            let statusStr = presentSet.has(data.mssv) ? "RA LỚP" : "VÀO LỚP";
-            let colorClass = presentSet.has(data.mssv) ? "bg-rose-50 text-rose-500" : "bg-emerald-50 text-emerald-600";
+            // XỬ LÝ THÀNH VIÊN HỢP LỆ
+            let isCheckOut = presentSet.has(data.mssv);
+            let statusStr = isCheckOut ? "RA LỚP" : "VÀO LỚP";
+            let colorClass = isCheckOut ? "bg-rose-50 text-rose-500" : "bg-emerald-50 text-emerald-600";
             
-            if (presentSet.has(data.mssv)) {
+            if (isCheckOut) {
                 presentSet.delete(data.mssv);
                 avatar.style.borderColor = "#f43f5e";
                 icon.className = "fa-solid fa-door-open text-6xl text-rose-400";
@@ -332,6 +351,7 @@
             nameEl.style.color = "#0f172a";
             lastActionEl.innerText = `${statusStr}: ${data.name}`;
 
+            // Ghi vào nhật ký
             logs.unshift({
                 time: new Date().toLocaleTimeString('vi-VN', { hour12: false }),
                 name: data.name,
@@ -358,15 +378,34 @@
             const count = presentSet.size;
             document.getElementById('present-count').innerText = count;
             document.getElementById('absent-count').innerText = Math.max(0, 40 - count);
+            
+            // Cập nhật biểu đồ theo ca hiện tại (ví dụ đơn giản)
+            updateChart(count);
+        }
+
+        function updateChart(currentCount) {
+            const now = new Date();
+            const time = now.getHours() * 60 + now.getMinutes();
+            let shiftIdx = SHIFTS.findIndex(s => {
+                const [sh, sm] = s.start.split(':').map(Number);
+                const [eh, em] = s.end.split(':').map(Number);
+                return time >= (sh * 60 + sm) && time <= (eh * 60 + em);
+            });
+            
+            if (shiftIdx !== -1) {
+                attendanceChart.data.datasets[0].data[shiftIdx] = currentCount;
+                attendanceChart.update();
+            }
         }
 
         function updateClock() {
             const now = new Date();
             document.getElementById('clock').innerText = now.toLocaleTimeString('vi-VN', { hour12: false });
             
-            const days = ["Chủ Nhật", "Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy"];
+            const days = ["CHỦ NHẬT", "THỨ HAI", "THỨ BA", "THỨ TƯ", "THỨ NĂM", "THỨ SÁU", "THỨ BẢY"];
             document.getElementById('date-now').innerText = `${days[now.getDay()]}, ${now.getDate()} THÁNG ${now.getMonth() + 1}, ${now.getFullYear()}`;
             
+            // Cập nhật thông tin ca học
             const time = now.getHours() * 60 + now.getMinutes();
             const shift = SHIFTS.find(s => {
                 const [sh, sm] = s.start.split(':').map(Number);
@@ -383,17 +422,20 @@
 
         function saveNewMember() {
             const name = document.getElementById('reg-name').value;
-            if(!name) return alert("Vui lòng nhập tên!");
-            document.getElementById('last-action').innerText = `Đã lưu thành viên: ${name}`;
-            alert("Lưu thành công!");
+            const uid = document.getElementById('reg-uid').value;
+            if(!name || !uid) {
+                document.getElementById('last-action').innerText = "Lỗi: Hãy quét thẻ trước khi lưu!";
+                return;
+            }
+            document.getElementById('last-action').innerText = `Đã ghi nhớ: ${name}. Hãy thêm UID vào code ESP32!`;
         }
 
         function exportExcel() {
             if (logs.length === 0) return;
             const ws = XLSX.utils.json_to_sheet(logs);
             const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Log");
-            XLSX.writeFile(wb, "DiemDanh.xlsx");
+            XLSX.utils.book_append_sheet(wb, ws, "Attendance_Log");
+            XLSX.writeFile(wb, `DiemDanh_${new Date().toLocaleDateString()}.xlsx`);
         }
 
         setInterval(updateClock, 1000);
