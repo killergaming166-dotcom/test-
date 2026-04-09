@@ -109,7 +109,6 @@
                         <p id="display-sub" class="text-slate-300 text-[11px] font-bold uppercase tracking-widest">HÃY ĐẶT THẺ VÀO ĐẦU ĐỌC</p>
                     </div>
                 </div>
-                <!-- Background decoration -->
                 <div class="absolute top-0 right-0 p-6 opacity-20">
                     <i class="fa-solid fa-fingerprint text-9xl text-white"></i>
                 </div>
@@ -187,11 +186,16 @@
                             </div>
                         </div>
                     </div>
-                    <div class="flex gap-2 w-full sm:w-auto">
-                        <button onclick="window.exportExcel()" class="flex-1 sm:flex-none bg-emerald-50 text-emerald-600 border border-emerald-100 text-[10px] font-black px-4 py-2.5 rounded-xl hover:bg-emerald-500 hover:text-white transition-all duration-300 shadow-sm">
+                    
+                    <!-- EXCEL DATE FILTER & BUTTONS -->
+                    <div class="flex gap-2 w-full sm:w-auto items-center flex-wrap sm:flex-nowrap">
+                        <!-- Thêm ô chọn ngày -->
+                        <input type="date" id="export-date" class="bg-white border border-emerald-100 text-slate-600 text-[10px] font-black px-3 py-2.5 rounded-xl hover:border-emerald-300 focus:border-emerald-500 focus:outline-none transition-colors shadow-sm cursor-pointer uppercase flex-1 sm:flex-none">
+                        
+                        <button onclick="window.exportExcel()" class="flex-1 sm:flex-none bg-emerald-50 text-emerald-600 border border-emerald-100 text-[10px] font-black px-4 py-2.5 rounded-xl hover:bg-emerald-500 hover:text-white transition-all duration-300 shadow-sm whitespace-nowrap">
                             <i class="fa-solid fa-file-excel mr-1"></i> XUẤT EXCEL
                         </button>
-                        <button onclick="window.clearLogs()" class="flex-1 sm:flex-none bg-rose-50 text-rose-600 border border-rose-100 text-[10px] font-black px-4 py-2.5 rounded-xl hover:bg-rose-500 hover:text-white transition-all duration-300 shadow-sm">
+                        <button onclick="window.clearLogs()" class="flex-1 sm:flex-none bg-rose-50 text-rose-600 border border-rose-100 text-[10px] font-black px-4 py-2.5 rounded-xl hover:bg-rose-500 hover:text-white transition-all duration-300 shadow-sm whitespace-nowrap">
                             <i class="fa-solid fa-trash-can mr-1"></i> XÓA LỊCH SỬ
                         </button>
                     </div>
@@ -282,10 +286,10 @@
     <!-- Footer -->
     <div class="mt-12 mb-6 border-t border-slate-200/60 pt-8 pb-4 text-center max-w-7xl mx-auto px-4">
         <p class="text-sm font-black text-slate-400 uppercase tracking-widest mb-3 flex items-center justify-center gap-2">
-            <i class="fa-solid fa-code-merge text-orange-500"></i> Hệ Thống Điểm Danh Fpoly <span class="bg-slate-200 text-slate-600 px-2 py-0.5 rounded text-[10px]">V2.0.0</span>
+            <i class="fa-solid fa-code-merge text-orange-500"></i> Hệ Thống Điểm Danh Fpoly <span class="bg-slate-200 text-slate-600 px-2 py-0.5 rounded text-[10px]">V2.1.0</span>
         </p>
         <p class="text-[11px] font-semibold text-slate-400 max-w-2xl mx-auto">
-            Giao diện được thiết kế lại theo phong cách Glassmorphism hiện đại. Màu sắc chuẩn nhận diện thương hiệu FPT Polytechnic. Hoạt động mượt mà trên cả PC và Mobile. Tích hợp lưu trữ Cloud thời gian thực.
+            Bản nâng cấp V2.1.0: Thêm tính năng Chống điểm danh gian lận (1 phút Cooldown giữa Vào/Ra Lớp). Tích hợp bộ lọc xuất Excel chuyên nghiệp theo ngày tùy chọn.
         </p>
     </div>
 
@@ -328,8 +332,10 @@
         import { getAuth, onAuthStateChanged, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // --- CẤU HÌNH THỜI GIAN CA HỌC & SĨ SỐ GỐC ---
+        // --- CẤU HÌNH THỜI GIAN CA HỌC, SĨ SỐ VÀ COOLDOWN ---
         const BASE_STUDENTS_ESP = 15; 
+        const CHECKOUT_COOLDOWN_MINUTES = 1; // 1 Phút để bạn dễ Test (Sau khi Test xong có thể đổi thành 15)
+
         const SHIFTS = [
             { id: "ca1", name: "Ca 1", start: "07:00", end: "09:15", index: 0 },
             { id: "ca2", name: "Ca 2", start: "09:30", end: "11:45", index: 1 },
@@ -345,7 +351,6 @@
 
         // Khởi tạo Chart (Giao diện mới)
         let ctx = document.getElementById('attendanceChart').getContext('2d');
-        // Tạo gradient cho cột biểu đồ
         let gradientOrange = ctx.createLinearGradient(0, 0, 0, 200);
         gradientOrange.addColorStop(0, '#f97316');
         gradientOrange.addColorStop(1, '#fdba74');
@@ -368,11 +373,15 @@
                 maintainAspectRatio: false, 
                 plugins: { legend: { display: false } }, 
                 scales: { 
-                    y: { display: true, grid: { color: '#f1f5f9', drawBorder: false }, ticks: { font: { family: 'Inter', size: 10 }, color: '#94a3b8', stepSize: 5 } }, 
-                    x: { grid: { display: false }, ticks: { font: { family: 'Inter', size: 10, weight: 'bold' }, color: '#64748b' } } 
+                    y: { display: true, grid: { color: '#f1f5f9', drawBorder: false }, ticks: { font: { family: 'Plus Jakarta Sans', size: 10 }, color: '#94a3b8', stepSize: 5 } }, 
+                    x: { grid: { display: false }, ticks: { font: { family: 'Plus Jakarta Sans', size: 10, weight: 'bold' }, color: '#64748b' } } 
                 } 
             }
         });
+
+        // Set Default Date for Export Input
+        const todayIso = new Date().toISOString().split('T')[0];
+        document.getElementById('export-date').value = todayIso;
 
         // --- FIREBASE INIT ---
         let app, auth, db, appId;
@@ -414,8 +423,10 @@
             if (type === 'error') icon = 'circle-exclamation';
             if (type === 'warning') icon = 'triangle-exclamation';
             
+            let colorTheme = type === 'warning' ? 'orange' : (type === 'error' ? 'rose' : 'emerald');
+            
             toast.className = `toast ${type}`;
-            toast.innerHTML = `<div class="w-8 h-8 rounded-full bg-${type === 'warning' ? 'orange' : (type === 'error' ? 'rose' : 'emerald')}-100 flex items-center justify-center text-${type === 'warning' ? 'orange' : (type === 'error' ? 'rose' : 'emerald')}-500"><i class="fa-solid fa-${icon} text-lg"></i></div> ${msg}`;
+            toast.innerHTML = `<div class="w-8 h-8 rounded-full bg-${colorTheme}-100 flex items-center justify-center text-${colorTheme}-500"><i class="fa-solid fa-${icon} text-lg"></i></div> ${msg}`;
             container.appendChild(toast);
             setTimeout(() => { toast.remove(); }, 3500);
         }
@@ -506,7 +517,6 @@
             
             let totalStudentsForShift = baseEspForThisShift + webRegisteredForThisShift;
             
-            // Effect update numbers
             document.getElementById('total-count').innerText = totalStudentsForShift;
             document.getElementById('registered-count-badge').innerHTML = `<i class="fa-solid fa-database"></i> ĐÃ LƯU: ${Object.keys(membersDb).length}`;
 
@@ -636,17 +646,61 @@
 
             } else {
                 // TÌNH HUỐNG 2: THÀNH VIÊN ĐÃ ĐĂNG KÝ
-                nameEl.innerText = finalName;
-                subEl.classList.replace('text-slate-300', 'text-emerald-300');
                 
+                // LOGIC CHỐNG QUẸT NHẦM / COOLDOWN (RA LỚP)
                 let isCheckOut = false;
+                let canCheckOut = true;
+                let diffMins = 0;
+
                 if (currentShift) {
                     let userLogsInShift = logsDb.filter(l => l.date === currentDateString && l.shiftId === currentShift.id && (l.mssv === finalMssv || l.uid === uid));
-                    if (userLogsInShift.length > 0 && userLogsInShift[0].status === "VÀO LỚP") {
-                        isCheckOut = true;
+                    if (userLogsInShift.length > 0) {
+                        let lastLog = userLogsInShift[0]; // Log gần nhất
+                        if (lastLog.status === "VÀO LỚP") {
+                            isCheckOut = true;
+                            // Tính thời gian từ lúc Vào Lớp đến hiện tại (phút)
+                            diffMins = (now.getTime() - lastLog.timestamp) / 60000;
+                            if (diffMins < CHECKOUT_COOLDOWN_MINUTES) {
+                                canCheckOut = false;
+                            }
+                        }
                     }
                 }
 
+                if (isCheckOut && !canCheckOut) {
+                    // CẢNH BÁO CHƯA TỚI GIỜ RA LỚP
+                    let remainingMins = Math.ceil(CHECKOUT_COOLDOWN_MINUTES - diffMins);
+                    nameEl.innerText = "CHƯA ĐẾN GIỜ RA";
+                    nameEl.classList.add('text-orange-500');
+                    subEl.innerText = `ĐỢI THÊM ${remainingMins} PHÚT NỮA ĐỂ ĐIỂM DANH RA!`;
+                    subEl.className = "text-[11px] font-black uppercase tracking-widest text-orange-400";
+                    
+                    avatar.style.borderColor = "#f59e0b";
+                    avatar.classList.add('glow-unknown');
+                    avatarIcon.className = "fa-solid fa-clock text-7xl text-orange-400";
+                    scanStatusDot.classList.add('bg-orange-500');
+                    
+                    window.showToast(`Cảnh báo: Hãy đợi ${remainingMins} phút nữa để quét Ra Lớp.`, 'warning');
+                    
+                    // Không lưu log, tự reset UI
+                    setTimeout(() => {
+                        if(lastUid === uid) {
+                            nameEl.innerText = "SẴN SÀNG";
+                            nameEl.className = "text-4xl md:text-5xl font-black text-white uppercase mb-3 tracking-tighter transition-all duration-300";
+                            subEl.innerText = "HÃY ĐẶT THẺ VÀO ĐẦU ĐỌC";
+                            subEl.className = "text-slate-300 text-[11px] font-bold uppercase tracking-widest";
+                            avatar.className = "avatar-circle glow-idle";
+                            avatarIcon.className = "fa-solid fa-expand text-7xl text-slate-400/50 transition-colors";
+                            scanStatusDot.className = "w-2 h-2 rounded-full bg-orange-500 animate-pulse";
+                            feedback.innerText = "Status: Idle";
+                        }
+                    }, 8000);
+                    return; // Chặn ngang tại đây, không xử lý DB nữa
+                }
+
+                // NẾU HỢP LỆ -> CHO VÀO HOẶC RA LỚP
+                nameEl.innerText = finalName;
+                subEl.classList.replace('text-slate-300', 'text-emerald-300');
                 let statusStr = isCheckOut ? "RA LỚP" : "VÀO LỚP";
                 let colorClass = isCheckOut ? "bg-rose-50 text-rose-500 border-rose-100" : "bg-emerald-50 text-emerald-600 border-emerald-100";
 
@@ -828,7 +882,28 @@
         window.exportExcel = function() {
             if (logsDb.length === 0) return window.showToast("Chưa có dữ liệu điểm danh để xuất!", "warning");
             
-            const exportData = logsDb.map((l, index) => ({
+            // Xử lý Filter theo ngày chọn
+            const selectedDateVal = document.getElementById('export-date').value;
+            let filterDateStr = "";
+            let fileNameSuffix = "TatCa";
+
+            if (selectedDateVal) {
+                const [y, m, d] = selectedDateVal.split('-');
+                filterDateStr = new Date(y, m-1, d).toDateString();
+                fileNameSuffix = selectedDateVal;
+            } else {
+                filterDateStr = new Date().toDateString(); // Default hôm nay
+                fileNameSuffix = "HomNay";
+            }
+
+            // Lọc log theo ngày
+            const filteredLogs = logsDb.filter(l => l.date === filterDateStr);
+
+            if (filteredLogs.length === 0) {
+                return window.showToast(`Không có người điểm danh trong ngày ${fileNameSuffix}!`, "warning");
+            }
+
+            const exportData = filteredLogs.map((l, index) => ({
                 "STT": index + 1,
                 "Ngày": l.date,
                 "Thời Gian": l.time,
@@ -844,7 +919,7 @@
             ws['!cols'] = [ {wch: 5}, {wch: 15}, {wch: 12}, {wch: 15}, {wch: 15}, {wch: 30}, {wch: 15}, {wch: 20}, {wch: 15} ];
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, "Báo Cáo Fpoly");
-            XLSX.writeFile(wb, `Bao_Cao_Diem_Danh_Fpoly_${new Date().getTime()}.xlsx`);
+            XLSX.writeFile(wb, `Bao_Cao_Diem_Danh_${fileNameSuffix}.xlsx`);
             window.showToast("Tải xuống Excel hoàn tất!");
         };
 
