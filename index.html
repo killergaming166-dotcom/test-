@@ -13,118 +13,88 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
         body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; color: #334155; margin: 0; padding: 20px; }
         .card { background: white; border-radius: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.02); border: 1px solid #e2e8f0; transition: all 0.3s ease; }
-        .stat-card { background: white; border-radius: 20px; padding: 16px; display: flex; align-items: center; justify-content: space-between; border: 1px solid #eef2f6; position: relative; overflow: hidden; }
-        .stat-card::after { content: ''; position: absolute; right: -10px; bottom: -10px; font-family: "Font Awesome 6 Free"; font-weight: 900; font-size: 60px; opacity: 0.03; pointer-events: none; }
-        .stat-user::after { content: '\f0c0'; }
-        .stat-present::after { content: '\f2bb'; }
-        .stat-absent::after { content: '\f506'; }
-
-        .avatar-circle { width: 140px; height: 140px; border-radius: 50%; background: #f8fafc; display: flex; align-items: center; justify-content: center; border: 4px solid #f1f5f9; margin: 0 auto 20px; transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+        .avatar-circle { width: 140px; height: 140px; border-radius: 50%; background: #f8fafc; display: flex; align-items: center; justify-content: center; border: 4px solid #f1f5f9; margin: 0 auto 20px; transition: 0.3s; }
         .input-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 10px 14px; font-size: 13px; width: 100%; transition: 0.2s; font-weight: 500; }
-        .input-box:focus { border-color: #3b82f6; outline: none; background: white; box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1); }
-        
-        .btn-save { background: linear-gradient(135deg, #ff7e20, #f97316); color: white; border-radius: 14px; font-weight: 800; padding: 14px; width: 100%; transition: 0.3s; border: none; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3); }
-        .btn-save:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(249, 115, 22, 0.4); }
-        
-        .log-table-container { max-height: 380px; overflow-y: auto; scrollbar-width: thin; }
+        .input-box:focus { border-color: #3b82f6; outline: none; background: white; }
+        .btn-save { background: linear-gradient(135deg, #ff7e20, #f97316); color: white; border-radius: 14px; font-weight: 800; padding: 14px; width: 100%; transition: 0.3s; border: none; cursor: pointer; text-transform: uppercase; }
+        .log-table-container { max-height: 400px; overflow-y: auto; }
         .log-table { width: 100%; border-collapse: collapse; }
-        .log-table th { font-size: 10px; color: #64748b; text-transform: uppercase; letter-spacing: 1px; padding: 12px; font-weight: 800; border-bottom: 2px solid #f1f5f9; text-align: left; position: sticky; top: 0; background: white; z-index: 10; }
-        .log-table td { padding: 14px 12px; font-size: 13px; font-weight: 500; border-bottom: 1px solid #f8fafc; }
+        .log-table th { font-size: 10px; color: #64748b; text-transform: uppercase; padding: 12px; border-bottom: 2px solid #f1f5f9; text-align: left; position: sticky; top: 0; background: white; z-index: 10; }
+        .log-table td { padding: 14px 12px; font-size: 13px; border-bottom: 1px solid #f8fafc; }
+        .pulse-orange { animation: pulse-orange 2s infinite; }
+        @keyframes pulse-orange { 0% { box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(249, 115, 22, 0); } 100% { box-shadow: 0 0 0 0 rgba(249, 115, 22, 0); } }
     </style>
 </head>
 <body>
-    <!-- Header -->
     <div class="flex justify-between items-center mb-6 px-2">
         <div class="flex items-center gap-4">
             <div class="w-12 h-12 bg-white rounded-2xl shadow-sm flex items-center justify-center text-orange-500 font-black text-2xl border border-orange-100">F</div>
             <div>
-                <h1 class="text-xl font-black text-[#0f172a] tracking-tight">ERA ATTENDANCE <span class="text-orange-500">PRO</span></h1>
+                <h1 class="text-xl font-black text-[#0f172a]">ERA ATTENDANCE <span class="text-orange-500">PRO</span></h1>
                 <div class="flex items-center gap-2">
                     <span id="era-status-dot" class="w-2 h-2 rounded-full bg-slate-300"></span>
-                    <span id="era-status-text" class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">HỆ THỐNG ĐANG KHỞI ĐỘNG...</span>
+                    <span id="era-status-text" class="text-[9px] font-bold text-slate-400 uppercase">ĐANG KẾT NỐI...</span>
                 </div>
             </div>
         </div>
         <div class="text-right">
-            <div class="text-4xl font-black text-[#1e293b] tracking-tighter" id="clock">00:00:00</div>
-            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest" id="date-now">THỨ HAI, 20 THÁNG 5, 2024</div>
+            <div class="text-4xl font-black text-[#1e293b]" id="clock">00:00:00</div>
+            <div class="text-[10px] font-bold text-slate-400 uppercase" id="date-now">...</div>
         </div>
     </div>
 
     <div class="grid grid-cols-12 gap-5">
-        <!-- CỘT TRÁI (8/12) -->
+        <!-- Cột Trái -->
         <div class="col-span-8 space-y-5">
             <!-- Màn hình quét chính -->
-            <div class="card p-8 flex flex-col items-center justify-center relative overflow-hidden min-h-[380px]">
-                <div class="absolute -top-10 -right-10 w-40 h-40 bg-orange-50 rounded-full blur-3xl opacity-50"></div>
-                
-                <div class="absolute top-6 left-6 flex items-center gap-2 bg-white/80 backdrop-blur-sm px-3 py-1.5 rounded-full border border-slate-100 shadow-sm z-10">
-                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                    <span class="text-[10px] font-black text-slate-600 uppercase tracking-wider">THIẾT BỊ SẴN SÀNG</span>
-                </div>
-                
+            <div class="card p-8 flex flex-col items-center justify-center relative min-h-[380px]" id="main-display-card">
                 <div class="avatar-circle" id="avatar-container">
-                    <i class="fa-solid fa-user-astronaut text-6xl text-slate-200" id="avatar-icon"></i>
+                    <i class="fa-solid fa-user-circle text-7xl text-slate-200" id="avatar-icon"></i>
                 </div>
-                
-                <div class="text-center z-10">
-                    <div class="flex justify-center gap-1.5 mb-4">
-                        <div class="w-8 h-1 bg-slate-200 rounded-full"></div>
-                        <div class="w-12 h-1 bg-orange-500 rounded-full"></div>
-                        <div class="w-8 h-1 bg-slate-200 rounded-full"></div>
-                    </div>
-                    <h2 id="display-name" class="text-4xl font-black text-slate-800 uppercase tracking-tighter mb-1">ĐANG ĐỢI THẺ...</h2>
-                    <p id="display-sub" class="text-slate-400 text-[10px] font-bold uppercase tracking-[0.3em]">Mời đặt thẻ vào đầu đọc</p>
+                <div class="text-center">
+                    <h2 id="display-name" class="text-4xl font-black text-slate-800 uppercase mb-1">SẴN SÀNG</h2>
+                    <p id="display-sub" class="text-slate-400 text-[10px] font-bold uppercase tracking-widest">MỜI ĐẶT THẺ VÀO ĐẦU ĐỌC</p>
                 </div>
+                <div id="scan-feedback" class="absolute top-6 right-8 text-[10px] font-black text-slate-300 uppercase">Status: Idle</div>
             </div>
 
-            <!-- Khối Đăng ký -->
-            <div class="card p-7 border-l-8 border-orange-500">
-                <div class="flex items-center justify-between mb-6">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 bg-orange-100 rounded-xl flex items-center justify-center text-orange-600 shadow-sm">
-                            <i class="fa-solid fa-id-card-clip text-lg"></i>
-                        </div>
-                        <h3 class="font-black text-sm uppercase text-slate-700 tracking-tight">Đăng ký thành viên mới</h3>
+            <!-- Panel Đăng Ký -->
+            <div class="card p-7 border-l-8 border-orange-500 bg-orange-50/30">
+                <div class="flex justify-between mb-4">
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-id-card text-orange-500"></i>
+                        <h3 class="font-black text-sm uppercase text-slate-700">Đăng ký thành viên mới</h3>
                     </div>
-                    <div class="text-[10px] font-black text-slate-300 uppercase tracking-widest">Bước 1: Quét thẻ để lấy UID</div>
+                    <span class="text-[10px] font-bold text-orange-400">BƯỚC 1: QUÉT THẺ TRỐNG</span>
                 </div>
-                
                 <div class="grid grid-cols-4 gap-4 mb-5">
-                    <div class="space-y-2">
-                        <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Mã thẻ UID</label>
-                        <input type="text" id="reg-uid" placeholder="..." class="input-box bg-slate-100 font-mono text-orange-600 font-bold" readonly>
+                    <div class="space-y-1">
+                        <label class="text-[9px] font-black text-slate-400 uppercase">Mã thẻ UID (Auto)</label>
+                        <input type="text" id="reg-uid" placeholder="Đang chờ thẻ..." class="input-box font-mono text-orange-600 font-bold bg-white" readonly>
                     </div>
-                    <div class="space-y-2">
-                        <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Họ và Tên</label>
-                        <input type="text" id="reg-name" placeholder="Nhập tên..." class="input-box">
+                    <div class="space-y-1">
+                        <label class="text-[9px] font-black text-slate-400 uppercase">Họ và Tên</label>
+                        <input type="text" id="reg-name" placeholder="Ví dụ: Nguyễn Văn A" class="input-box bg-white">
                     </div>
-                    <div class="space-y-2">
-                        <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">MSSV / ID</label>
-                        <input type="text" id="reg-mssv" placeholder="Nhập MSSV..." class="input-box">
+                    <div class="space-y-1">
+                        <label class="text-[9px] font-black text-slate-400 uppercase">MSSV / ID</label>
+                        <input type="text" id="reg-mssv" placeholder="PS12345" class="input-box bg-white">
                     </div>
-                    <div class="space-y-2">
-                        <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Lớp / Bộ phận</label>
-                        <input type="text" id="reg-class" placeholder="Nhập lớp..." class="input-box">
+                    <div class="space-y-1">
+                        <label class="text-[9px] font-black text-slate-400 uppercase">Lớp / Bộ phận</label>
+                        <input type="text" id="reg-class" placeholder="WD18301" class="input-box bg-white">
                     </div>
                 </div>
-
-                <button class="btn-save flex items-center justify-center gap-3" onclick="saveNewMember()">
-                    <i class="fa-solid fa-cloud-arrow-up"></i>
-                    Xác nhận lưu thông tin thành viên
+                <button class="btn-save shadow-lg shadow-orange-200" onclick="saveNewMember()">
+                    <i class="fa-solid fa-cloud-arrow-up mr-2"></i>Xác nhận lưu thông tin
                 </button>
             </div>
 
-            <!-- Bảng lịch sử -->
+            <!-- Bảng Lịch Sử -->
             <div class="card p-6">
-                <div class="flex justify-between items-center mb-6">
-                    <div class="flex items-center gap-2">
-                        <div class="w-1.5 h-5 bg-blue-600 rounded-full"></div>
-                        <h3 class="font-black text-sm text-slate-800 tracking-tight uppercase">Nhật ký điểm danh trực tiếp</h3>
-                    </div>
-                    <button onclick="exportExcel()" class="bg-blue-50 text-blue-600 text-[10px] font-black px-4 py-2 rounded-xl uppercase hover:bg-blue-600 hover:text-white transition-all">
-                        <i class="fa-solid fa-download mr-1"></i> Excel
-                    </button>
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-black text-sm text-slate-800 uppercase">Nhật ký điểm danh</h3>
+                    <button onclick="exportExcel()" class="bg-blue-50 text-blue-600 text-[10px] font-black px-4 py-2 rounded-xl hover:bg-blue-100">XUẤT EXCEL</button>
                 </div>
                 <div class="log-table-container">
                     <table class="log-table">
@@ -143,75 +113,41 @@
             </div>
         </div>
 
-        <!-- CỘT PHẢI -->
+        <!-- Cột Phải -->
         <div class="col-span-4 space-y-5">
-            <div class="grid grid-cols-1 gap-3">
-                <div class="stat-card stat-user">
-                    <div>
-                        <p class="text-[9px] font-black text-slate-400 uppercase mb-0.5">Sĩ số lớp</p>
-                        <h4 class="text-3xl font-black text-slate-800">40</h4>
-                    </div>
-                    <div class="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center text-slate-400 border border-slate-100">
-                        <i class="fa-solid fa-users"></i>
-                    </div>
+            <!-- Thống kê -->
+            <div class="space-y-3">
+                <div class="card p-4 flex justify-between items-center border-l-4 border-slate-300">
+                    <div><p class="text-[9px] font-black text-slate-400 uppercase">Sĩ số lớp</p><h4 class="text-3xl font-black">40</h4></div>
+                    <i class="fa-solid fa-users text-slate-200 text-2xl"></i>
                 </div>
-                <div class="stat-card stat-present border-l-4 border-l-emerald-500">
-                    <div>
-                        <p class="text-[9px] font-black text-emerald-500 uppercase mb-0.5">Hiện diện</p>
-                        <h4 class="text-3xl font-black text-slate-800" id="present-count">0</h4>
-                    </div>
-                    <div class="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-500">
-                        <i class="fa-solid fa-user-check"></i>
-                    </div>
+                <div class="card p-4 flex justify-between items-center border-l-4 border-emerald-500">
+                    <div><p class="text-[9px] font-black text-emerald-500 uppercase">Hiện diện</p><h4 class="text-3xl font-black" id="present-count">0</h4></div>
+                    <i class="fa-solid fa-user-check text-emerald-100 text-2xl"></i>
                 </div>
-                <div class="stat-card stat-absent border-l-4 border-l-rose-500">
-                    <div>
-                        <p class="text-[9px] font-black text-rose-500 uppercase mb-0.5">Vắng mặt</p>
-                        <h4 class="text-3xl font-black text-slate-800" id="absent-count">40</h4>
-                    </div>
-                    <div class="w-10 h-10 bg-rose-50 rounded-xl flex items-center justify-center text-rose-500">
-                        <i class="fa-solid fa-user-xmark"></i>
-                    </div>
+                <div class="card p-4 flex justify-between items-center border-l-4 border-rose-500">
+                    <div><p class="text-[9px] font-black text-rose-500 uppercase">Vắng mặt</p><h4 class="text-3xl font-black" id="absent-count">40</h4></div>
+                    <i class="fa-solid fa-user-xmark text-rose-100 text-2xl"></i>
                 </div>
             </div>
 
+            <!-- Biểu đồ -->
             <div class="card p-5">
-                <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Phân tích chuyên cần</h4>
+                <h4 class="text-[10px] font-black text-slate-400 uppercase mb-4">Phân tích theo ca</h4>
                 <canvas id="attendanceChart" height="200"></canvas>
             </div>
 
-            <div class="card p-6 bg-[#0f172a] text-white">
-                <div class="flex items-center justify-between mb-5">
-                    <span class="text-[10px] font-black text-blue-400 uppercase tracking-[0.2em]">CA ĐANG DIỄN RA</span>
-                    <span class="px-2 py-1 bg-blue-500/20 text-blue-400 rounded-md text-[9px] font-bold border border-blue-500/30" id="shift-id">CA --</span>
-                </div>
-                <div class="flex items-center justify-between gap-4">
-                    <div class="flex-1 text-center border-r border-slate-800">
-                        <p class="text-[8px] font-bold text-slate-500 uppercase mb-1">BẮT ĐẦU</p>
-                        <p class="text-xl font-black tracking-tight" id="ca-start">--:--</p>
-                    </div>
-                    <div class="flex-1 text-center">
-                        <p class="text-[8px] font-bold text-slate-500 uppercase mb-1">KẾT THÚC</p>
-                        <p class="text-xl font-black tracking-tight" id="ca-end">--:--</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card p-5 space-y-4 bg-slate-50/50">
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-2">
-                        <i class="fa-solid fa-microchip text-slate-400"></i>
-                        <span class="text-[10px] font-bold text-slate-600 uppercase">Thiết bị</span>
-                    </div>
+            <!-- Trạng thái ESP32 -->
+            <div class="card p-5 space-y-3 bg-slate-50">
+                <div class="flex items-center justify-between text-[10px] font-bold">
+                    <span>ESP32 HARDWARE</span>
                     <span id="device-dot" class="w-2 h-2 rounded-full bg-emerald-500"></span>
                 </div>
-                <div class="p-3 bg-white rounded-xl border border-slate-200">
-                    <p class="text-[8px] font-black text-slate-400 uppercase mb-2">Hành động cuối</p>
-                    <p class="text-[11px] font-bold text-slate-700" id="last-action">Sẵn sàng nhận thẻ...</p>
+                <div class="bg-white p-3 rounded-xl border border-slate-200 text-[11px]">
+                    <p class="text-slate-400 font-black uppercase text-[8px] mb-1">Mã thẻ cuối</p>
+                    <p id="last-uid-debug" class="font-mono font-bold text-slate-700 tracking-wider">NONE</p>
                 </div>
-                <button onclick="location.reload()" class="w-full bg-white border border-slate-200 text-slate-600 text-[10px] font-black py-3 rounded-xl uppercase hover:bg-slate-100 transition-all">
-                    Kiểm tra kết nối
-                </button>
+                <button onclick="location.reload()" class="w-full py-3 bg-white border border-slate-200 rounded-xl text-[10px] font-black hover:bg-slate-100 transition-all">LÀM MỚI KẾT NỐI</button>
             </div>
         </div>
     </div>
@@ -221,25 +157,17 @@
         let config = { uid: null, name: null, mssv: null, class: null };
         const logs = [];
         const presentSet = new Set();
-        let lastUid = "";
+        let lastUid = ""; // Lưu trữ UID hiện tại để tránh nhảy
 
-        const SHIFTS = [
-            { name: "Ca 1", start: "07:00", end: "09:15" },
-            { name: "Ca 2", start: "09:30", end: "11:45" },
-            { name: "Ca 3", start: "13:00", end: "15:00" },
-            { name: "Ca 4", start: "15:00", end: "17:00" },
-            { name: "Ca 5", start: "17:15", end: "19:30" }
-        ];
-
-        // Biểu đồ
+        // Setup Chart
         let ctx = document.getElementById('attendanceChart').getContext('2d');
         let attendanceChart = new Chart(ctx, {
             type: 'bar',
             data: {
                 labels: ['Ca 1', 'Ca 2', 'Ca 3', 'Ca 4', 'Ca 5'],
-                datasets: [{ label: 'Hiện diện', data: [0,0,0,0,0], backgroundColor: '#3b82f6', borderRadius: 6, barThickness: 15 }]
+                datasets: [{ label: 'Hiện diện', data: [0,0,0,0,0], backgroundColor: '#3b82f6', borderRadius: 4 }]
             },
-            options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { display: false }, ticks: { font: { size: 9 } } }, x: { grid: { display: false }, ticks: { font: { size: 9 } } } } }
+            options: { plugins: { legend: { display: false } }, scales: { y: { display: false }, x: { grid: { display: false }, ticks: { font: { size: 8 } } } } }
         });
 
         eraWidget.init({
@@ -259,108 +187,147 @@
                 const mssvVal = v[config.mssv?.id]?.value;
                 const classVal = v[config.class?.id]?.value;
 
-                if (!uidVal || uidVal === "None" || uidVal === "0") {
-                    resetDisplay();
-                    return;
-                }
-
-                if (uidVal !== lastUid) {
-                    lastUid = uidVal;
-                    document.getElementById('reg-uid').value = uidVal; // Luôn điền UID vào ô đăng ký khi quẹt
+                // FIX 1: Chỉ xử lý nếu UID thực sự có giá trị và khác giá trị cũ
+                // Không tự động gọi reset khi nhận "None" từ thiết bị
+                if (uidVal && uidVal !== "0" && uidVal !== "None") {
+                    document.getElementById('last-uid-debug').innerText = uidVal;
                     
-                    handleScan({
-                        uid: uidVal,
-                        name: nameVal,
-                        mssv: mssvVal,
-                        class: classVal
-                    });
+                    if (uidVal !== lastUid) {
+                        lastUid = uidVal;
+                        
+                        // FIX 2: "Chốt" UID vào ô đăng ký ngay lập tức
+                        document.getElementById('reg-uid').value = uidVal;
+                        
+                        handleScan({
+                            uid: uidVal,
+                            name: nameVal,
+                            mssv: mssvVal,
+                            class: classVal
+                        });
+                    }
                 }
+                // Chú ý: Không gọi resetDisplay ở đây để tránh bị nhảy màn hình khi thẻ rời đầu đọc
             }
         });
 
-        function resetDisplay() {
-            lastUid = "";
-            document.getElementById('display-name').innerText = "ĐANG ĐỢI THẺ...";
-            document.getElementById('display-name').style.color = "#1e293b";
-            document.getElementById('avatar-container').style.borderColor = "#f1f5f9";
-            document.getElementById('avatar-icon').className = "fa-solid fa-user-astronaut text-6xl text-slate-200";
-        }
-
         function handleScan(data) {
             const nameEl = document.getElementById('display-name');
+            const subEl = document.getElementById('display-sub');
+            const statusFeedback = document.getElementById('scan-feedback');
             const avatar = document.getElementById('avatar-container');
-            const icon = document.getElementById('avatar-icon');
-            const actionEl = document.getElementById('last-action');
+            const avatarIcon = document.getElementById('avatar-icon');
+            
+            statusFeedback.innerText = "Status: Scanned";
 
-            // KIỂM TRA THẺ CHƯA ĐĂNG KÝ (Dựa trên tên gửi từ ESP32)
-            const isUnknown = (!data.name || data.name === "None" || data.name === "NGUOI LA" || data.name === "THẺ CHƯA ĐĂNG KÝ");
+            // Nhận diện thẻ lạ
+            const isUnknown = (!data.name || data.name === "None" || data.name === "NGUOI LA" || data.name === "Người lạ");
 
             if (isUnknown) {
-                nameEl.innerText = "THẺ MỚI";
-                nameEl.style.color = "#f97316";
+                nameEl.innerText = "THẺ CHƯA ĐĂNG KÝ";
+                nameEl.classList.remove('text-slate-800');
+                nameEl.classList.add('text-orange-500');
+                subEl.innerText = "VUI LÒNG ĐIỀN THÔNG TIN BÊN DƯỚI";
+                
                 avatar.style.borderColor = "#f97316";
-                icon.className = "fa-solid fa-id-card text-6xl text-orange-400";
-                actionEl.innerText = `Phát hiện thẻ mới: ${data.uid}`;
-                // Không ghi vào nhật ký điểm danh nhưng đã hiện UID ở ô đăng ký
-                return;
-            }
+                avatar.classList.add('pulse-orange');
+                avatarIcon.className = "fa-solid fa-user-plus text-7xl text-orange-200";
 
-            // XỬ LÝ ĐIỂM DANH THẺ ĐÃ ĐĂNG KÝ
-            let isCheckOut = presentSet.has(data.mssv);
-            let status = isCheckOut ? "RA LỚP" : "VÀO LỚP";
-            
-            if (isCheckOut) {
-                presentSet.delete(data.mssv);
-                avatar.style.borderColor = "#f43f5e";
-                icon.className = "fa-solid fa-door-open text-6xl text-rose-400";
+                addLog("THẺ LẠ", "---", "---", "CHƯA ĐĂNG KÝ", "bg-orange-50 text-orange-600");
             } else {
-                presentSet.add(data.mssv);
-                avatar.style.borderColor = "#10b981";
-                icon.className = "fa-solid fa-user-check text-6xl text-emerald-500";
+                // Thẻ đã có tên
+                nameEl.innerText = data.name;
+                nameEl.classList.remove('text-orange-500');
+                nameEl.classList.add('text-slate-800');
+                subEl.innerText = "MSSV: " + (data.mssv || "---");
+
+                avatar.classList.remove('pulse-orange');
+                avatarIcon.className = "fa-solid fa-user-check text-7xl text-emerald-500";
+                
+                let isCheckOut = presentSet.has(data.mssv);
+                let statusText = isCheckOut ? "RA LỚP" : "VÀO LỚP";
+                
+                if (isCheckOut) presentSet.delete(data.mssv);
+                else presentSet.add(data.mssv);
+
+                avatar.style.borderColor = isCheckOut ? "#f43f5e" : "#10b981";
+
+                addLog(data.name, data.mssv, data.class, statusText, isCheckOut ? "bg-rose-50 text-rose-500" : "bg-emerald-50 text-emerald-600");
             }
-
-            nameEl.innerText = data.name;
-            nameEl.style.color = "#0f172a";
-            actionEl.innerText = `${status}: ${data.name}`;
-
-            logs.unshift({
-                time: new Date().toLocaleTimeString('vi-VN', { hour12: false }),
-                name: data.name,
-                mssv: data.mssv,
-                class: data.class,
-                status: status,
-                color: isCheckOut ? "bg-rose-50 text-rose-500" : "bg-emerald-50 text-emerald-600"
-            });
-            renderLogs();
+            
+            // Tự động quay về trạng thái chờ sau 5 giây nếu không có thẻ mới
+            setTimeout(() => {
+                if(lastUid === data.uid) {
+                    statusFeedback.innerText = "Status: Idle";
+                }
+            }, 5000);
         }
 
-        function renderLogs() {
+        function addLog(name, mssv, clazz, status, colorClass) {
+            logs.unshift({
+                time: new Date().toLocaleTimeString('vi-VN', { hour12: false }),
+                name, mssv, class: clazz, status, color: colorClass
+            });
+            render();
+        }
+
+        function render() {
             document.getElementById('log-body').innerHTML = logs.map(l => `
-                <tr>
-                    <td class="text-slate-400 font-bold font-mono text-[11px]">${l.time}</td>
+                <tr class="hover:bg-slate-50 transition-colors">
+                    <td class="font-mono text-[11px] text-slate-400 font-bold">${l.time}</td>
                     <td class="font-black text-slate-700 uppercase">${l.name}</td>
                     <td class="text-slate-500 font-bold">${l.mssv}</td>
-                    <td class="text-slate-400 font-semibold">${l.class}</td>
+                    <td class="text-slate-400">${l.class}</td>
                     <td><span class="px-3 py-1 rounded-full text-[10px] font-black ${l.color}">${l.status}</span></td>
                 </tr>
             `).join('');
-            document.getElementById('present-count').innerText = presentSet.size;
-            document.getElementById('absent-count').innerText = Math.max(0, 40 - presentSet.size);
-            updateChart(presentSet.size);
+            
+            const count = presentSet.size;
+            document.getElementById('present-count').innerText = count;
+            document.getElementById('absent-count').innerText = Math.max(0, 40 - count);
+            updateChart(count);
         }
 
-        function updateChart(count) {
-            const now = new Date();
-            const time = now.getHours() * 60 + now.getMinutes();
-            let idx = SHIFTS.findIndex(s => {
-                const [sh, sm] = s.start.split(':').map(Number);
-                const [eh, em] = s.end.split(':').map(Number);
-                return time >= (sh * 60 + sm) && time <= (eh * 60 + em);
-            });
-            if (idx !== -1) {
-                attendanceChart.data.datasets[0].data[idx] = count;
+        function updateChart(val) {
+            const hour = new Date().getHours();
+            let idx = -1;
+            if(hour >= 7 && hour < 10) idx = 0;
+            else if(hour >= 10 && hour < 12) idx = 1;
+            else if(hour >= 13 && hour < 15) idx = 2;
+            else if(hour >= 15 && hour < 17) idx = 3;
+            else if(hour >= 17) idx = 4;
+            
+            if(idx !== -1) {
+                attendanceChart.data.datasets[0].data[idx] = val;
                 attendanceChart.update();
             }
+        }
+
+        function saveNewMember() {
+            const uid = document.getElementById('reg-uid').value;
+            const name = document.getElementById('reg-name').value;
+            if(!uid || uid === "Đang chờ thẻ...") {
+                alertCustom("Vui lòng quẹt thẻ trước khi đăng ký!");
+                return;
+            }
+            if(!name) {
+                alertCustom("Vui lòng nhập tên thành viên!");
+                return;
+            }
+            
+            // Giả lập lưu
+            alertCustom("Đã đăng ký thành công: " + name);
+            
+            // Xóa form sau khi lưu
+            document.getElementById('reg-uid').value = "Đang chờ thẻ...";
+            document.getElementById('reg-name').value = "";
+            document.getElementById('reg-mssv').value = "";
+            document.getElementById('reg-class').value = "";
+            lastUid = ""; // Reset chốt để cho phép quẹt lại chính thẻ đó
+        }
+
+        function alertCustom(msg) {
+            // Thay vì dùng alert() làm đứng trình duyệt, ta log ra debug panel
+            console.log("System Alert: " + msg);
         }
 
         function updateClock() {
@@ -368,35 +335,6 @@
             document.getElementById('clock').innerText = now.toLocaleTimeString('vi-VN', { hour12: false });
             const days = ["CHỦ NHẬT", "THỨ HAI", "THỨ BA", "THỨ TƯ", "THỨ NĂM", "THỨ SÁU", "THỨ BẢY"];
             document.getElementById('date-now').innerText = `${days[now.getDay()]}, ${now.getDate()} THÁNG ${now.getMonth() + 1}, ${now.getFullYear()}`;
-            const time = now.getHours() * 60 + now.getMinutes();
-            const shift = SHIFTS.find(s => {
-                const [sh, sm] = s.start.split(':').map(Number);
-                const [eh, em] = s.end.split(':').map(Number);
-                return time >= (sh * 60 + sm) && time <= (eh * 60 + em);
-            });
-            if (shift) {
-                document.getElementById('shift-id').innerText = shift.name.toUpperCase();
-                document.getElementById('ca-start').innerText = shift.start;
-                document.getElementById('ca-end').innerText = shift.end;
-            }
-        }
-
-        function saveNewMember() {
-            const name = document.getElementById('reg-name').value;
-            const uid = document.getElementById('reg-uid').value;
-            if(!name || !uid) {
-                document.getElementById('last-action').innerText = "Lỗi: Điền tên và quét thẻ trước!";
-                return;
-            }
-            // Logic lưu trữ có thể thêm tại đây (Firebase hoặc Local)
-            document.getElementById('last-action').innerText = `Đã ghi: ${name} (${uid})`;
-        }
-
-        function exportExcel() {
-            const ws = XLSX.utils.json_to_sheet(logs);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Logs");
-            XLSX.writeFile(wb, "DiemDanh.xlsx");
         }
 
         setInterval(updateClock, 1000);
