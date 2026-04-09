@@ -10,253 +10,326 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
         
-        /* Fpoly Colors: Primary Orange #f97316 */
-        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #334155; margin: 0; padding: 20px; }
-        .card { background: white; border-radius: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.02); border: 1px solid #e2e8f0; transition: all 0.3s ease; }
-        .stat-card { background: white; border-radius: 20px; padding: 16px; display: flex; align-items: center; justify-content: space-between; border: 1px solid #eef2f6; position: relative; overflow: hidden; }
-        .avatar-circle { width: 140px; height: 140px; border-radius: 50%; background: #ffffff; display: flex; align-items: center; justify-content: center; border: 4px solid #fff; margin: 0 auto 20px; transition: 0.3s; box-shadow: 0 10px 25px rgba(249, 115, 22, 0.1); }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f1f5f9; color: #334155; margin: 0; padding: 20px; background-image: radial-gradient(#e2e8f0 1px, transparent 1px); background-size: 20px 20px; }
         
-        .input-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 10px 14px; font-size: 13px; width: 100%; transition: 0.2s; font-weight: 500; color: #1e293b; }
-        .input-box:focus { border-color: #f97316; outline: none; background: white; box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1); }
-        select.input-box { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; background-size: 16px; padding-right: 30px; }
+        /* Modern Cards */
+        .card { background: white; border-radius: 28px; box-shadow: 0 10px 40px -10px rgba(0,0,0,0.05); border: 1px solid rgba(255,255,255,0.8); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .card-dark { background: linear-gradient(145deg, #0f172a, #1e293b); border-radius: 28px; box-shadow: 0 20px 40px -10px rgba(249, 115, 22, 0.15); border: 1px solid rgba(255,255,255,0.05); position: relative; overflow: hidden; }
+        .card-dark::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(249,115,22,0.1) 0%, transparent 50%); pointer-events: none; }
         
-        .btn-save { background: linear-gradient(135deg, #f97316, #ea580c); color: white; border-radius: 12px; font-weight: 800; padding: 12px; transition: 0.3s; cursor: pointer; text-transform: uppercase; font-size: 11px; }
-        .btn-save:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3); }
-        .btn-manage { background: #f0fdfa; color: #0d9488; border: 1px solid #ccfbf1; border-radius: 12px; font-weight: 800; padding: 12px; transition: 0.3s; cursor: pointer; text-transform: uppercase; font-size: 11px; }
-        .btn-manage:hover { background: #ccfbf1; transform: translateY(-2px); }
+        /* Stats Cards Gradients */
+        .stat-card { border-radius: 24px; padding: 20px; display: flex; align-items: center; justify-content: space-between; position: relative; overflow: hidden; box-shadow: 0 10px 30px -10px rgba(0,0,0,0.05); border: 1px solid white; }
+        .stat-total { background: linear-gradient(135deg, #fffaf5, #fff7ed); }
+        .stat-present { background: linear-gradient(135deg, #f0fdf4, #ecfdf5); }
+        .stat-absent { background: linear-gradient(135deg, #fff1f2, #ffe4e6); }
+        
+        .stat-icon-wrapper { width: 56px; height: 56px; border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 24px; box-shadow: inset 0 2px 4px rgba(255,255,255,0.5); }
+        
+        /* Avatar & Scanning Effects */
+        .avatar-circle { width: 150px; height: 150px; border-radius: 50%; background: rgba(255,255,255,0.05); backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: center; border: 4px solid rgba(255,255,255,0.1); margin: 0 auto 24px; transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); box-shadow: 0 0 40px rgba(0,0,0,0.2); }
+        
+        /* Glowing states for Avatar */
+        .glow-idle { box-shadow: 0 0 30px rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); }
+        .glow-unknown { box-shadow: 0 0 50px rgba(249, 115, 22, 0.4), inset 0 0 20px rgba(249, 115, 22, 0.2); border-color: #f97316; animation: pulse-orange 2s infinite; }
+        .glow-in { box-shadow: 0 0 50px rgba(16, 185, 129, 0.4), inset 0 0 20px rgba(16, 185, 129, 0.2); border-color: #10b981; }
+        .glow-out { box-shadow: 0 0 50px rgba(244, 63, 94, 0.4), inset 0 0 20px rgba(244, 63, 94, 0.2); border-color: #f43f5e; }
 
-        .log-table-container { max-height: 400px; overflow-y: auto; overflow-x: auto; }
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        /* Inputs & Buttons */
+        .input-box { background: #f8fafc; border: 2px solid transparent; border-radius: 16px; padding: 12px 16px; font-size: 13px; width: 100%; transition: 0.3s; font-weight: 600; color: #1e293b; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); }
+        .input-box:focus { border-color: #f97316; outline: none; background: white; box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.1); }
+        select.input-box { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23f97316'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; background-size: 16px; padding-right: 36px; }
+        
+        .btn-primary { background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); color: white; border-radius: 16px; font-weight: 800; padding: 14px 20px; transition: all 0.3s ease; cursor: pointer; text-transform: uppercase; font-size: 12px; letter-spacing: 0.5px; box-shadow: 0 10px 20px -5px rgba(249, 115, 22, 0.4); border: 1px solid rgba(255,255,255,0.2); }
+        .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 15px 25px -5px rgba(249, 115, 22, 0.5); }
+        
+        .btn-secondary { background: white; color: #0f172a; border: 2px solid #e2e8f0; border-radius: 16px; font-weight: 800; padding: 12px 20px; transition: all 0.3s ease; cursor: pointer; text-transform: uppercase; font-size: 11px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+        .btn-secondary:hover { border-color: #cbd5e1; background: #f8fafc; transform: translateY(-2px); }
+
+        /* Tables & Scrollbars */
+        .log-table-container { max-height: 400px; overflow-y: auto; overflow-x: auto; border-radius: 16px; }
+        .custom-scrollbar::-webkit-scrollbar { width: 8px; height: 8px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 10px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; border: 2px solid #f1f5f9; }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
-        .log-table { width: 100%; border-collapse: collapse; min-width: 600px; }
-        .log-table th { font-size: 10px; color: #64748b; text-transform: uppercase; padding: 12px; border-bottom: 2px solid #f1f5f9; text-align: left; position: sticky; top: 0; background: white; z-index: 10; }
-        .log-table td { padding: 14px 12px; font-size: 13px; border-bottom: 1px solid #f8fafc; }
+        .log-table { width: 100%; border-collapse: separate; border-spacing: 0; min-width: 600px; }
+        .log-table th { font-size: 10px; color: #64748b; text-transform: uppercase; padding: 16px; border-bottom: 2px solid #e2e8f0; text-align: left; position: sticky; top: 0; background: rgba(255,255,255,0.9); backdrop-filter: blur(8px); z-index: 10; font-weight: 800; letter-spacing: 0.5px; }
+        .log-table td { padding: 16px; font-size: 13px; border-bottom: 1px solid #f1f5f9; font-weight: 600; color: #334155; }
+        .log-table tr:hover td { background-color: #f8fafc; }
         
-        .pulse-orange { animation: pulse-orange 2s infinite; }
-        @keyframes pulse-orange { 0% { box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(249, 115, 22, 0); } 100% { box-shadow: 0 0 0 0 rgba(249, 115, 22, 0); } }
+        @keyframes pulse-orange { 0% { box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.4), inset 0 0 20px rgba(249, 115, 22, 0.2); } 70% { box-shadow: 0 0 0 20px rgba(249, 115, 22, 0), inset 0 0 10px rgba(249, 115, 22, 0); } 100% { box-shadow: 0 0 0 0 rgba(249, 115, 22, 0), inset 0 0 20px rgba(249, 115, 22, 0.2); } }
 
-        /* Toast Notification */
-        #toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
-        .toast { background: white; border-radius: 12px; padding: 12px 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border-left: 4px solid #f97316; display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 600; animation: slideIn 0.3s ease-out forwards; }
+        /* Toast */
+        #toast-container { position: fixed; top: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 12px; pointer-events: none; }
+        .toast { background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); border-radius: 16px; padding: 16px 24px; box-shadow: 0 20px 40px -10px rgba(0,0,0,0.1); border-left: 6px solid #f97316; display: flex; align-items: center; gap: 12px; font-size: 14px; font-weight: 700; animation: slideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; color: #1e293b; pointer-events: auto; }
         .toast.success { border-color: #10b981; }
-        .toast.error { border-color: #ef4444; }
+        .toast.error { border-color: #f43f5e; }
         .toast.warning { border-color: #f59e0b; }
-        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes slideIn { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
     </style>
 </head>
 <body>
     <div id="toast-container"></div>
 
-    <!-- Header -->
-    <div class="flex flex-col md:flex-row justify-between items-center mb-6 px-2 gap-4">
-        <div class="flex flex-col md:flex-row items-center gap-4 text-center md:text-left">
-            <div class="w-12 h-12 bg-orange-500 rounded-2xl shadow-lg shadow-orange-500/30 flex items-center justify-center text-white font-black text-2xl mx-auto md:mx-0">F</div>
+    <!-- Header Update -->
+    <div class="flex flex-col md:flex-row justify-between items-center mb-8 px-4 gap-6 max-w-7xl mx-auto">
+        <div class="flex flex-col md:flex-row items-center gap-5 text-center md:text-left">
+            <div class="w-14 h-14 bg-gradient-to-br from-orange-400 to-orange-600 rounded-2xl shadow-xl shadow-orange-500/30 flex items-center justify-center text-white font-black text-3xl mx-auto md:mx-0 border border-orange-300">F</div>
             <div>
-                <h1 class="text-xl font-black text-[#0f172a]">FPOLY ATTENDANCE <span class="text-orange-500">PRO</span></h1>
-                <div class="flex items-center justify-center md:justify-start gap-2 mt-1 md:mt-0">
-                    <span id="era-status-dot" class="w-2 h-2 rounded-full bg-slate-300"></span>
-                    <span id="era-status-text" class="text-[9px] font-bold text-slate-400 uppercase">ĐANG KẾT NỐI...</span>
+                <h1 class="text-2xl font-black text-slate-800 tracking-tight">FPOLY ATTENDANCE <span class="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-rose-500">PRO</span></h1>
+                <div class="flex items-center justify-center md:justify-start gap-2 mt-1 bg-white px-3 py-1 rounded-full shadow-sm w-max mx-auto md:mx-0 border border-slate-100">
+                    <span id="era-status-dot" class="w-2.5 h-2.5 rounded-full bg-slate-300 animate-pulse"></span>
+                    <span id="era-status-text" class="text-[10px] font-extrabold text-slate-500 uppercase tracking-widest">ĐANG KHỞI TẠO</span>
                 </div>
             </div>
         </div>
-        <div class="text-center md:text-right">
-            <div class="text-4xl font-black text-orange-500" id="clock">00:00:00</div>
-            <div class="text-[10px] font-bold text-slate-400 uppercase" id="date-now">...</div>
+        <div class="text-center md:text-right bg-white px-6 py-3 rounded-2xl shadow-sm border border-slate-100">
+            <div class="text-4xl font-black text-slate-800 tracking-tighter" id="clock">00:00:00</div>
+            <div class="text-[10px] font-extrabold text-orange-500 uppercase tracking-widest mt-1" id="date-now">...</div>
         </div>
     </div>
 
     <!-- Main Grid -->
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
-        <!-- Cột Trái -->
-        <div class="lg:col-span-8 space-y-5">
-            <!-- Màn hình quét chính -->
-            <div class="card p-8 flex flex-col items-center justify-center relative min-h-[380px] bg-gradient-to-b from-orange-50 to-white border-orange-100" id="main-display-card">
-                <div class="avatar-circle" id="avatar-container">
-                    <i class="fa-solid fa-user-circle text-7xl text-slate-200" id="avatar-icon"></i>
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 max-w-7xl mx-auto">
+        
+        <!-- CỘT TRÁI (8 phần) -->
+        <div class="lg:col-span-8 space-y-6">
+            
+            <!-- Màn hình quét chính (DARK MODE THEME) -->
+            <div class="card-dark p-10 flex flex-col items-center justify-center min-h-[400px]" id="main-display-card">
+                <div class="avatar-circle glow-idle" id="avatar-container">
+                    <i class="fa-solid fa-expand text-7xl text-slate-400/50 transition-colors" id="avatar-icon"></i>
                 </div>
-                <div class="text-center">
-                    <h2 id="display-name" class="text-3xl md:text-4xl font-black text-slate-800 uppercase mb-1 transition-colors duration-300">SẴN SÀNG</h2>
-                    <p id="display-sub" class="text-slate-400 text-[10px] font-bold uppercase tracking-widest transition-colors duration-300">MỜI ĐẶT THẺ VÀO ĐẦU ĐỌC</p>
+                <div class="text-center z-10">
+                    <h2 id="display-name" class="text-4xl md:text-5xl font-black text-white uppercase mb-3 tracking-tighter transition-all duration-300">SẴN SÀNG</h2>
+                    <div class="inline-flex items-center gap-2 bg-slate-800/80 backdrop-blur-md px-4 py-1.5 rounded-full border border-slate-700">
+                        <span class="w-2 h-2 rounded-full bg-orange-500 animate-pulse" id="scan-status-dot"></span>
+                        <p id="display-sub" class="text-slate-300 text-[11px] font-bold uppercase tracking-widest">HÃY ĐẶT THẺ VÀO ĐẦU ĐỌC</p>
+                    </div>
                 </div>
-                <div id="scan-feedback" class="absolute top-4 right-4 md:top-6 md:right-8 text-[10px] font-black text-orange-300 uppercase">Status: Idle</div>
+                <!-- Background decoration -->
+                <div class="absolute top-0 right-0 p-6 opacity-20">
+                    <i class="fa-solid fa-fingerprint text-9xl text-white"></i>
+                </div>
             </div>
 
-            <!-- Panel Đăng Ký Sinh Viên Muốn Học -->
-            <div class="card p-5 md:p-7 border-l-8 border-orange-500 bg-white">
-                <div class="flex flex-col sm:flex-row justify-between gap-2 mb-4">
-                    <div class="flex items-center justify-center sm:justify-start gap-2">
-                        <i class="fa-solid fa-graduation-cap text-orange-500"></i>
-                        <h3 class="font-black text-sm uppercase text-slate-700">Đăng ký sinh viên muốn học</h3>
+            <!-- Panel Đăng Ký Sinh Viên -->
+            <div class="card p-6 md:p-8 border-t-4 border-orange-500 relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-orange-50 rounded-bl-full -z-10 opacity-50"></div>
+                <div class="flex flex-col sm:flex-row justify-between gap-3 mb-6">
+                    <div class="flex items-center justify-center sm:justify-start gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center text-orange-500 text-lg">
+                            <i class="fa-solid fa-address-card"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-black text-sm uppercase text-slate-800">Cấp mới thẻ sinh viên</h3>
+                            <p class="text-[10px] font-bold text-slate-400">Quét thẻ lạ để hệ thống tự động nhận UID</p>
+                        </div>
                     </div>
-                    <span id="registered-count-badge" class="text-[10px] font-bold text-orange-500 bg-orange-50 px-3 py-1 rounded-lg text-center mx-auto sm:mx-0 w-max">ĐÃ LƯU: 0 THẺ</span>
+                    <span id="registered-count-badge" class="text-[11px] font-black text-orange-600 bg-orange-100 border border-orange-200 px-4 py-2 rounded-xl text-center mx-auto sm:mx-0 w-max h-max flex items-center gap-2">
+                        <i class="fa-solid fa-database"></i> ĐÃ LƯU: 0
+                    </span>
                 </div>
                 
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 mb-4">
-                    <div class="space-y-1">
-                        <label class="text-[9px] font-black text-slate-400 uppercase">Mã thẻ UID</label>
-                        <input type="text" id="reg-uid" placeholder="Đang chờ thẻ..." class="input-box font-mono text-orange-600 font-bold bg-orange-50 border-orange-100" readonly>
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-5 mb-6">
+                    <div class="space-y-1.5">
+                        <label class="text-[10px] font-extrabold text-slate-500 uppercase tracking-wide">Mã thẻ (UID)</label>
+                        <input type="text" id="reg-uid" placeholder="Chờ quẹt thẻ..." class="input-box font-mono text-orange-500 bg-orange-50/50 border-orange-100 text-center tracking-wider" readonly>
                     </div>
-                    <div class="space-y-1 sm:col-span-1 md:col-span-1">
-                        <label class="text-[9px] font-black text-slate-400 uppercase">Họ và Tên</label>
-                        <input type="text" id="reg-name" placeholder="Nguyễn Văn A" class="input-box bg-white">
+                    <div class="space-y-1.5 sm:col-span-1 md:col-span-1">
+                        <label class="text-[10px] font-extrabold text-slate-500 uppercase tracking-wide">Họ và Tên</label>
+                        <input type="text" id="reg-name" placeholder="Nguyễn Văn A" class="input-box">
                     </div>
-                    <div class="space-y-1">
-                        <label class="text-[9px] font-black text-slate-400 uppercase">MSSV / ID</label>
-                        <input type="text" id="reg-mssv" placeholder="PS12345" class="input-box bg-white">
+                    <div class="space-y-1.5">
+                        <label class="text-[10px] font-extrabold text-slate-500 uppercase tracking-wide">MSSV</label>
+                        <input type="text" id="reg-mssv" placeholder="PS12345" class="input-box font-mono uppercase">
                     </div>
-                    <div class="space-y-1">
-                        <label class="text-[9px] font-black text-slate-400 uppercase">Lớp / Bộ phận</label>
-                        <input type="text" id="reg-class" placeholder="WD18301" class="input-box bg-white">
+                    <div class="space-y-1.5">
+                        <label class="text-[10px] font-extrabold text-slate-500 uppercase tracking-wide">Lớp học</label>
+                        <input type="text" id="reg-class" placeholder="WD18301" class="input-box uppercase">
                     </div>
-                    <div class="space-y-1">
-                        <label class="text-[9px] font-black text-slate-400 uppercase">Ca Học</label>
-                        <select id="reg-shift" class="input-box bg-white">
-                            <option value="Ca 1">Ca 1</option>
-                            <option value="Ca 2">Ca 2</option>
-                            <option value="Ca 3">Ca 3</option>
-                            <option value="Ca 4">Ca 4</option>
-                            <option value="Ca 5">Ca 5</option>
+                    <div class="space-y-1.5">
+                        <label class="text-[10px] font-extrabold text-slate-500 uppercase tracking-wide">Ca Học</label>
+                        <select id="reg-shift" class="input-box font-bold text-orange-600">
+                            <option value="Ca 1">Ca 1 (07:00)</option>
+                            <option value="Ca 2">Ca 2 (09:30)</option>
+                            <option value="Ca 3">Ca 3 (13:00)</option>
+                            <option value="Ca 4">Ca 4 (15:00)</option>
+                            <option value="Ca 5">Ca 5 (17:15)</option>
                         </select>
                     </div>
                 </div>
                 
-                <div class="flex flex-col sm:flex-row gap-3 mt-4">
-                    <button class="btn-save flex-1 flex items-center justify-center gap-2" onclick="window.saveNewMember()">
-                        <i class="fa-solid fa-cloud-arrow-up"></i> Lưu thông tin sinh viên
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <button class="btn-primary flex-1 flex items-center justify-center gap-2" onclick="window.saveNewMember()">
+                        <i class="fa-solid fa-floppy-disk text-lg"></i> Lưu Thông Tin Vào Hệ Thống
                     </button>
-                    <button class="btn-manage flex items-center justify-center gap-2 px-6" onclick="window.openManageMembersModal()">
-                        <i class="fa-solid fa-list"></i> Quản lý thẻ đã lưu
+                    <button class="btn-secondary flex items-center justify-center gap-2 px-6 text-slate-600 hover:text-slate-900" onclick="window.openManageMembersModal()">
+                        <i class="fa-solid fa-bars-staggered"></i> Quản lý thẻ
                     </button>
                 </div>
             </div>
 
             <!-- Bảng Lịch Sử -->
-            <div class="card p-5 md:p-6 w-full overflow-hidden">
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3">
-                    <h3 class="font-black text-sm text-slate-800 uppercase flex items-center gap-2">
-                        Nhật ký điểm danh
-                        <span id="current-shift-badge" class="bg-orange-100 text-orange-600 px-2 py-0.5 rounded text-[9px] whitespace-nowrap">CA --</span>
-                    </h3>
+            <div class="card p-6 md:p-8 w-full overflow-hidden">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-500">
+                            <i class="fa-solid fa-clock-rotate-left"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-black text-sm text-slate-800 uppercase">Nhật ký điểm danh</h3>
+                            <div class="flex items-center gap-2 mt-1">
+                                <span id="current-shift-badge" class="bg-gradient-to-r from-orange-500 to-orange-400 text-white px-2.5 py-0.5 rounded-md text-[9px] font-black whitespace-nowrap shadow-sm">CA --</span>
+                                <span class="text-[10px] text-slate-400 font-bold">Hôm nay</span>
+                            </div>
+                        </div>
+                    </div>
                     <div class="flex gap-2 w-full sm:w-auto">
-                        <button onclick="window.exportExcel()" class="flex-1 sm:flex-none bg-orange-50 text-orange-600 text-[10px] font-black px-4 py-2 rounded-xl hover:bg-orange-100 transition-colors">
+                        <button onclick="window.exportExcel()" class="flex-1 sm:flex-none bg-emerald-50 text-emerald-600 border border-emerald-100 text-[10px] font-black px-4 py-2.5 rounded-xl hover:bg-emerald-500 hover:text-white transition-all duration-300 shadow-sm">
                             <i class="fa-solid fa-file-excel mr-1"></i> XUẤT EXCEL
                         </button>
-                        <button onclick="window.clearLogs()" class="flex-1 sm:flex-none bg-rose-50 text-rose-600 text-[10px] font-black px-4 py-2 rounded-xl hover:bg-rose-100 transition-colors">
+                        <button onclick="window.clearLogs()" class="flex-1 sm:flex-none bg-rose-50 text-rose-600 border border-rose-100 text-[10px] font-black px-4 py-2.5 rounded-xl hover:bg-rose-500 hover:text-white transition-all duration-300 shadow-sm">
                             <i class="fa-solid fa-trash-can mr-1"></i> XÓA LỊCH SỬ
                         </button>
                     </div>
                 </div>
-                <div class="log-table-container pb-2 custom-scrollbar">
+                <div class="log-table-container custom-scrollbar rounded-xl border border-slate-100 bg-slate-50/50 p-1">
                     <table class="log-table">
                         <thead>
                             <tr>
-                                <th>THỜI GIAN</th>
+                                <th class="rounded-tl-lg">THỜI GIAN</th>
                                 <th>THÀNH VIÊN</th>
                                 <th>MSSV</th>
                                 <th>LỚP</th>
-                                <th>TRẠNG THÁI</th>
+                                <th class="rounded-tr-lg">TRẠNG THÁI</th>
                             </tr>
                         </thead>
-                        <tbody id="log-body"></tbody>
+                        <tbody id="log-body">
+                            <!-- Rows generated by JS -->
+                        </tbody>
                     </table>
                 </div>
             </div>
         </div>
 
-        <!-- Cột Phải -->
-        <div class="lg:col-span-4 space-y-5">
-            <div class="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-1 gap-3">
-                <div class="stat-card">
-                    <div><p class="text-[9px] font-black text-slate-400 uppercase">Sĩ số lớp (Ca này)</p><h4 class="text-3xl font-black text-orange-500" id="total-count">0</h4></div>
-                    <i class="fa-solid fa-users text-slate-200 text-2xl"></i>
+        <!-- CỘT PHẢI (4 phần) -->
+        <div class="lg:col-span-4 space-y-6">
+            <!-- Thống kê -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-1 gap-4">
+                <div class="stat-card stat-total">
+                    <div>
+                        <p class="text-[10px] font-extrabold text-orange-600/70 uppercase mb-1">Tổng Sĩ Số (Ca này)</p>
+                        <h4 class="text-4xl font-black text-orange-600" id="total-count">0</h4>
+                    </div>
+                    <div class="stat-icon-wrapper bg-orange-100 text-orange-500">
+                        <i class="fa-solid fa-users"></i>
+                    </div>
                 </div>
-                <div class="stat-card border-l-4 border-emerald-500">
-                    <div><p class="text-[9px] font-black text-emerald-500 uppercase">Hiện diện (Ca này)</p><h4 class="text-3xl font-black" id="present-count">0</h4></div>
-                    <i class="fa-solid fa-user-check text-emerald-100 text-2xl"></i>
+                <div class="stat-card stat-present">
+                    <div>
+                        <p class="text-[10px] font-extrabold text-emerald-600/70 uppercase mb-1">Đã có mặt</p>
+                        <h4 class="text-4xl font-black text-emerald-600" id="present-count">0</h4>
+                    </div>
+                    <div class="stat-icon-wrapper bg-emerald-100 text-emerald-500">
+                        <i class="fa-solid fa-user-check"></i>
+                    </div>
                 </div>
-                <div class="stat-card border-l-4 border-rose-500">
-                    <div><p class="text-[9px] font-black text-rose-500 uppercase">Vắng mặt (Ca này)</p><h4 class="text-3xl font-black" id="absent-count">0</h4></div>
-                    <i class="fa-solid fa-user-xmark text-rose-100 text-2xl"></i>
+                <div class="stat-card stat-absent">
+                    <div>
+                        <p class="text-[10px] font-extrabold text-rose-600/70 uppercase mb-1">Vắng mặt</p>
+                        <h4 class="text-4xl font-black text-rose-600" id="absent-count">0</h4>
+                    </div>
+                    <div class="stat-icon-wrapper bg-rose-100 text-rose-500">
+                        <i class="fa-solid fa-user-xmark"></i>
+                    </div>
                 </div>
             </div>
 
-            <div class="card p-5">
-                <h4 class="text-[10px] font-black text-slate-400 uppercase mb-4">Phân tích theo ca (Hôm nay)</h4>
-                <div class="relative w-full h-[200px]">
+            <!-- Biểu đồ -->
+            <div class="card p-6">
+                <div class="flex items-center gap-2 mb-6">
+                    <i class="fa-solid fa-chart-simple text-orange-500"></i>
+                    <h4 class="text-[11px] font-black text-slate-700 uppercase">Phân tích hiện diện (Ngày)</h4>
+                </div>
+                <div class="relative w-full h-[220px]">
                     <canvas id="attendanceChart"></canvas>
                 </div>
             </div>
 
-            <div class="card p-5 space-y-3 bg-slate-50 border-orange-100">
-                <div class="flex items-center justify-between text-[10px] font-bold">
-                    <span>ESP32 HARDWARE</span>
-                    <span id="device-dot" class="w-2 h-2 rounded-full bg-emerald-500"></span>
+            <!-- Console phần cứng -->
+            <div class="card p-6 bg-slate-800 text-slate-300 relative overflow-hidden">
+                <div class="absolute -right-4 -top-4 text-slate-700 opacity-20 text-6xl">
+                    <i class="fa-solid fa-microchip"></i>
                 </div>
-                <div class="bg-white p-3 rounded-xl border border-slate-200 text-[11px] break-all">
-                    <p class="text-slate-400 font-black uppercase text-[8px] mb-1">Trạng thái Database</p>
-                    <p id="cloud-status" class="font-bold text-slate-700">Đang khởi tạo...</p>
+                <div class="flex items-center justify-between text-[11px] font-black uppercase mb-4 relative z-10">
+                    <span class="text-slate-100"><i class="fa-solid fa-server text-emerald-400 mr-2"></i>System Status</span>
+                    <span id="device-dot" class="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.8)]"></span>
                 </div>
-                <button onclick="location.reload()" class="w-full py-3 bg-white border border-slate-200 rounded-xl text-[10px] font-black hover:bg-slate-100 transition-all text-orange-500">LÀM MỚI HỆ THỐNG</button>
+                <div class="bg-slate-900 p-4 rounded-xl border border-slate-700 text-[12px] font-mono mb-4 relative z-10">
+                    <p class="text-slate-500 uppercase text-[9px] font-sans font-bold mb-1">Database Endpoint</p>
+                    <p id="cloud-status" class="font-bold text-emerald-400">Initializing...</p>
+                </div>
+                <button onclick="location.reload()" class="w-full py-3.5 bg-slate-700 hover:bg-slate-600 rounded-xl text-[11px] font-black text-white transition-all uppercase tracking-widest relative z-10">
+                    <i class="fa-solid fa-rotate-right mr-2"></i>Làm mới kết nối
+                </button>
             </div>
         </div>
     </div>
     
-    <!-- Footer V1.x.x -->
-    <div class="mt-8 mb-4 border-t border-slate-200 pt-6 pb-2 text-center max-w-7xl mx-auto">
-        <p class="text-sm font-black text-slate-500 uppercase tracking-widest mb-2"><i class="fa-solid fa-code-merge mr-1"></i> Phiên bản V1.5.0 (Advanced Management)</p>
-        <div class="inline-block text-left text-[11px] text-slate-400 bg-white px-6 py-4 rounded-xl border border-slate-100 shadow-sm max-w-2xl mx-2">
-            <p class="font-bold text-slate-500 mb-2">Lỗi đã Fix / Tính năng mới cập nhật:</p>
-            <ul class="list-disc pl-4 space-y-1.5">
-                <li><span class="font-semibold text-slate-600">Popup Quản lý thẻ:</span> Thay thế chức năng Xóa thẻ mù quáng bằng cửa sổ Popup hiển thị toàn bộ danh sách thẻ đã đăng ký để dễ dàng chọn và Xóa từng thẻ cụ thể.</li>
-                <li><span class="font-semibold text-slate-600">Đồng bộ Ca học ESP32:</span> Nhận trực tiếp dữ liệu V9 từ ESP32 để gán ca tự động cho các thẻ gốc.</li>
-                <li><span class="font-semibold text-slate-600">Sĩ số linh hoạt theo Ca:</span> Tự động đếm thẻ gốc trong ESP32 + thẻ được đăng ký trên Web thuộc đúng Ca đang diễn ra.</li>
-                <li><span class="font-semibold text-slate-600">Nhận diện Vào/Ra lớp:</span> Quét VÀO hiện Xanh ngọc, quét RA hiện Đỏ với icon khác biệt. Thẻ lạ cảnh báo Cam.</li>
-            </ul>
-        </div>
+    <!-- Footer -->
+    <div class="mt-12 mb-6 border-t border-slate-200/60 pt-8 pb-4 text-center max-w-7xl mx-auto px-4">
+        <p class="text-sm font-black text-slate-400 uppercase tracking-widest mb-3 flex items-center justify-center gap-2">
+            <i class="fa-solid fa-code-merge text-orange-500"></i> Hệ Thống Điểm Danh Fpoly <span class="bg-slate-200 text-slate-600 px-2 py-0.5 rounded text-[10px]">V2.0.0</span>
+        </p>
+        <p class="text-[11px] font-semibold text-slate-400 max-w-2xl mx-auto">
+            Giao diện được thiết kế lại theo phong cách Glassmorphism hiện đại. Màu sắc chuẩn nhận diện thương hiệu FPT Polytechnic. Hoạt động mượt mà trên cả PC và Mobile. Tích hợp lưu trữ Cloud thời gian thực.
+        </p>
     </div>
 
     <!-- MODAL QUẢN LÝ THẺ -->
-    <div id="manage-members-modal" class="fixed inset-0 bg-slate-900/60 z-50 hidden flex items-center justify-center p-4 backdrop-blur-sm transition-opacity">
-        <div class="bg-white rounded-3xl w-full max-w-3xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
-            <div class="px-6 py-5 border-b border-slate-100 flex justify-between items-center bg-slate-50">
-                <h3 class="font-black text-slate-800 uppercase flex items-center gap-2"><i class="fa-solid fa-list-check text-teal-600"></i> Danh sách Thẻ đã đăng ký</h3>
-                <button onclick="window.closeManageMembersModal()" class="text-slate-400 hover:text-rose-500 transition-colors"><i class="fa-solid fa-xmark text-xl"></i></button>
+    <div id="manage-members-modal" class="fixed inset-0 bg-slate-900/70 z-[100] hidden flex items-center justify-center p-4 backdrop-blur-sm transition-opacity">
+        <div class="bg-white rounded-[28px] w-full max-w-4xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh] border border-white">
+            <div class="px-8 py-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                <h3 class="font-black text-slate-800 uppercase text-base flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-lg bg-teal-100 text-teal-600 flex items-center justify-center"><i class="fa-solid fa-list-check"></i></div>
+                    Danh sách sinh viên đã lưu
+                </h3>
+                <button onclick="window.closeManageMembersModal()" class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 hover:bg-rose-100 hover:text-rose-500 transition-colors flex items-center justify-center"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
             <div class="p-6 overflow-y-auto custom-scrollbar flex-grow bg-white">
-                <table class="w-full text-left border-collapse min-w-[500px]">
+                <table class="w-full text-left border-collapse min-w-[600px]">
                     <thead>
                         <tr>
-                            <th class="text-[10px] font-bold text-slate-400 uppercase pb-3 border-b border-slate-100 pl-2">Mã Thẻ (UID)</th>
-                            <th class="text-[10px] font-bold text-slate-400 uppercase pb-3 border-b border-slate-100">Họ và Tên</th>
-                            <th class="text-[10px] font-bold text-slate-400 uppercase pb-3 border-b border-slate-100">MSSV</th>
-                            <th class="text-[10px] font-bold text-slate-400 uppercase pb-3 border-b border-slate-100">Ca Học</th>
-                            <th class="text-[10px] font-bold text-slate-400 uppercase pb-3 border-b border-slate-100 text-right pr-2">Thao tác</th>
+                            <th class="text-[10px] font-extrabold text-slate-400 uppercase pb-4 border-b-2 border-slate-100 pl-4">Mã Thẻ (UID)</th>
+                            <th class="text-[10px] font-extrabold text-slate-400 uppercase pb-4 border-b-2 border-slate-100">Họ và Tên</th>
+                            <th class="text-[10px] font-extrabold text-slate-400 uppercase pb-4 border-b-2 border-slate-100">MSSV</th>
+                            <th class="text-[10px] font-extrabold text-slate-400 uppercase pb-4 border-b-2 border-slate-100">Ca Học</th>
+                            <th class="text-[10px] font-extrabold text-slate-400 uppercase pb-4 border-b-2 border-slate-100 text-right pr-4">Thao tác</th>
                         </tr>
                     </thead>
                     <tbody id="modal-members-list">
-                        <!-- JS sẽ render danh sách vào đây -->
+                        <!-- JS renders here -->
                     </tbody>
                 </table>
             </div>
-            <div class="px-6 py-4 bg-slate-50 border-t border-slate-100 text-right">
-                <button onclick="window.closeManageMembersModal()" class="bg-slate-800 text-white text-xs font-bold uppercase tracking-wider px-6 py-2.5 rounded-xl hover:bg-slate-900 transition-colors">Đóng</button>
+            <div class="px-8 py-5 bg-slate-50 border-t border-slate-100 flex justify-between items-center">
+                <p class="text-[11px] font-bold text-slate-400">Dữ liệu được đồng bộ an toàn.</p>
+                <button onclick="window.closeManageMembersModal()" class="bg-slate-800 text-white text-xs font-bold uppercase tracking-wider px-8 py-3 rounded-xl hover:bg-slate-900 shadow-lg shadow-slate-900/20 transition-all">Hoàn tất</button>
             </div>
         </div>
     </div>
 
-    <!-- Firebase & Logic -->
+    <!-- Firebase & Logic App -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // --- CẤU HÌNH THỜI GIAN CA HỌC & SĨ SỐ GỐC ---
-        const BASE_STUDENTS_ESP = 15; // Số sinh viên gốc mặc định nếu không có trong DB gốc
+        const BASE_STUDENTS_ESP = 15; 
         const SHIFTS = [
             { id: "ca1", name: "Ca 1", start: "07:00", end: "09:15", index: 0 },
             { id: "ca2", name: "Ca 2", start: "09:30", end: "11:45", index: 1 },
@@ -270,19 +343,34 @@
             { uid: "A1B2C3D4", shift: "Ca 1" }
         ];
 
-        // Khởi tạo Chart
+        // Khởi tạo Chart (Giao diện mới)
         let ctx = document.getElementById('attendanceChart').getContext('2d');
+        // Tạo gradient cho cột biểu đồ
+        let gradientOrange = ctx.createLinearGradient(0, 0, 0, 200);
+        gradientOrange.addColorStop(0, '#f97316');
+        gradientOrange.addColorStop(1, '#fdba74');
+
         let attendanceChart = new Chart(ctx, {
             type: 'bar',
             data: {
                 labels: ['Ca 1', 'Ca 2', 'Ca 3', 'Ca 4', 'Ca 5'],
-                datasets: [{ label: 'Hiện diện', data: [0,0,0,0,0], backgroundColor: '#f97316', borderRadius: 4 }]
+                datasets: [{ 
+                    label: 'Hiện diện', 
+                    data: [0,0,0,0,0], 
+                    backgroundColor: gradientOrange, 
+                    borderRadius: 6,
+                    borderSkipped: false,
+                    barThickness: 24
+                }]
             },
             options: { 
                 responsive: true, 
                 maintainAspectRatio: false, 
                 plugins: { legend: { display: false } }, 
-                scales: { y: { display: false }, x: { grid: { display: false }, ticks: { font: { size: 8 } } } } 
+                scales: { 
+                    y: { display: true, grid: { color: '#f1f5f9', drawBorder: false }, ticks: { font: { family: 'Inter', size: 10 }, color: '#94a3b8', stepSize: 5 } }, 
+                    x: { grid: { display: false }, ticks: { font: { family: 'Inter', size: 10, weight: 'bold' }, color: '#64748b' } } 
+                } 
             }
         });
 
@@ -301,7 +389,7 @@
                 isCloudActive = true;
             }
         } catch (error) {
-            console.warn("Chạy ở chế độ nội bộ (Local Storage).");
+            console.warn("Chạy ở chế độ nội bộ.");
         }
 
         let membersDb = JSON.parse(localStorage.getItem('era_members')) || {}; 
@@ -327,9 +415,9 @@
             if (type === 'warning') icon = 'triangle-exclamation';
             
             toast.className = `toast ${type}`;
-            toast.innerHTML = `<i class="fa-solid fa-${icon}"></i> ${msg}`;
+            toast.innerHTML = `<div class="w-8 h-8 rounded-full bg-${type === 'warning' ? 'orange' : (type === 'error' ? 'rose' : 'emerald')}-100 flex items-center justify-center text-${type === 'warning' ? 'orange' : (type === 'error' ? 'rose' : 'emerald')}-500"><i class="fa-solid fa-${icon} text-lg"></i></div> ${msg}`;
             container.appendChild(toast);
-            setTimeout(() => { toast.remove(); }, 3000);
+            setTimeout(() => { toast.remove(); }, 3500);
         }
 
         // --- AUTHENTICATION ---
@@ -349,19 +437,19 @@
             onAuthStateChanged(auth, (user) => {
                 currentUser = user;
                 if (user) {
-                    document.getElementById('cloud-status').innerText = "Đã kết nối Cloud (Online)";
-                    document.getElementById('cloud-status').className = "font-bold text-emerald-600";
+                    document.getElementById('cloud-status').innerText = "Online Database Connected";
+                    document.getElementById('cloud-status').className = "font-bold text-emerald-400";
                     loadCloudData();
                 }
             });
             initAuth();
         } else {
-            setupLocalMode("Lưu trữ nội bộ (Trình duyệt)");
+            setupLocalMode("Local Storage (Offline)");
         }
 
         function setupLocalMode(message) {
             document.getElementById('cloud-status').innerText = message;
-            document.getElementById('cloud-status').className = "font-bold text-orange-500";
+            document.getElementById('cloud-status').className = "font-bold text-amber-400";
             processLogsAndRender();
         }
 
@@ -372,10 +460,8 @@
             onSnapshot(membersRef, (snapshot) => {
                 membersDb = {};
                 snapshot.forEach(doc => { membersDb[doc.id] = doc.data(); });
-                document.getElementById('registered-count-badge').innerText = `ĐÃ LƯU: ${Object.keys(membersDb).length} THẺ WEB`;
+                document.getElementById('registered-count-badge').innerHTML = `<i class="fa-solid fa-database"></i> ĐÃ LƯU: ${Object.keys(membersDb).length}`;
                 processLogsAndRender();
-                
-                // Nếu modal đang mở, cập nhật lại danh sách ngay lập tức
                 if(!document.getElementById('manage-members-modal').classList.contains('hidden')) {
                     window.renderManageMembersList();
                 }
@@ -409,20 +495,20 @@
             
             document.getElementById('current-shift-badge').innerText = currentShift ? currentShift.name.toUpperCase() : "NGOÀI CA";
             
-            // Tính sĩ số
             let baseEspForThisShift = 0;
             let webRegisteredForThisShift = 0;
 
             if (currentShift) {
                 baseEspForThisShift = ESP32_STUDENTS.filter(s => s.shift === currentShift.name).length;
-                if(baseEspForThisShift === 0) baseEspForThisShift = BASE_STUDENTS_ESP; // Fallback
+                if(baseEspForThisShift === 0) baseEspForThisShift = BASE_STUDENTS_ESP; 
                 webRegisteredForThisShift = Object.values(membersDb).filter(m => m.shift === currentShift.name).length;
             }
             
             let totalStudentsForShift = baseEspForThisShift + webRegisteredForThisShift;
             
+            // Effect update numbers
             document.getElementById('total-count').innerText = totalStudentsForShift;
-            document.getElementById('registered-count-badge').innerText = `ĐÃ LƯU: ${Object.keys(membersDb).length} THẺ WEB`;
+            document.getElementById('registered-count-badge').innerHTML = `<i class="fa-solid fa-database"></i> ĐÃ LƯU: ${Object.keys(membersDb).length}`;
 
             let currentShiftLogs = [];
             let presentInCurrentShift = new Set();
@@ -438,15 +524,19 @@
             });
 
             const tbody = document.getElementById('log-body');
-            tbody.innerHTML = currentShiftLogs.map(l => `
-                <tr class="hover:bg-slate-50 transition-colors">
-                    <td class="font-mono text-[11px] text-slate-400 font-bold whitespace-nowrap">${l.time}</td>
-                    <td class="font-black text-slate-700 uppercase min-w-[120px]">${l.name}</td>
-                    <td class="text-slate-500 font-bold whitespace-nowrap">${l.mssv}</td>
-                    <td class="text-slate-400 min-w-[100px]">${l.class} ${l.shiftReg ? `<span class="text-[9px] text-blue-500 bg-blue-50 px-1.5 py-0.5 ml-1 rounded whitespace-nowrap">${l.shiftReg}</span>` : ''}</td>
-                    <td class="whitespace-nowrap"><span class="px-3 py-1 rounded-full text-[10px] font-black ${l.color}">${l.status}</span></td>
-                </tr>
-            `).join('');
+            if (currentShiftLogs.length === 0) {
+                 tbody.innerHTML = `<tr><td colspan="5" class="py-12 text-center opacity-40"><i class="fa-solid fa-inbox text-5xl mb-3 block text-slate-300"></i><span class="text-xs font-bold uppercase tracking-widest text-slate-500">Chưa có người điểm danh ca này</span></td></tr>`;
+            } else {
+                tbody.innerHTML = currentShiftLogs.map(l => `
+                    <tr class="hover:bg-orange-50/30 transition-colors">
+                        <td class="font-mono text-[11px] text-slate-400 font-bold whitespace-nowrap"><i class="fa-regular fa-clock mr-1 text-slate-300"></i> ${l.time}</td>
+                        <td class="font-black text-slate-800 uppercase min-w-[120px]">${l.name}</td>
+                        <td class="text-slate-500 font-bold whitespace-nowrap">${l.mssv}</td>
+                        <td class="text-slate-500 font-semibold min-w-[100px]">${l.class} ${l.shiftReg ? `<span class="text-[9px] font-black text-orange-600 bg-orange-100 px-2 py-0.5 ml-2 rounded-md whitespace-nowrap border border-orange-200">${l.shiftReg}</span>` : ''}</td>
+                        <td class="whitespace-nowrap"><span class="px-4 py-1.5 rounded-lg text-[10px] font-black tracking-widest border ${l.status === 'VÀO LỚP' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : (l.status === 'RA LỚP' ? 'bg-rose-50 text-rose-600 border-rose-100' : 'bg-orange-50 text-orange-600 border-orange-100')}">${l.status}</span></td>
+                    </tr>
+                `).join('');
+            }
 
             const present = presentInCurrentShift.size;
             document.getElementById('present-count').innerText = present;
@@ -475,8 +565,9 @@
                 eConfig.mssv = c.realtime_configs[2];
                 eConfig.class = c.realtime_configs[3];
                 eConfig.shift = c.realtime_configs[4];
-                document.getElementById('era-status-dot').className = "w-2 h-2 rounded-full bg-emerald-500";
-                document.getElementById('era-status-text').innerText = "HỆ THỐNG TRỰC TUYẾN";
+                document.getElementById('era-status-dot').className = "w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.8)]";
+                document.getElementById('era-status-text').innerText = "SYSTEM LIVE";
+                document.getElementById('era-status-text').classList.replace('text-slate-500', 'text-emerald-600');
             },
             onValues: (v) => {
                 const uidVal = v[eConfig.uid?.id]?.value;
@@ -501,6 +592,8 @@
             const subEl = document.getElementById('display-sub');
             const avatar = document.getElementById('avatar-container');
             const avatarIcon = document.getElementById('avatar-icon');
+            const scanStatusDot = document.getElementById('scan-status-dot');
+            const feedback = document.getElementById('scan-feedback');
             
             const uid = data.uid;
             const cloudMember = membersDb[uid];
@@ -518,17 +611,22 @@
 
             document.getElementById('reg-uid').value = uid;
 
-            nameEl.classList.remove('text-orange-500', 'text-slate-800', 'text-rose-600', 'text-emerald-600');
-            avatar.classList.remove('pulse-orange');
+            // Reset classes
+            nameEl.className = "text-4xl md:text-5xl font-black uppercase mb-3 tracking-tighter transition-all duration-300";
+            avatar.className = "avatar-circle";
+            scanStatusDot.className = "w-2 h-2 rounded-full animate-pulse";
+            feedback.innerText = "Status: Scanned";
 
             if (!finalName) {
-                // THẺ LẠ
-                nameEl.innerText = "THẺ CHƯA ĐĂNG KÝ";
+                // TÌNH HUỐNG 1: THẺ LẠ
+                nameEl.innerText = "THẺ CHƯA LƯU";
                 nameEl.classList.add('text-orange-500');
                 subEl.innerText = "UID: " + uid;
-                avatar.style.borderColor = "#f97316";
-                avatar.classList.add('pulse-orange');
-                avatarIcon.className = "fa-solid fa-user-plus text-7xl text-orange-400";
+                subEl.classList.replace('text-slate-300', 'text-orange-300');
+                
+                avatar.classList.add('glow-unknown');
+                avatarIcon.className = "fa-solid fa-fingerprint text-7xl text-orange-400";
+                scanStatusDot.classList.add('bg-orange-500');
                 
                 window.showToast(`Phát hiện thẻ mới: ${uid}`, 'warning');
                 
@@ -537,8 +635,9 @@
                 document.getElementById('reg-class').value = "";
 
             } else {
-                // THÀNH VIÊN ĐÃ ĐĂNG KÝ
+                // TÌNH HUỐNG 2: THÀNH VIÊN ĐÃ ĐĂNG KÝ
                 nameEl.innerText = finalName;
+                subEl.classList.replace('text-slate-300', 'text-emerald-300');
                 
                 let isCheckOut = false;
                 if (currentShift) {
@@ -549,18 +648,22 @@
                 }
 
                 let statusStr = isCheckOut ? "RA LỚP" : "VÀO LỚP";
-                let colorClass = isCheckOut ? "bg-rose-50 text-rose-500" : "bg-emerald-50 text-emerald-600";
+                let colorClass = isCheckOut ? "bg-rose-50 text-rose-500 border-rose-100" : "bg-emerald-50 text-emerald-600 border-emerald-100";
 
                 if (isCheckOut) {
-                    nameEl.classList.add('text-rose-600');
+                    nameEl.classList.add('text-rose-500');
                     subEl.innerText = "TẠM BIỆT! ĐÃ ĐIỂM DANH RA LỚP";
-                    avatar.style.borderColor = "#f43f5e";
+                    subEl.className = "text-[11px] font-black uppercase tracking-widest text-rose-300";
+                    avatar.classList.add('glow-out');
                     avatarIcon.className = "fa-solid fa-person-walking-arrow-right text-7xl text-rose-500";
+                    scanStatusDot.classList.add('bg-rose-500');
                 } else {
-                    nameEl.classList.add('text-emerald-600');
+                    nameEl.classList.add('text-emerald-400');
                     subEl.innerText = "XIN CHÀO! ĐÃ ĐIỂM DANH VÀO LỚP";
-                    avatar.style.borderColor = "#10b981";
-                    avatarIcon.className = "fa-solid fa-user-check text-7xl text-emerald-500";
+                    subEl.className = "text-[11px] font-black uppercase tracking-widest text-emerald-300";
+                    avatar.classList.add('glow-in');
+                    avatarIcon.className = "fa-solid fa-user-shield text-7xl text-emerald-400";
+                    scanStatusDot.classList.add('bg-emerald-400');
                 }
 
                 let logEntry = {
@@ -592,11 +695,13 @@
             setTimeout(() => {
                 if(lastUid === uid) {
                     nameEl.innerText = "SẴN SÀNG";
-                    nameEl.className = "text-3xl md:text-4xl font-black text-slate-800 uppercase mb-1 transition-colors duration-300";
-                    subEl.innerText = "MỜI ĐẶT THẺ VÀO ĐẦU ĐỌC";
-                    avatar.style.borderColor = "#fff";
-                    avatar.classList.remove('pulse-orange');
-                    avatarIcon.className = "fa-solid fa-user-circle text-7xl text-slate-200";
+                    nameEl.className = "text-4xl md:text-5xl font-black text-white uppercase mb-3 tracking-tighter transition-all duration-300";
+                    subEl.innerText = "HÃY ĐẶT THẺ VÀO ĐẦU ĐỌC";
+                    subEl.className = "text-slate-300 text-[11px] font-bold uppercase tracking-widest";
+                    avatar.className = "avatar-circle glow-idle";
+                    avatarIcon.className = "fa-solid fa-expand text-7xl text-slate-400/50 transition-colors";
+                    scanStatusDot.className = "w-2 h-2 rounded-full bg-orange-500 animate-pulse";
+                    feedback.innerText = "Status: Idle";
                 }
             }, 8000);
         }
@@ -608,7 +713,7 @@
             const clazz = document.getElementById('reg-class').value;
             const shift = document.getElementById('reg-shift').value;
 
-            if(!uid || uid === "Đang chờ thẻ...") return window.showToast("Quét thẻ lạ trước khi lưu!", "warning");
+            if(!uid || uid === "Đang chờ thẻ...") return window.showToast("Cần quẹt thẻ để lấy mã UID!", "warning");
             if(!name) return window.showToast("Cần nhập Họ và Tên!", "warning");
 
             let memberData = { name: name, mssv: mssv || "---", class: clazz || "---", shift: shift, registeredAt: Date.now() };
@@ -617,14 +722,14 @@
                 try {
                     const memberRef = doc(db, 'artifacts', appId, 'public', 'data', 'members', uid);
                     await setDoc(memberRef, memberData);
-                    window.showToast(`Đã lưu Cloud thành công: ${name}`);
+                    window.showToast(`Đã cấp thẻ mới cho: ${name}`);
                 } catch (error) {
-                    window.showToast("Lỗi khi lưu lên Cloud!", "error");
+                    window.showToast("Lỗi khi lưu dữ liệu đám mây!", "error");
                 }
             } else {
                 membersDb[uid] = memberData;
                 saveToLocal();
-                window.showToast(`Đã lưu nội bộ thành công: ${name}`);
+                window.showToast(`Đã lưu thẻ Offline: ${name}`);
                 processLogsAndRender();
             }
             
@@ -635,64 +740,59 @@
             lastUid = ""; 
         };
 
-        // Mở Modal Quản Lý Thẻ
         window.openManageMembersModal = function() {
             window.renderManageMembersList();
             document.getElementById('manage-members-modal').classList.remove('hidden');
         };
 
-        // Đóng Modal Quản Lý Thẻ
         window.closeManageMembersModal = function() {
             document.getElementById('manage-members-modal').classList.add('hidden');
         };
 
-        // Render Danh sách Thẻ trong Modal
         window.renderManageMembersList = function() {
             const tbody = document.getElementById('modal-members-list');
             const membersList = Object.keys(membersDb).map(uid => ({ uid, ...membersDb[uid] }));
             
             if (membersList.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="py-12 text-center text-slate-400 text-xs font-bold uppercase"><i class="fa-solid fa-folder-open text-4xl mb-3 block text-slate-300"></i>Chưa có sinh viên nào được lưu trên Web</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="5" class="py-16 text-center text-slate-300 text-xs font-bold uppercase"><i class="fa-solid fa-box-open text-5xl mb-4 block opacity-50"></i>Hệ thống chưa có thẻ nào được cấp</td></tr>`;
                 return;
             }
             
             tbody.innerHTML = membersList.map(m => `
-                <tr class="hover:bg-slate-50 transition-colors border-b border-slate-100">
-                    <td class="py-4 font-mono text-[11px] font-bold text-orange-500 pl-2">${m.uid}</td>
-                    <td class="py-4 text-xs font-black text-slate-700 uppercase">${m.name}</td>
-                    <td class="py-4 text-[11px] font-bold text-slate-500">${m.mssv}</td>
-                    <td class="py-4 text-[11px] font-bold text-slate-500">
-                        <span class="bg-blue-50 text-blue-500 px-2 py-1 rounded text-[9px] whitespace-nowrap">${m.shift || '---'}</span>
+                <tr class="hover:bg-orange-50/30 transition-colors border-b border-slate-50 group">
+                    <td class="py-5 font-mono text-[11px] font-bold text-orange-500 pl-4">${m.uid}</td>
+                    <td class="py-5 text-[13px] font-black text-slate-800 uppercase">${m.name}</td>
+                    <td class="py-5 text-[11px] font-extrabold text-slate-500">${m.mssv}</td>
+                    <td class="py-5 text-[11px] font-bold text-slate-500">
+                        <span class="bg-slate-100 text-slate-600 px-2.5 py-1 rounded-md text-[9px] font-black uppercase whitespace-nowrap border border-slate-200">${m.shift || '---'}</span>
                     </td>
-                    <td class="py-4 text-right pr-2">
-                        <button onclick="window.deleteMember('${m.uid}')" class="bg-rose-50 text-rose-500 hover:bg-rose-500 hover:text-white px-3 py-1.5 rounded-lg text-[10px] font-black transition-colors whitespace-nowrap">
-                            <i class="fa-solid fa-trash-can"></i> XÓA
+                    <td class="py-5 text-right pr-4">
+                        <button onclick="window.deleteMember('${m.uid}')" class="bg-white text-rose-500 border border-rose-200 hover:bg-rose-500 hover:text-white hover:border-rose-500 px-3 py-2 rounded-xl text-[10px] font-black transition-all duration-300 shadow-sm opacity-50 group-hover:opacity-100 whitespace-nowrap">
+                            <i class="fa-solid fa-trash-can mr-1"></i> XÓA
                         </button>
                     </td>
                 </tr>
             `).join('');
         };
 
-        // Xóa một thẻ cụ thể (Hỗ trợ từ Modal)
         window.deleteMember = async function(uidToDelete) {
-            if(!confirm("Bạn có chắc chắn muốn xóa sinh viên này khỏi hệ thống?")) return;
+            if(!confirm("Thu hồi vĩnh viễn thẻ này khỏi hệ thống?")) return;
 
             if (isCloudActive && currentUser) {
                 try {
                     await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'members', uidToDelete));
-                    window.showToast("Đã xóa thẻ khỏi Cloud!");
+                    window.showToast("Đã thu hồi thẻ Cloud!");
                 } catch (error) {
                     window.showToast("Lỗi khi xóa thẻ!", "error");
                 }
             } else {
                 delete membersDb[uidToDelete];
                 saveToLocal();
-                window.showToast("Đã xóa thẻ cục bộ!");
+                window.showToast("Đã thu hồi thẻ Offline!");
                 processLogsAndRender();
-                window.renderManageMembersList(); // Update modal list
+                window.renderManageMembersList(); 
             }
 
-            // Nếu thẻ vừa xóa đang nằm chờ trong ô đăng ký thì reset ô đó
             if (document.getElementById('reg-uid').value === uidToDelete) {
                 document.getElementById('reg-uid').value = "Đang chờ thẻ...";
                 document.getElementById('reg-name').value = "";
@@ -703,16 +803,16 @@
         };
 
         window.clearLogs = async function() {
-            if (logsDb.length === 0) return window.showToast("Không có dữ liệu để xóa!", "warning");
+            if (logsDb.length === 0) return window.showToast("Nhật ký đang trống!", "warning");
 
-            if(confirm("Xóa toàn bộ lịch sử điểm danh? Quá trình này không thể hoàn tác!")) {
-                window.showToast("Đang xóa dữ liệu...");
+            if(confirm("Làm sạch toàn bộ nhật ký điểm danh? Lưu ý: Hành động này không thể khôi phục.")) {
+                window.showToast("Đang dọn dẹp hệ thống...");
                 if (isCloudActive && currentUser) {
                     try {
                         for (let log of logsDb) {
                             await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'attendance_logs', log.id));
                         }
-                        window.showToast("Đã dọn dẹp lịch sử trên Cloud!");
+                        window.showToast("Đã xóa sạch nhật ký Cloud!");
                     } catch (error) {
                         window.showToast("Có lỗi xảy ra khi xóa!", "error");
                     }
@@ -720,13 +820,13 @@
                     logsDb = [];
                     saveToLocal();
                     processLogsAndRender();
-                    window.showToast("Đã dọn dẹp lịch sử cục bộ!");
+                    window.showToast("Đã xóa sạch nhật ký Offline!");
                 }
             }
         };
 
         window.exportExcel = function() {
-            if (logsDb.length === 0) return window.showToast("Không có dữ liệu để xuất!", "warning");
+            if (logsDb.length === 0) return window.showToast("Chưa có dữ liệu điểm danh để xuất!", "warning");
             
             const exportData = logsDb.map((l, index) => ({
                 "STT": index + 1,
@@ -741,11 +841,11 @@
             }));
 
             const ws = XLSX.utils.json_to_sheet(exportData);
-            ws['!cols'] = [ {wch: 5}, {wch: 15}, {wch: 12}, {wch: 15}, {wch: 15}, {wch: 25}, {wch: 15}, {wch: 15}, {wch: 15} ];
+            ws['!cols'] = [ {wch: 5}, {wch: 15}, {wch: 12}, {wch: 15}, {wch: 15}, {wch: 30}, {wch: 15}, {wch: 20}, {wch: 15} ];
             const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Báo Cáo Điểm Danh");
+            XLSX.utils.book_append_sheet(wb, ws, "Báo Cáo Fpoly");
             XLSX.writeFile(wb, `Bao_Cao_Diem_Danh_Fpoly_${new Date().getTime()}.xlsx`);
-            window.showToast("Xuất Excel thành công!");
+            window.showToast("Tải xuống Excel hoàn tất!");
         };
 
         setInterval(() => {
