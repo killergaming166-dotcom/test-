@@ -105,7 +105,6 @@
             text-transform: uppercase;
         }
 
-        /* Tùy chỉnh thanh cuộn cho bảng */
         .custom-table-container::-webkit-scrollbar { width: 4px; }
         .custom-table-container::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
     </style>
@@ -130,17 +129,13 @@
     </div>
 
     <div class="grid grid-cols-12 gap-6">
-        
-        <!-- Left Column (Main Area) -->
+        <!-- Cột trái -->
         <div class="col-span-8 space-y-6">
-            
-            <!-- Scanning Display -->
             <div class="card-main p-10 flex flex-col items-center justify-center relative min-h-[480px]">
                 <div class="absolute top-8 left-8 flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-full border border-slate-100">
                     <span id="session-status-dot" class="w-2 h-2 rounded-full bg-rose-400"></span>
                     <span id="session-status-text" class="text-[10px] font-extrabold text-slate-400 uppercase tracking-tighter">DISCONNECTED</span>
                 </div>
-                
                 <div id="ca-display-badge" class="absolute top-8 right-8 bg-[#0f172a] text-white text-[10px] font-bold px-4 py-1.5 rounded-full uppercase">CA --</div>
 
                 <div class="avatar-container">
@@ -160,7 +155,7 @@
                 </div>
             </div>
 
-            <!-- Registration Section -->
+            <!-- Đăng ký -->
             <div class="card-main p-8 border-l-[10px] border-[#ff7d29]">
                 <div class="flex items-center gap-3 mb-8">
                     <div class="w-8 h-8 rounded-full bg-orange-50 flex items-center justify-center text-[#ff7d29]">
@@ -187,13 +182,13 @@
                     </div>
                     <div class="col-span-2">
                         <button class="btn-action w-full flex items-center justify-center gap-2">
-                            <i class="fa-solid fa-check"></i> XÁC NHẬN ĐK
+                            <i class="fa-solid fa-check"></i> XÁC NHẬN
                         </button>
                     </div>
                 </div>
             </div>
 
-            <!-- Table Logs -->
+            <!-- Bảng lịch sử -->
             <div class="card-main overflow-hidden p-8">
                 <div class="flex justify-between items-center mb-8">
                     <h3 class="font-black text-slate-800 text-xl tracking-tight">Lịch sử điểm danh</h3>
@@ -215,17 +210,14 @@
                                 <th class="pb-4">TRẠNG THÁI</th>
                             </tr>
                         </thead>
-                        <tbody id="log-body">
-                            <!-- Data injected here -->
-                        </tbody>
+                        <tbody id="log-body"></tbody>
                     </table>
                 </div>
             </div>
         </div>
 
-        <!-- Right Column (Stats) -->
+        <!-- Cột phải (Thống kê) -->
         <div class="col-span-4 space-y-6">
-            
             <div class="stat-card">
                 <div>
                     <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">SĨ SỐ LỚP</p>
@@ -250,13 +242,11 @@
                 <div class="stat-icon red"><i class="fa-solid fa-circle-xmark"></i></div>
             </div>
 
-            <!-- Timeline Box -->
             <div class="card-main p-8">
                 <div class="flex items-center gap-2 mb-8">
                     <div class="w-1.5 h-6 bg-blue-600 rounded-full"></div>
                     <h3 class="font-extrabold text-slate-800 uppercase text-sm tracking-tight">Timeline</h3>
                 </div>
-                
                 <div class="grid grid-cols-2 gap-4 mb-8">
                     <div class="bg-[#f8fbff] p-5 rounded-3xl text-center border border-blue-50">
                         <p class="text-[9px] font-bold text-blue-400 uppercase mb-2">BẮT ĐẦU</p>
@@ -267,15 +257,11 @@
                         <p id="time-end" class="text-2xl font-black text-slate-700">--:--</p>
                     </div>
                 </div>
-
                 <div class="bg-emerald-50/50 border border-emerald-100 p-4 rounded-2xl flex justify-between items-center mb-4">
                     <span id="hardware-status" class="text-[10px] font-black text-emerald-600 uppercase tracking-tighter">ESP32: WAITING...</span>
                     <span id="hardware-dot" class="w-2 h-2 rounded-full bg-slate-200"></span>
                 </div>
-
-                <button class="w-full bg-[#0f172a] text-white font-bold py-4 rounded-2xl text-[11px] uppercase tracking-[0.1em] hover:bg-slate-800 transition-all">
-                    RECONNECT SYSTEM
-                </button>
+                <button class="w-full bg-[#0f172a] text-white font-bold py-4 rounded-2xl text-[11px] uppercase tracking-[0.1em]">RECONNECT</button>
             </div>
         </div>
     </div>
@@ -284,9 +270,12 @@
         const eraWidget = new EraWidget();
         let configPins = { uid: null, name: null, mssv: null, class: null };
         const logs = [];
+        
+        // BIẾN QUAN TRỌNG ĐỂ FIX LỖI ĐỌC 2 LẦN
         let lastUidScan = "";
+        let lastScanTime = 0;
+        let isProcessing = false;
 
-        // CA LÀM VIỆC THEO YÊU CẦU
         const SHIFTS = [
             { name: "CA 1", start: "07:00", end: "09:15" },
             { name: "CA 2", start: "09:15", end: "11:30" },
@@ -311,15 +300,31 @@
             },
             onValues: (values) => {
                 const uidVal = values[configPins.uid?.id]?.value;
-                if (uidVal && uidVal !== "0" && uidVal !== "" && uidVal !== "None" && uidVal !== lastUidScan) {
-                    lastUidScan = uidVal;
-                    processAttendance({
-                        uid: uidVal,
-                        name: values[configPins.name?.id]?.value,
-                        mssv: values[configPins.mssv?.id]?.value,
-                        className: values[configPins.class?.id]?.value
-                    });
-                    setTimeout(() => { lastUidScan = ""; }, 3000);
+                const now = Date.now();
+
+                // CHẶN TRÙNG LẶP: 
+                // 1. UID hợp lệ
+                // 2. Không đang trong quá trình xử lý (isProcessing)
+                // 3. (Khác UID cũ) HOẶC (Cùng UID nhưng cách nhau trên 5 giây)
+                if (uidVal && uidVal !== "0" && uidVal !== "" && uidVal !== "None") {
+                    if (!isProcessing && (uidVal !== lastUidScan || (now - lastScanTime > 5000))) {
+                        
+                        isProcessing = true; // Khóa xử lý
+                        lastUidScan = uidVal;
+                        lastScanTime = now;
+
+                        processAttendance({
+                            uid: uidVal,
+                            name: values[configPins.name?.id]?.value,
+                            mssv: values[configPins.mssv?.id]?.value,
+                            className: values[configPins.class?.id]?.value
+                        });
+
+                        // Mở khóa sau 2 giây để sẵn sàng cho lần quét tiếp theo
+                        setTimeout(() => {
+                            isProcessing = false;
+                        }, 2000);
+                    }
                 }
             }
         });
@@ -337,41 +342,37 @@
         function updateShiftUI() {
             const shift = getCurrentShift();
             const badge = document.getElementById('ca-display-badge');
-            const statusDot = document.getElementById('session-status-dot');
-            const statusText = document.getElementById('session-status-text');
-            const sText = document.getElementById('time-start');
-            const eText = document.getElementById('time-end');
+            const sDot = document.getElementById('session-status-dot');
+            const sText = document.getElementById('session-status-text');
+            const startT = document.getElementById('time-start');
+            const endT = document.getElementById('time-end');
 
             if (shift) {
                 badge.innerText = shift.name;
-                sText.innerText = shift.start;
-                eText.innerText = shift.end;
-                
+                startT.innerText = shift.start;
+                endT.innerText = shift.end;
                 if (shift.name === "CA NGHỈ") {
-                    statusDot.className = "w-2 h-2 rounded-full bg-orange-400";
-                    statusText.innerText = "ĐANG NGHỈ";
-                    statusText.className = "text-[10px] font-extrabold text-orange-400 uppercase tracking-tighter";
+                    sDot.className = "w-2 h-2 rounded-full bg-orange-400";
+                    sText.innerText = "ĐANG NGHỈ";
                 } else {
-                    statusDot.className = "w-2 h-2 rounded-full bg-emerald-500";
-                    statusText.innerText = "ĐANG DIỄN RA";
-                    statusText.className = "text-[10px] font-extrabold text-emerald-600 uppercase tracking-tighter";
+                    sDot.className = "w-2 h-2 rounded-full bg-emerald-500";
+                    sText.innerText = "ĐANG DIỄN RA";
                 }
             } else {
-                badge.innerText = "CA --";
-                statusDot.className = "w-2 h-2 rounded-full bg-slate-300";
-                statusText.innerText = "CHƯA VÀO CA";
+                badge.innerText = "OFF";
+                sDot.className = "w-2 h-2 rounded-full bg-slate-300";
+                sText.innerText = "NGOÀI GIỜ";
             }
         }
 
         function processAttendance(data) {
-            const now = new Date();
-            const time = now.toLocaleTimeString('vi-VN', { hour12: false });
+            const timeStr = new Date().toLocaleTimeString('vi-VN', { hour12: false });
             const shift = getCurrentShift();
             
             document.getElementById('display-name').innerText = data.name || "NGƯỜI LẠ";
             
             logs.unshift({
-                time,
+                time: timeStr,
                 name: data.name || "Người lạ",
                 mssv: data.mssv || "---",
                 class: data.className || "---",
@@ -392,19 +393,18 @@
                 </tr>
             `).join('');
             
-            const presentCount = logs.length;
-            document.getElementById('present-count').innerText = presentCount;
-            document.getElementById('absent-count').innerText = Math.max(0, 40 - presentCount);
+            document.getElementById('present-count').innerText = logs.length;
+            document.getElementById('absent-count').innerText = Math.max(0, 40 - logs.length);
         }
 
         function exportToExcel() {
             const ws = XLSX.utils.json_to_sheet(logs);
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, "Attendance");
-            XLSX.writeFile(wb, "Diem_Danh_Era.xlsx");
+            XLSX.writeFile(wb, "Diem_Danh.xlsx");
         }
 
-        function clearLogs() { if(confirm("Xóa lịch sử?")) { logs.length = 0; updateUI(); } }
+        function clearLogs() { if(confirm("Xóa hết dữ liệu?")) { logs.length = 0; updateUI(); } }
 
         setInterval(() => {
             document.getElementById('clock').innerText = new Date().toLocaleTimeString('vi-VN', { hour12: false });
