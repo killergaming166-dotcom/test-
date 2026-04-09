@@ -46,6 +46,7 @@
     <div class="grid grid-cols-12 gap-5">
         <!-- Cột Trái -->
         <div class="col-span-8 space-y-5">
+            <!-- Màn hình quét chính -->
             <div class="card p-8 flex flex-col items-center justify-center relative min-h-[380px]" id="main-display-card">
                 <div class="avatar-circle" id="avatar-container">
                     <i class="fa-solid fa-user-circle text-7xl text-slate-200" id="avatar-icon"></i>
@@ -57,6 +58,7 @@
                 <div id="scan-feedback" class="absolute top-6 right-8 text-[10px] font-black text-slate-300 uppercase">Status: Idle</div>
             </div>
 
+            <!-- Panel Đăng Ký -->
             <div class="card p-7 border-l-8 border-orange-500 bg-orange-50/30">
                 <div class="flex justify-between mb-4">
                     <div class="flex items-center gap-2">
@@ -88,6 +90,7 @@
                 </button>
             </div>
 
+            <!-- Bảng Lịch Sử -->
             <div class="card p-6">
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="font-black text-sm text-slate-800 uppercase">Nhật ký điểm danh</h3>
@@ -182,10 +185,10 @@
                 const mssvVal = v[config.mssv?.id]?.value;
                 const classVal = v[config.class?.id]?.value;
 
-                // Lọc tín hiệu rác
-                if (!uidVal || uidVal === "0" || uidVal === "None" || uidVal === "") return;
+                // 1. Chỉ lọc tín hiệu hoàn toàn rỗng. Các giá trị "0" hoặc "None" thường là của thẻ chưa đăng ký
+                if (!uidVal || uidVal === "") return;
 
-                // Chống lặp (Debounce)
+                // 2. Chống lặp (Debounce 3 giây cho mỗi lần quẹt)
                 if (uidVal === lastUid && isProcessing) return;
 
                 lastUid = uidVal;
@@ -194,6 +197,7 @@
                 // Cập nhật debug panel
                 document.getElementById('last-uid-debug').innerText = uidVal;
                 
+                // 3. Xử lý quét thẻ (Bao gồm cả thẻ lạ)
                 handleScan({
                     uid: uidVal,
                     name: nameVal,
@@ -201,7 +205,7 @@
                     class: classVal
                 });
 
-                // Reset debounce sau 3 giây để nhận diện lại
+                // Reset processing để nhận diện thẻ khác ngay lập tức, hoặc nhận diện lại thẻ cũ sau 3s
                 setTimeout(() => { isProcessing = false; }, 3000);
             }
         });
@@ -215,22 +219,29 @@
             
             statusFeedback.innerText = "Status: Scanned";
 
-            // Nhận diện thẻ lạ
-            const isUnknown = (!data.name || data.name === "None" || data.name === "NGUOI LA" || data.name === "nguoi la" || data.name === "Người lạ");
+            // KIỂM TRA THẺ LẠ: Dựa trên dữ liệu tên từ thiết bị
+            const isUnknown = (!data.name || data.name === "0" || data.name === "None" || data.name === "NGUOI LA" || data.name === "nguoi la" || data.name === "Người lạ");
 
             if (isUnknown) {
-                // KHÓA UID vào ô đăng ký ngay lập tức
-                document.getElementById('reg-uid').value = data.uid;
-                
+                // HIỂN THỊ THẺ LẠ TRÊN MÀN HÌNH CHÍNH
                 nameEl.innerText = "THẺ CHƯA ĐĂNG KÝ";
                 nameEl.classList.remove('text-slate-800');
-                nameEl.classList.add('text-orange-500');
-                subEl.innerText = "VUI LÒNG ĐIỀN THÔNG TIN BÊN DƯỚI";
+                nameEl.classList.add('text-orange-500'); // Màu cam cảnh báo
+                subEl.innerText = "UID: " + data.uid;
                 
+                // Đổi icon sang hình người lạ/dấu cộng
                 avatar.style.borderColor = "#f97316";
                 avatar.classList.add('pulse-orange');
-                avatarIcon.className = "fa-solid fa-user-plus text-7xl text-orange-200";
+                avatarIcon.className = "fa-solid fa-user-plus text-7xl text-orange-400";
+
+                // Tự động điền UID vào ô đăng ký bên dưới
+                document.getElementById('reg-uid').value = data.uid;
+
+                // Đẩy vào nhật ký dưới dạng người lạ
+                addLog("THẺ CHƯA ĐĂNG KÝ", data.uid, "---", "THẺ LẠ", "bg-orange-50 text-orange-600");
+
             } else {
+                // HIỂN THỊ THÀNH VIÊN ĐÃ ĐĂNG KÝ
                 nameEl.innerText = data.name;
                 nameEl.classList.remove('text-orange-500');
                 nameEl.classList.add('text-slate-800');
@@ -239,6 +250,7 @@
                 avatar.classList.remove('pulse-orange');
                 avatarIcon.className = "fa-solid fa-user-check text-7xl text-emerald-500";
                 
+                // Logic Vào/Ra
                 let isCheckOut = presentSet.has(data.mssv);
                 let statusText = isCheckOut ? "RA LỚP" : "VÀO LỚP";
                 
@@ -249,10 +261,10 @@
                 addLog(data.name, data.mssv, data.class, statusText, isCheckOut ? "bg-rose-50 text-rose-500" : "bg-emerald-50 text-emerald-600");
             }
             
-            // Tự động quay về trạng thái chờ sau 8 giây
+            // Tự động quay về trạng thái chờ sau 10 giây nếu không có thẻ mới
             setTimeout(() => {
                 if(lastUid === data.uid) resetDisplay();
-            }, 8000);
+            }, 10000);
         }
 
         function resetDisplay() {
@@ -311,12 +323,15 @@
             if(!uid || uid === "Đang chờ thẻ...") return;
             if(!name) return;
             
-            addLog(name, document.getElementById('reg-mssv').value, document.getElementById('reg-class').value, "ĐÃ LƯU", "bg-blue-50 text-blue-600");
+            // Log thông báo đã lưu
+            addLog(name, document.getElementById('reg-mssv').value, document.getElementById('reg-class').value, "ĐÃ ĐĂNG KÝ", "bg-blue-50 text-blue-600");
             
+            // Xóa form
             document.getElementById('reg-uid').value = "Đang chờ thẻ...";
             document.getElementById('reg-name').value = "";
             document.getElementById('reg-mssv').value = "";
             document.getElementById('reg-class').value = "";
+            
             lastUid = ""; 
             isProcessing = false;
             resetDisplay();
