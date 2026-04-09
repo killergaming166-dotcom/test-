@@ -79,7 +79,7 @@
                 <div class="flex justify-between mb-4">
                     <div class="flex items-center gap-2">
                         <i class="fa-solid fa-database text-orange-500"></i>
-                        <h3 class="font-black text-sm uppercase text-slate-700">Quản lý Thành Viên (Hệ thống)</h3>
+                        <h3 class="font-black text-sm uppercase text-slate-700">Quản lý Thành Viên</h3>
                     </div>
                     <span class="text-[10px] font-bold text-orange-400">QUÉT THẺ ĐỂ LẤY UID</span>
                 </div>
@@ -180,7 +180,6 @@
         </div>
     </div>
 
-    <!-- Firebase & Logic (Sử dụng Module) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
@@ -206,7 +205,7 @@
             options: { plugins: { legend: { display: false } }, scales: { y: { display: false }, x: { grid: { display: false }, ticks: { font: { size: 8 } } } } }
         });
 
-        // --- FIREBASE INIT (Chế độ an toàn chống sập) ---
+        // --- FIREBASE INIT ---
         let app, auth, db, appId;
         let isCloudActive = false;
         let currentUser = null;
@@ -221,11 +220,19 @@
                 isCloudActive = true;
             }
         } catch (error) {
-            console.warn("Không tìm thấy cấu hình Cloud, hệ thống tự động chuyển sang chế độ Nội bộ (Offline).");
+            console.warn("Chạy ở chế độ nội bộ (Local Storage).");
         }
 
-        let membersDb = {}; 
-        let logsDb = [];    
+        // Khởi tạo Database từ LocalStorage để lưu giữ khi F5/Reset (Chế độ Offline)
+        let membersDb = JSON.parse(localStorage.getItem('era_members')) || {}; 
+        let logsDb = JSON.parse(localStorage.getItem('era_logs')) || [];    
+
+        function saveToLocal() {
+            if (!isCloudActive) {
+                localStorage.setItem('era_members', JSON.stringify(membersDb));
+                localStorage.setItem('era_logs', JSON.stringify(logsDb));
+            }
+        }
 
         let lastUid = ""; 
         let isProcessing = false;
@@ -256,7 +263,6 @@
                         await signInAnonymously(auth);
                     }
                 } catch (error) {
-                    console.error("Auth Error:", error);
                     setupLocalMode("Lỗi xác thực Cloud!");
                 }
             };
@@ -269,16 +275,14 @@
                     loadCloudData();
                 }
             });
-
             initAuth();
         } else {
-            setupLocalMode("Bộ nhớ thiết bị (Offline)");
+            setupLocalMode("Lưu trữ nội bộ (Trình duyệt)");
         }
 
         function setupLocalMode(message) {
             document.getElementById('cloud-status').innerText = message;
             document.getElementById('cloud-status').className = "font-bold text-orange-500";
-            // Render ban đầu cho chế độ local
             processLogsAndRender();
         }
 
@@ -316,13 +320,15 @@
             });
         }
 
-        // FIX TREO MÁY: Hàm này giờ chỉ chạy khi có cập nhật dữ liệu hoặc đổi Ca học (Không chạy mỗi giây nữa)
         function processLogsAndRender() {
             const now = new Date();
             const todayStr = now.toDateString();
             
             document.getElementById('current-shift-badge').innerText = currentShift ? currentShift.name.toUpperCase() : "NGOÀI CA";
-            document.getElementById('total-count').innerText = Object.keys(membersDb).length;
+            
+            // Nếu có card cứng từ ESP32 chưa đăng ký Web, đếm có thể sai, tốt nhất đếm trên membersDb
+            let totalMembers = Object.keys(membersDb).length;
+            document.getElementById('total-count').innerText = totalMembers > 0 ? totalMembers : 40; // Fallback 40 nếu chưa có ai
 
             let currentShiftLogs = [];
             let presentInCurrentShift = new Set();
@@ -331,8 +337,8 @@
                 if (log.date === todayStr) {
                     if (currentShift && log.shiftId === currentShift.id) {
                         currentShiftLogs.push(log);
-                        if (log.status === "VÀO LỚP") presentInCurrentShift.add(log.mssv);
-                        if (log.status === "RA LỚP") presentInCurrentShift.delete(log.mssv);
+                        if (log.status === "VÀO LỚP") presentInCurrentShift.add(log.mssv || log.uid); // Dùng UID nếu MSSV trống
+                        if (log.status === "RA LỚP") presentInCurrentShift.delete(log.mssv || log.uid);
                     }
                 }
             });
@@ -349,16 +355,15 @@
             `).join('');
 
             const present = presentInCurrentShift.size;
-            const total = Object.keys(membersDb).length;
             document.getElementById('present-count').innerText = present;
-            document.getElementById('absent-count').innerText = Math.max(0, total - present);
+            document.getElementById('absent-count').innerText = Math.max(0, (totalMembers > 0 ? totalMembers : 40) - present);
 
-            // Cập nhật biểu đồ nhẹ nhàng
+            // Cập nhật biểu đồ
             let chartSets = [new Set(), new Set(), new Set(), new Set(), new Set()];
             logsDb.forEach(log => {
                 if(log.date === todayStr && log.shiftIndex >= 0 && log.shiftIndex <= 4) {
-                    if(log.status === "VÀO LỚP") chartSets[log.shiftIndex].add(log.mssv);
-                    if(log.status === "RA LỚP") chartSets[log.shiftIndex].delete(log.mssv);
+                    if(log.status === "VÀO LỚP") chartSets[log.shiftIndex].add(log.mssv || log.uid);
+                    if(log.status === "RA LỚP") chartSets[log.shiftIndex].delete(log.mssv || log.uid);
                 }
             });
             attendanceChart.data.datasets[0].data = chartSets.map(s => s.size);
@@ -382,6 +387,9 @@
             },
             onValues: (v) => {
                 const uidVal = v[eConfig.uid?.id]?.value;
+                const nameVal = v[eConfig.name?.id]?.value;
+                const mssvVal = v[eConfig.mssv?.id]?.value;
+                const classVal = v[eConfig.class?.id]?.value;
 
                 if (!uidVal || uidVal === "" || uidVal === "0" || uidVal === "None") return;
                 if (uidVal === lastUid && isProcessing) return;
@@ -389,26 +397,42 @@
                 lastUid = uidVal;
                 isProcessing = true;
 
-                handleHardwareScan(uidVal);
+                handleHardwareScan({
+                    uid: uidVal,
+                    name: nameVal,
+                    mssv: mssvVal,
+                    class: classVal
+                });
 
                 setTimeout(() => { isProcessing = false; }, 3000);
             }
         });
 
-        function handleHardwareScan(uid) {
+        function handleHardwareScan(data) {
             const nameEl = document.getElementById('display-name');
             const subEl = document.getElementById('display-sub');
             const avatar = document.getElementById('avatar-container');
             const avatarIcon = document.getElementById('avatar-icon');
             
-            const member = membersDb[uid];
+            const uid = data.uid;
+            const cloudMember = membersDb[uid];
+            
+            // XÁC NHẬN THẺ GỐC TỪ ESP32 HOẶC WEB DB
+            // Nếu có tên từ ESP32 (Không phải rỗng, không phải "None", "NGUOI LA")
+            const espNameValid = data.name && data.name !== "None" && data.name !== "0" && data.name !== "NGUOI LA" && data.name !== "nguoi la" && data.name !== "Người lạ";
+            
+            let finalName = cloudMember ? cloudMember.name : (espNameValid ? data.name : null);
+            let finalMssv = cloudMember ? cloudMember.mssv : (espNameValid ? data.mssv : "---");
+            let finalClass = cloudMember ? cloudMember.class : (espNameValid ? data.class : "---");
+
             const now = new Date();
             const timeStr = now.toLocaleTimeString('vi-VN', { hour12: false });
             currentShift = getShiftByTime(now);
 
             document.getElementById('reg-uid').value = uid;
 
-            if (!member) {
+            if (!finalName) {
+                // THẺ LẠ
                 nameEl.innerText = "THẺ CHƯA ĐĂNG KÝ";
                 nameEl.classList.remove('text-slate-800');
                 nameEl.classList.add('text-orange-500');
@@ -424,16 +448,17 @@
                 document.getElementById('reg-class').value = "";
 
             } else {
-                nameEl.innerText = member.name;
+                // THÀNH VIÊN ĐÃ ĐĂNG KÝ (Cloud hoặc ESP32)
+                nameEl.innerText = finalName;
                 nameEl.classList.remove('text-orange-500');
                 nameEl.classList.add('text-slate-800');
-                subEl.innerText = "MSSV: " + member.mssv;
+                subEl.innerText = "MSSV: " + finalMssv;
                 avatar.classList.remove('pulse-orange');
                 avatarIcon.className = "fa-solid fa-user-check text-7xl text-emerald-500";
 
                 let isCheckOut = false;
                 if (currentShift) {
-                    let userLogsInShift = logsDb.filter(l => l.date === currentDateString && l.shiftId === currentShift.id && l.mssv === member.mssv);
+                    let userLogsInShift = logsDb.filter(l => l.date === currentDateString && l.shiftId === currentShift.id && (l.mssv === finalMssv || l.uid === uid));
                     if (userLogsInShift.length > 0 && userLogsInShift[0].status === "VÀO LỚP") {
                         isCheckOut = true;
                     }
@@ -445,9 +470,9 @@
 
                 let logEntry = {
                     uid: uid,
-                    name: member.name,
-                    mssv: member.mssv,
-                    class: member.class,
+                    name: finalName,
+                    mssv: finalMssv,
+                    class: finalClass,
                     time: timeStr,
                     timestamp: now.getTime(),
                     date: currentDateString,
@@ -463,10 +488,12 @@
                 } else {
                     logEntry.id = Date.now().toString();
                     logsDb.unshift(logEntry);
+                    saveToLocal();
                     processLogsAndRender(); // Gọi cập nhật tay khi ở chế độ offline
                 }
             }
 
+            // Tự reset màn hình chính sau 8 giây
             setTimeout(() => {
                 if(lastUid === uid) {
                     nameEl.innerText = "SẴN SÀNG";
@@ -501,7 +528,8 @@
                 }
             } else {
                 membersDb[uid] = memberData;
-                window.showToast(`Đã lưu cục bộ thành công: ${name}`);
+                saveToLocal();
+                window.showToast(`Đã lưu nội bộ thành công: ${name}`);
                 processLogsAndRender();
             }
             
@@ -526,6 +554,7 @@
                     }
                 } else {
                     delete membersDb[uid];
+                    saveToLocal();
                     window.showToast("Đã xóa thẻ cục bộ!");
                     processLogsAndRender();
                 }
@@ -554,6 +583,7 @@
                     }
                 } else {
                     logsDb = [];
+                    saveToLocal();
                     processLogsAndRender();
                     window.showToast("Đã dọn dẹp lịch sử cục bộ!");
                 }
