@@ -7,200 +7,207 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://www.unpkg.com/@eohjsc/era-widget@1.1.3/src/index.js"></script>
-    <!-- Thêm thư viện SheetJS để xuất Excel -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
         
         body { 
             font-family: 'Plus Jakarta Sans', sans-serif; 
-            background-color: #f8fafc;
-            color: #334155;
-            padding: 2rem;
+            background-color: #f0f4f8; 
+            color: #334155; 
+            padding: 1.5rem;
         }
 
-        .card-base {
+        .card-main {
             background: #ffffff;
-            border-radius: 28px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.01);
-            border: 1px solid #f1f5f9;
+            border-radius: 35px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+            border: 1px solid #ffffff;
         }
 
         .stat-card {
-            padding: 1.5rem 2rem;
-            position: relative;
             background: #ffffff;
-            border-radius: 24px;
+            border-radius: 25px;
+            padding: 1.5rem;
             display: flex;
             align-items: center;
             justify-content: space-between;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
             border: 1px solid #f1f5f9;
-            overflow: hidden;
-        }
-        .stat-card::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 15%;
-            height: 70%;
-            width: 5px;
-            border-radius: 0 10px 10px 0;
-        }
-        .stat-total::before { background-color: #cbd5e1; }
-        .stat-present::before { background-color: #10b981; }
-        .stat-absent::before { background-color: #f43f5e; }
-
-        .stat-icon-container {
-            width: 44px;
-            height: 44px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background-color: #f8fafc;
         }
 
-        .avatar-placeholder {
-            width: 180px;
-            height: 180px;
+        .stat-card.active-green { border-left: 6px solid #10b981; }
+        .stat-card.active-red { border-left: 6px solid #f43f5e; }
+
+        .stat-icon {
+            width: 50px;
+            height: 50px;
             border-radius: 50%;
-            background: #f1f5f9;
+            background: #f8fafc;
             display: flex;
             align-items: center;
             justify-content: center;
-            border: 8px solid white;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.03);
             color: #cbd5e1;
+            font-size: 1.2rem;
         }
 
-        .input-group label {
-            font-size: 10px;
-            font-weight: 700;
-            color: #94a3b8;
-            margin-bottom: 8px;
-            display: block;
-            text-transform: uppercase;
-        }
-        .custom-input {
+        .stat-icon.green { color: #10b981; background: #ecfdf5; }
+        .stat-icon.red { color: #f43f5e; background: #fff1f2; }
+
+        .avatar-container {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
             background: #f8fafc;
-            border: 1px solid #e2e8f0;
-            border-radius: 12px;
-            padding: 0.75rem 1rem;
-            width: 100%;
-            font-size: 13px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            position: relative;
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.02);
         }
 
-        .btn-register {
-            background: linear-gradient(135deg, #ff9048 0%, #ff7d29 100%);
-            color: white;
-            font-weight: 800;
-            border-radius: 12px;
-            padding: 0.75rem 1.5rem;
-            text-transform: uppercase;
-            font-size: 12px;
-            box-shadow: 0 4px 12px rgba(255, 125, 41, 0.2);
-            width: 100%;
-        }
+        .avatar-container i { color: #e2e8f0; font-size: 5rem; }
 
         .digital-clock {
-            font-size: 4rem;
-            font-weight: 900;
-            color: #1e293b;
-            letter-spacing: -2px;
+            font-size: 4.5rem;
+            font-weight: 800;
+            color: #334155;
+            line-height: 1;
         }
+
+        .input-field {
+            background: #f8fafc;
+            border: 1px solid #eef2f6;
+            border-radius: 15px;
+            padding: 12px 15px;
+            width: 100%;
+            font-size: 14px;
+        }
+
+        .btn-action {
+            background: #ff7d29;
+            color: white;
+            border-radius: 15px;
+            padding: 12px 25px;
+            font-weight: 700;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+
+        .btn-action:hover { opacity: 0.9; transform: translateY(-1px); }
+
+        .tag-status {
+            font-size: 10px;
+            font-weight: 800;
+            padding: 4px 12px;
+            border-radius: 10px;
+            text-transform: uppercase;
+        }
+
+        /* Tùy chỉnh thanh cuộn cho bảng */
+        .custom-table-container::-webkit-scrollbar { width: 4px; }
+        .custom-table-container::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
     </style>
 </head>
-<body>
+<body class="max-w-[1400px] mx-auto">
 
-    <!-- Header -->
-    <div class="flex justify-between items-center mb-8">
-        <div class="flex items-center gap-3">
-            <div class="w-10 h-10 bg-white shadow-sm border border-slate-100 rounded-lg flex items-center justify-center font-black text-[#ff7d29]">F</div>
+    <!-- Header Section -->
+    <div class="flex justify-between items-start mb-6 px-4">
+        <div class="flex items-center gap-4">
+            <div class="w-12 h-12 bg-white rounded-2xl shadow-sm flex items-center justify-center font-bold text-[#ff7d29] text-xl">F</div>
             <div>
-                <h1 class="text-xl font-extrabold text-slate-800 tracking-tight">DASHBOARD</h1>
+                <h1 class="text-2xl font-extrabold text-[#0f172a] tracking-tight">DASHBOARD</h1>
                 <div class="flex items-center gap-2">
-                    <span id="era-dot" class="w-2 h-2 rounded-full bg-slate-300"></span>
-                    <span id="era-status" class="text-[9px] font-bold text-slate-400 uppercase tracking-widest italic">CONNECTING TO ERA...</span>
+                    <span id="era-dot" class="w-2 h-2 rounded-full bg-rose-500"></span>
+                    <span id="era-status" class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">LIVE ATTENDANCE SYSTEM</span>
                 </div>
             </div>
         </div>
-        <div class="digital-clock" id="clock">00:00:00</div>
+        <div class="text-right">
+            <div class="digital-clock" id="clock">00:00:00</div>
+        </div>
     </div>
 
     <div class="grid grid-cols-12 gap-6">
         
-        <!-- Left Section -->
+        <!-- Left Column (Main Area) -->
         <div class="col-span-8 space-y-6">
-            <div class="card-base p-12 flex flex-col items-center justify-center relative min-h-[450px]">
-                <div class="absolute top-6 left-8 bg-slate-50 border border-slate-100 px-4 py-1 rounded-full flex items-center gap-2">
-                    <span id="session-status-dot" class="w-2 h-2 rounded-full bg-slate-300"></span>
-                    <span id="session-status-text" class="text-[10px] font-bold text-slate-400 uppercase">CHỜ DỮ LIỆU</span>
+            
+            <!-- Scanning Display -->
+            <div class="card-main p-10 flex flex-col items-center justify-center relative min-h-[480px]">
+                <div class="absolute top-8 left-8 flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-full border border-slate-100">
+                    <span id="session-status-dot" class="w-2 h-2 rounded-full bg-rose-400"></span>
+                    <span id="session-status-text" class="text-[10px] font-extrabold text-slate-400 uppercase tracking-tighter">DISCONNECTED</span>
                 </div>
-                <div id="ca-display-badge" class="absolute top-6 right-8 bg-[#0f172a] text-white text-[10px] font-bold px-3 py-1 rounded-lg">CA --</div>
+                
+                <div id="ca-display-badge" class="absolute top-8 right-8 bg-[#0f172a] text-white text-[10px] font-bold px-4 py-1.5 rounded-full uppercase">CA --</div>
 
-                <div class="avatar-placeholder mb-8">
-                    <i class="fa-solid fa-user text-7xl"></i>
+                <div class="avatar-container">
+                    <i class="fa-solid fa-user"></i>
                 </div>
 
                 <div class="text-center">
-                    <div class="flex justify-center gap-2 mb-4">
-                        <div class="w-8 h-1.5 bg-[#1e293b] rounded-full"></div>
-                        <div class="w-8 h-1.5 bg-[#1e293b] rounded-full"></div>
-                        <div class="w-8 h-1.5 bg-[#1e293b] rounded-full"></div>
+                    <div class="flex justify-center gap-1.5 mb-6">
+                        <div class="w-10 h-1.5 bg-slate-800 rounded-full"></div>
+                        <div class="w-10 h-1.5 bg-slate-800 rounded-full"></div>
+                        <div class="w-10 h-1.5 bg-slate-800 rounded-full"></div>
                     </div>
-                    <h2 id="display-name" class="text-2xl font-black text-slate-800 uppercase tracking-widest mb-2">ĐANG ĐỢI THẺ...</h2>
+                    <h2 id="display-name" class="text-3xl font-black text-slate-800 uppercase tracking-[0.2em] mb-3">ĐANG ĐỢI THẺ...</h2>
                     <div class="flex items-center justify-center gap-2 text-blue-500 font-bold text-[11px] uppercase tracking-widest">
-                        <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span> SẴN SÀNG
+                        <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span> SẴN SÀNG
                     </div>
                 </div>
             </div>
 
-            <!-- Registration Area -->
-            <div class="card-base p-6 border-l-8 border-[#ff7d29]">
-                <div class="flex items-center gap-3 mb-6">
+            <!-- Registration Section -->
+            <div class="card-main p-8 border-l-[10px] border-[#ff7d29]">
+                <div class="flex items-center gap-3 mb-8">
                     <div class="w-8 h-8 rounded-full bg-orange-50 flex items-center justify-center text-[#ff7d29]">
-                        <i class="fa-solid fa-id-card-clip"></i>
+                        <i class="fa-solid fa-id-card"></i>
                     </div>
-                    <h3 class="font-extrabold text-slate-800 text-[12px] uppercase">ĐĂNG KÝ THẺ THÀNH VIÊN</h3>
+                    <h3 class="font-extrabold text-slate-800 uppercase text-sm tracking-tight">ĐĂNG KÝ THẺ THÀNH VIÊN</h3>
                 </div>
-                <div class="grid grid-cols-5 gap-4 items-end">
-                    <div class="input-group">
-                        <label>MÃ UID</label>
-                        <input type="text" id="reg-uid" placeholder="UID..." class="custom-input">
+                <div class="grid grid-cols-12 gap-4 items-end">
+                    <div class="col-span-2">
+                        <label class="text-[9px] font-black text-slate-400 uppercase mb-2 block">MÃ UID</label>
+                        <input type="text" id="reg-uid" placeholder="UID..." class="input-field">
                     </div>
-                    <div class="input-group">
-                        <label>HỌ VÀ TÊN</label>
-                        <input type="text" id="reg-name" placeholder="Tên SV..." class="custom-input">
+                    <div class="col-span-3">
+                        <label class="text-[9px] font-black text-slate-400 uppercase mb-2 block">HỌ VÀ TÊN</label>
+                        <input type="text" id="reg-name" placeholder="Tên SV..." class="input-field">
                     </div>
-                    <div class="input-group">
-                        <label>MSSV / ID</label>
-                        <input type="text" id="reg-mssv" placeholder="MSSV..." class="custom-input">
+                    <div class="col-span-3">
+                        <label class="text-[9px] font-black text-slate-400 uppercase mb-2 block">MSSV / ID</label>
+                        <input type="text" id="reg-mssv" placeholder="MSSV..." class="input-field">
                     </div>
-                    <div class="input-group">
-                        <label>LỚP / BỘ PHẬN</label>
-                        <input type="text" id="reg-class" placeholder="Lớp..." class="custom-input">
+                    <div class="col-span-2">
+                        <label class="text-[9px] font-black text-slate-400 uppercase mb-2 block">LỚP / BỘ PHẬN</label>
+                        <input type="text" id="reg-class" placeholder="Lớp..." class="input-field">
                     </div>
-                    <div>
-                        <button class="btn-register" onclick="alert('Đã gửi yêu cầu đăng ký!')">XÁC NHẬN ĐK</button>
+                    <div class="col-span-2">
+                        <button class="btn-action w-full flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-check"></i> XÁC NHẬN ĐK
+                        </button>
                     </div>
                 </div>
             </div>
 
-            <!-- Table Section -->
-            <div class="card-base overflow-hidden">
-                <div class="p-6 flex justify-between items-center">
-                    <h3 class="font-extrabold text-slate-800">Lịch sử điểm danh</h3>
+            <!-- Table Logs -->
+            <div class="card-main overflow-hidden p-8">
+                <div class="flex justify-between items-center mb-8">
+                    <h3 class="font-black text-slate-800 text-xl tracking-tight">Lịch sử điểm danh</h3>
                     <div class="flex gap-2">
-                        <button onclick="exportToExcel()" class="bg-[#10b981] text-white text-[10px] font-bold py-2 px-4 rounded-xl uppercase flex items-center gap-2 hover:bg-emerald-600 transition-colors shadow-sm">
-                            <i class="fa-solid fa-file-excel"></i> XUẤT EXCEL
+                        <button onclick="exportToExcel()" class="bg-[#2563eb] text-white text-[11px] font-bold py-2.5 px-6 rounded-xl uppercase flex items-center gap-2 shadow-md shadow-blue-100">
+                            <i class="fa-solid fa-file-export"></i> XUẤT EXCEL
                         </button>
-                        <button onclick="clearLogs()" class="bg-rose-50 text-rose-500 text-[10px] font-bold py-2 px-4 rounded-xl uppercase border border-rose-100 hover:bg-rose-100 transition-colors">XÓA DỮ LIỆU</button>
+                        <button onclick="clearLogs()" class="bg-white text-rose-500 text-[11px] font-bold py-2.5 px-6 rounded-xl uppercase border border-rose-100 hover:bg-rose-50">XÓA DỮ LIỆU</button>
                     </div>
                 </div>
-                <div class="px-6 pb-6">
+                <div class="custom-table-container max-h-[400px] overflow-y-auto">
                     <table class="w-full text-left">
                         <thead>
-                            <tr class="text-[10px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-50">
+                            <tr class="text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b pb-4">
                                 <th class="pb-4">THỜI GIAN</th>
                                 <th class="pb-4">SINH VIÊN</th>
                                 <th class="pb-4">MSSV</th>
@@ -208,64 +215,67 @@
                                 <th class="pb-4">TRẠNG THÁI</th>
                             </tr>
                         </thead>
-                        <tbody id="log-body"></tbody>
+                        <tbody id="log-body">
+                            <!-- Data injected here -->
+                        </tbody>
                     </table>
                 </div>
             </div>
         </div>
 
-        <!-- Right Section -->
+        <!-- Right Column (Stats) -->
         <div class="col-span-4 space-y-6">
-            <div class="stat-card stat-total">
+            
+            <div class="stat-card">
                 <div>
                     <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">SĨ SỐ LỚP</p>
-                    <h4 class="text-5xl font-black text-slate-800" id="total-students">40</h4>
+                    <h4 class="text-5xl font-extrabold text-slate-800" id="total-count">40</h4>
                 </div>
-                <div class="stat-icon-container"><i class="fa-solid fa-users text-slate-300"></i></div>
+                <div class="stat-icon"><i class="fa-solid fa-users"></i></div>
             </div>
 
-            <div class="stat-card stat-present">
+            <div class="stat-card active-green">
                 <div>
-                    <p class="text-[10px] font-bold text-emerald-500 uppercase mb-1">HIỆN DIỆN</p>
-                    <h4 class="text-5xl font-black text-slate-800" id="present-count">0</h4>
+                    <p class="text-[10px] font-bold text-emerald-500 uppercase mb-1 tracking-wider">HIỆN DIỆN</p>
+                    <h4 class="text-5xl font-extrabold text-slate-800" id="present-count">0</h4>
                 </div>
-                <div class="stat-icon-container bg-emerald-50"><i class="fa-solid fa-circle-check text-emerald-500"></i></div>
+                <div class="stat-icon green"><i class="fa-solid fa-circle-check"></i></div>
             </div>
 
-            <div class="stat-card stat-absent">
+            <div class="stat-card active-red">
                 <div>
-                    <p class="text-[10px] font-bold text-rose-500 uppercase mb-1">VẮNG MẶT</p>
-                    <h4 class="text-5xl font-black text-rose-500" id="absent-count">40</h4>
+                    <p class="text-[10px] font-bold text-rose-500 uppercase mb-1 tracking-wider">VẮNG MẶT</p>
+                    <h4 class="text-5xl font-extrabold text-rose-500" id="absent-count">40</h4>
                 </div>
-                <div class="stat-icon-container bg-rose-50"><i class="fa-solid fa-circle-xmark text-rose-500"></i></div>
+                <div class="stat-icon red"><i class="fa-solid fa-circle-xmark"></i></div>
             </div>
 
-            <!-- Timeline -->
-            <div class="card-base p-8">
+            <!-- Timeline Box -->
+            <div class="card-main p-8">
                 <div class="flex items-center gap-2 mb-8">
-                    <div class="w-1 h-5 bg-blue-600 rounded-full"></div>
-                    <h3 class="font-extrabold text-slate-800 uppercase text-[12px]">THỜI GIAN BIỂU</h3>
+                    <div class="w-1.5 h-6 bg-blue-600 rounded-full"></div>
+                    <h3 class="font-extrabold text-slate-800 uppercase text-sm tracking-tight">Timeline</h3>
                 </div>
                 
                 <div class="grid grid-cols-2 gap-4 mb-8">
-                    <div class="bg-slate-50 p-4 rounded-2xl text-center border border-slate-100">
-                        <p class="text-[9px] font-bold text-blue-500 uppercase mb-1">BẮT ĐẦU</p>
+                    <div class="bg-[#f8fbff] p-5 rounded-3xl text-center border border-blue-50">
+                        <p class="text-[9px] font-bold text-blue-400 uppercase mb-2">BẮT ĐẦU</p>
                         <p id="time-start" class="text-2xl font-black text-slate-700">--:--</p>
                     </div>
-                    <div class="bg-slate-50 p-4 rounded-2xl text-center border border-slate-100">
-                        <p class="text-[9px] font-bold text-blue-500 uppercase mb-1">KẾT THÚC</p>
+                    <div class="bg-[#f8fbff] p-5 rounded-3xl text-center border border-blue-50">
+                        <p class="text-[9px] font-bold text-blue-400 uppercase mb-2">KẾT THÚC</p>
                         <p id="time-end" class="text-2xl font-black text-slate-700">--:--</p>
                     </div>
                 </div>
 
-                <div class="bg-emerald-50 border border-emerald-100 p-3 rounded-xl flex justify-between items-center mb-4">
-                    <span id="hardware-status" class="text-[9px] font-black text-emerald-600 uppercase italic">ESP32: WAITING...</span>
-                    <span id="hardware-dot" class="w-1.5 h-1.5 rounded-full bg-slate-300"></span>
+                <div class="bg-emerald-50/50 border border-emerald-100 p-4 rounded-2xl flex justify-between items-center mb-4">
+                    <span id="hardware-status" class="text-[10px] font-black text-emerald-600 uppercase tracking-tighter">ESP32: WAITING...</span>
+                    <span id="hardware-dot" class="w-2 h-2 rounded-full bg-slate-200"></span>
                 </div>
 
-                <div id="shift-info-box" class="mt-4 p-4 rounded-2xl bg-slate-50 border border-dashed border-slate-200 text-center">
-                    <p id="current-ca-name" class="text-xs font-black text-slate-800 uppercase tracking-widest">ĐANG TÍNH TOÁN CA...</p>
-                </div>
+                <button class="w-full bg-[#0f172a] text-white font-bold py-4 rounded-2xl text-[11px] uppercase tracking-[0.1em] hover:bg-slate-800 transition-all">
+                    RECONNECT SYSTEM
+                </button>
             </div>
         </div>
     </div>
@@ -274,8 +284,9 @@
         const eraWidget = new EraWidget();
         let configPins = { uid: null, name: null, mssv: null, class: null };
         const logs = [];
-        
-        // CẬP NHẬT THEO YÊU CẦU MỚI
+        let lastUidScan = "";
+
+        // CA LÀM VIỆC THEO YÊU CẦU
         const SHIFTS = [
             { name: "CA 1", start: "07:00", end: "09:15" },
             { name: "CA 2", start: "09:15", end: "11:30" },
@@ -296,30 +307,31 @@
                 document.getElementById('era-dot').className = "w-2 h-2 rounded-full bg-emerald-500";
                 document.getElementById('era-status').innerText = "ONLINE";
                 document.getElementById('hardware-status').innerText = "ESP32: CONNECTED";
-                document.getElementById('hardware-dot').className = "w-1.5 h-1.5 rounded-full bg-emerald-500";
+                document.getElementById('hardware-dot').className = "w-2 h-2 rounded-full bg-emerald-500";
             },
             onValues: (values) => {
-                const uidValue = values[configPins.uid?.id]?.value;
-                if (uidValue && uidValue !== "0" && uidValue !== "") {
-                    processAttendance({ 
-                        uid: uidValue, 
-                        name: values[configPins.name?.id]?.value, 
-                        mssv: values[configPins.mssv?.id]?.value, 
-                        className: values[configPins.class?.id]?.value 
+                const uidVal = values[configPins.uid?.id]?.value;
+                if (uidVal && uidVal !== "0" && uidVal !== "" && uidVal !== "None" && uidVal !== lastUidScan) {
+                    lastUidScan = uidVal;
+                    processAttendance({
+                        uid: uidVal,
+                        name: values[configPins.name?.id]?.value,
+                        mssv: values[configPins.mssv?.id]?.value,
+                        className: values[configPins.class?.id]?.value
                     });
+                    setTimeout(() => { lastUidScan = ""; }, 3000);
                 }
             }
         });
 
         function getCurrentShift() {
             const now = new Date();
-            const currentTime = now.getHours() * 60 + now.getMinutes();
-            for (const shift of SHIFTS) {
-                const [sH, sM] = shift.start.split(':').map(Number);
-                const [eH, eM] = shift.end.split(':').map(Number);
-                if (currentTime >= (sH * 60 + sM) && currentTime <= (eH * 60 + eM)) return shift;
-            }
-            return null;
+            const currentTotalMin = now.getHours() * 60 + now.getMinutes();
+            return SHIFTS.find(s => {
+                const [sH, sM] = s.start.split(':').map(Number);
+                const [eH, eM] = s.end.split(':').map(Number);
+                return currentTotalMin >= (sH * 60 + sM) && currentTotalMin <= (eH * 60 + eM);
+            });
         }
 
         function updateShiftUI() {
@@ -327,45 +339,43 @@
             const badge = document.getElementById('ca-display-badge');
             const statusDot = document.getElementById('session-status-dot');
             const statusText = document.getElementById('session-status-text');
-            const startText = document.getElementById('time-start');
-            const endText = document.getElementById('time-end');
-            const caNameBox = document.getElementById('current-ca-name');
+            const sText = document.getElementById('time-start');
+            const eText = document.getElementById('time-end');
 
             if (shift) {
                 badge.innerText = shift.name;
-                startText.innerText = shift.start;
-                endText.innerText = shift.end;
-                caNameBox.innerText = shift.name;
-
+                sText.innerText = shift.start;
+                eText.innerText = shift.end;
+                
                 if (shift.name === "CA NGHỈ") {
                     statusDot.className = "w-2 h-2 rounded-full bg-orange-400";
-                    statusText.innerText = "ĐANG NGHỈ TRƯA";
-                    statusText.className = "text-[10px] font-bold text-orange-400 uppercase";
-                    badge.className = "absolute top-6 right-8 bg-orange-500 text-white text-[10px] font-bold px-3 py-1 rounded-lg";
+                    statusText.innerText = "ĐANG NGHỈ";
+                    statusText.className = "text-[10px] font-extrabold text-orange-400 uppercase tracking-tighter";
                 } else {
-                    statusDot.className = "w-2 h-2 rounded-full bg-emerald-500 animate-pulse";
+                    statusDot.className = "w-2 h-2 rounded-full bg-emerald-500";
                     statusText.innerText = "ĐANG DIỄN RA";
-                    statusText.className = "text-[10px] font-bold text-emerald-500 uppercase";
-                    badge.className = "absolute top-6 right-8 bg-[#0f172a] text-white text-[10px] font-bold px-3 py-1 rounded-lg";
+                    statusText.className = "text-[10px] font-extrabold text-emerald-600 uppercase tracking-tighter";
                 }
             } else {
-                badge.innerText = "NGOÀI GIỜ";
-                caNameBox.innerText = "HẾT GIỜ LÀM VIỆC";
+                badge.innerText = "CA --";
                 statusDot.className = "w-2 h-2 rounded-full bg-slate-300";
-                statusText.innerText = "NGOÀI GIỜ";
+                statusText.innerText = "CHƯA VÀO CA";
             }
         }
 
         function processAttendance(data) {
             const now = new Date();
-            const timeStr = now.toLocaleTimeString('vi-VN', { hour12: false });
-            document.getElementById('display-name').innerText = data.name || "CHƯA ĐĂNG KÝ";
+            const time = now.toLocaleTimeString('vi-VN', { hour12: false });
+            const shift = getCurrentShift();
+            
+            document.getElementById('display-name').innerText = data.name || "NGƯỜI LẠ";
+            
             logs.unshift({
-                time: timeStr,
-                name: data.name || "N/A",
+                time,
+                name: data.name || "Người lạ",
                 mssv: data.mssv || "---",
                 class: data.className || "---",
-                shift: getCurrentShift()?.name || "N/A"
+                shift: shift ? shift.name : "N/A"
             });
             updateUI();
         }
@@ -373,32 +383,33 @@
         function updateUI() {
             const body = document.getElementById('log-body');
             body.innerHTML = logs.map(l => `
-                <tr class="border-b border-slate-50 hover:bg-slate-50 transition-colors">
-                    <td class="py-4 text-[11px] font-bold text-slate-400 font-mono">${l.time}</td>
-                    <td class="py-4 text-[13px] font-black text-slate-700 uppercase">${l.name}</td>
-                    <td class="py-4 text-[13px] font-medium text-slate-500">${l.mssv}</td>
-                    <td class="py-4 text-[13px] font-medium text-slate-500">${l.class}</td>
-                    <td class="py-4"><span class="bg-emerald-50 text-emerald-600 text-[9px] font-black px-3 py-1 rounded-full uppercase">${l.shift}</span></td>
+                <tr class="border-b border-slate-50 hover:bg-slate-50 transition-all">
+                    <td class="py-5 text-[11px] font-bold text-slate-400 font-mono">${l.time}</td>
+                    <td class="py-5 text-[14px] font-black text-slate-700 uppercase">${l.name}</td>
+                    <td class="py-5 text-[13px] font-medium text-slate-500">${l.mssv}</td>
+                    <td class="py-5 text-[13px] font-medium text-slate-500">${l.class}</td>
+                    <td class="py-5"><span class="tag-status ${l.shift === 'CA NGHỈ' ? 'bg-orange-50 text-orange-500' : 'bg-blue-50 text-blue-500'}">${l.shift}</span></td>
                 </tr>
             `).join('');
-            document.getElementById('present-count').innerText = logs.length;
-            document.getElementById('absent-count').innerText = Math.max(0, 40 - logs.length);
+            
+            const presentCount = logs.length;
+            document.getElementById('present-count').innerText = presentCount;
+            document.getElementById('absent-count').innerText = Math.max(0, 40 - presentCount);
         }
-
-        function clearLogs() { if(confirm("Xóa dữ liệu?")) { logs.length = 0; updateUI(); } }
 
         function exportToExcel() {
-            const worksheet = XLSX.utils.json_to_sheet(logs.map(l => ({ "Thời Gian": l.time, "Ca": l.shift, "Họ Tên": l.name, "MSSV": l.mssv, "Lớp": l.class })));
-            const workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, worksheet, "DiemDanh");
-            XLSX.writeFile(workbook, "Danh_Sach_Diem_Danh.xlsx");
+            const ws = XLSX.utils.json_to_sheet(logs);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Attendance");
+            XLSX.writeFile(wb, "Diem_Danh_Era.xlsx");
         }
+
+        function clearLogs() { if(confirm("Xóa lịch sử?")) { logs.length = 0; updateUI(); } }
 
         setInterval(() => {
             document.getElementById('clock').innerText = new Date().toLocaleTimeString('vi-VN', { hour12: false });
             updateShiftUI();
         }, 1000);
-
         updateShiftUI();
     </script>
 </body>
