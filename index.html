@@ -167,7 +167,7 @@
         <div class="lg:col-span-4 space-y-5">
             <div class="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-1 gap-3">
                 <div class="stat-card">
-                    <div><p class="text-[9px] font-black text-slate-400 uppercase">Sĩ số lớp (Ca này)</p><h4 class="text-3xl font-black text-orange-500" id="total-count">15</h4></div>
+                    <div><p class="text-[9px] font-black text-slate-400 uppercase">Sĩ số lớp (Ca này)</p><h4 class="text-3xl font-black text-orange-500" id="total-count">0</h4></div>
                     <i class="fa-solid fa-users text-slate-200 text-2xl"></i>
                 </div>
                 <div class="stat-card border-l-4 border-emerald-500">
@@ -175,7 +175,7 @@
                     <i class="fa-solid fa-user-check text-emerald-100 text-2xl"></i>
                 </div>
                 <div class="stat-card border-l-4 border-rose-500">
-                    <div><p class="text-[9px] font-black text-rose-500 uppercase">Vắng mặt (Ca này)</p><h4 class="text-3xl font-black" id="absent-count">15</h4></div>
+                    <div><p class="text-[9px] font-black text-rose-500 uppercase">Vắng mặt (Ca này)</p><h4 class="text-3xl font-black" id="absent-count">0</h4></div>
                     <i class="fa-solid fa-user-xmark text-rose-100 text-2xl"></i>
                 </div>
             </div>
@@ -203,10 +203,11 @@
     
     <!-- Footer V1.x.x -->
     <div class="mt-8 mb-4 border-t border-slate-200 pt-6 pb-2 text-center max-w-7xl mx-auto">
-        <p class="text-sm font-black text-slate-500 uppercase tracking-widest mb-2"><i class="fa-solid fa-code-merge mr-1"></i> Phiên bản V1.4.0 (Smart Class Size)</p>
+        <p class="text-sm font-black text-slate-500 uppercase tracking-widest mb-2"><i class="fa-solid fa-code-merge mr-1"></i> Phiên bản V1.4.1 (ESP32 V9 Shift Integration)</p>
         <div class="inline-block text-left text-[11px] text-slate-400 bg-white px-6 py-4 rounded-xl border border-slate-100 shadow-sm max-w-2xl mx-2">
             <p class="font-bold text-slate-500 mb-2">Lỗi đã Fix / Tính năng mới cập nhật:</p>
             <ul class="list-disc pl-4 space-y-1.5">
+                <li><span class="font-semibold text-slate-600">Đồng bộ Ca học ESP32:</span> Nhận trực tiếp dữ liệu V9 từ ESP32 để gán ca tự động cho các thẻ gốc (như bạn Danh - Ca 2).</li>
                 <li><span class="font-semibold text-slate-600">Sĩ số linh hoạt theo Ca:</span> Tự động đếm thẻ gốc trong ESP32 + thẻ được đăng ký trên Web thuộc đúng Ca đang diễn ra.</li>
                 <li><span class="font-semibold text-slate-600">Nhận diện Vào/Ra lớp:</span> Khi quét VÀO hiện màu Xanh ngọc (Check-in), quét RA hiện màu Đỏ (Check-out) với biểu tượng hoàn toàn khác biệt.</li>
                 <li><span class="font-semibold text-slate-600">Giao diện điện thoại:</span> Responsive hoàn hảo, tự xếp chồng và thêm thanh cuộn ngang để tránh vỡ giao diện.</li>
@@ -337,7 +338,7 @@
             onSnapshot(membersRef, (snapshot) => {
                 membersDb = {};
                 snapshot.forEach(doc => { membersDb[doc.id] = doc.data(); });
-                document.getElementById('registered-count-badge').innerText = `ĐÃ LƯU: ${Object.keys(membersDb).length} THẺ`;
+                document.getElementById('registered-count-badge').innerText = `ĐÃ LƯU: ${Object.keys(membersDb).length} THẺ WEB`;
                 processLogsAndRender();
             });
 
@@ -425,16 +426,17 @@
         }
 
         const eraWidgetConfig = new EraWidget();
-        let eConfig = { uid: null, name: null, mssv: null, class: null };
+        let eConfig = { uid: null, name: null, mssv: null, class: null, shift: null };
 
         eraWidgetConfig.init({
             needRealtimeConfigs: true,
-            maxRealtimeConfigsCount: 4,
+            maxRealtimeConfigsCount: 5, // Đã cập nhật lên 5 để nhận V9
             onConfiguration: (c) => {
                 eConfig.uid = c.realtime_configs[0];
                 eConfig.name = c.realtime_configs[1];
                 eConfig.mssv = c.realtime_configs[2];
                 eConfig.class = c.realtime_configs[3];
+                eConfig.shift = c.realtime_configs[4]; // Nhận V9
                 document.getElementById('era-status-dot').className = "w-2 h-2 rounded-full bg-emerald-500";
                 document.getElementById('era-status-text').innerText = "HỆ THỐNG TRỰC TUYẾN";
             },
@@ -443,6 +445,7 @@
                 const nameVal = v[eConfig.name?.id]?.value;
                 const mssvVal = v[eConfig.mssv?.id]?.value;
                 const classVal = v[eConfig.class?.id]?.value;
+                const shiftVal = eConfig.shift ? v[eConfig.shift?.id]?.value : ""; 
 
                 if (!uidVal || uidVal === "" || uidVal === "0" || uidVal === "None") return;
                 if (uidVal === lastUid && isProcessing) return;
@@ -450,7 +453,7 @@
                 lastUid = uidVal;
                 isProcessing = true;
 
-                handleHardwareScan({ uid: uidVal, name: nameVal, mssv: mssvVal, class: classVal });
+                handleHardwareScan({ uid: uidVal, name: nameVal, mssv: mssvVal, class: classVal, shift: shiftVal });
                 setTimeout(() => { isProcessing = false; }, 3000);
             }
         });
@@ -469,7 +472,8 @@
             let finalName = cloudMember ? cloudMember.name : (espNameValid ? data.name : null);
             let finalMssv = cloudMember ? cloudMember.mssv : (espNameValid ? data.mssv : "---");
             let finalClass = cloudMember ? cloudMember.class : (espNameValid ? data.class : "---");
-            let finalShiftReg = cloudMember ? cloudMember.shift : ""; 
+            // Lấy ca học (Từ Web DB ưu tiên trước, nếu không có thì lấy từ ESP32 V9)
+            let finalShiftReg = cloudMember ? cloudMember.shift : (espNameValid && data.shift && data.shift !== "---" && data.shift !== "None" ? data.shift : ""); 
 
             const now = new Date();
             const timeStr = now.toLocaleTimeString('vi-VN', { hour12: false });
