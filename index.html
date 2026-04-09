@@ -13,19 +13,30 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
         body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; color: #334155; margin: 0; padding: 20px; }
         .card { background: white; border-radius: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.02); border: 1px solid #e2e8f0; transition: all 0.3s ease; }
+        .stat-card { background: white; border-radius: 20px; padding: 16px; display: flex; align-items: center; justify-content: space-between; border: 1px solid #eef2f6; position: relative; overflow: hidden; }
+        .stat-card::after { content: ''; position: absolute; right: -10px; bottom: -10px; font-family: "Font Awesome 6 Free"; font-weight: 900; font-size: 60px; opacity: 0.03; pointer-events: none; }
+        .stat-user::after { content: '\f0c0'; }
+        .stat-present::after { content: '\f2bb'; }
+        .stat-absent::after { content: '\f506'; }
+
         .avatar-circle { width: 140px; height: 140px; border-radius: 50%; background: #f8fafc; display: flex; align-items: center; justify-content: center; border: 4px solid #f1f5f9; margin: 0 auto 20px; transition: 0.3s; }
         .input-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 10px 14px; font-size: 13px; width: 100%; transition: 0.2s; font-weight: 500; }
-        .input-box:focus { border-color: #3b82f6; outline: none; background: white; }
-        .btn-save { background: linear-gradient(135deg, #ff7e20, #f97316); color: white; border-radius: 14px; font-weight: 800; padding: 14px; width: 100%; transition: 0.3s; border: none; cursor: pointer; text-transform: uppercase; }
-        .log-table-container { max-height: 400px; overflow-y: auto; }
+        .input-box:focus { border-color: #3b82f6; outline: none; background: white; box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1); }
+        
+        .btn-save { background: linear-gradient(135deg, #ff7e20, #f97316); color: white; border-radius: 14px; font-weight: 800; padding: 14px; width: 100%; transition: 0.3s; border: none; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3); }
+        .btn-save:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(249, 115, 22, 0.4); }
+        
+        .log-table-container { max-height: 400px; overflow-y: auto; scrollbar-width: thin; }
         .log-table { width: 100%; border-collapse: collapse; }
         .log-table th { font-size: 10px; color: #64748b; text-transform: uppercase; padding: 12px; border-bottom: 2px solid #f1f5f9; text-align: left; position: sticky; top: 0; background: white; z-index: 10; }
         .log-table td { padding: 14px 12px; font-size: 13px; border-bottom: 1px solid #f8fafc; }
+
         .pulse-orange { animation: pulse-orange 2s infinite; }
         @keyframes pulse-orange { 0% { box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(249, 115, 22, 0); } 100% { box-shadow: 0 0 0 0 rgba(249, 115, 22, 0); } }
     </style>
 </head>
 <body>
+    <!-- Header -->
     <div class="flex justify-between items-center mb-6 px-2">
         <div class="flex items-center gap-4">
             <div class="w-12 h-12 bg-white rounded-2xl shadow-sm flex items-center justify-center text-orange-500 font-black text-2xl border border-orange-100">F</div>
@@ -115,6 +126,7 @@
 
         <!-- Cột Phải -->
         <div class="col-span-4 space-y-5">
+            <!-- Thống kê nhanh -->
             <div class="space-y-3">
                 <div class="card p-4 flex justify-between items-center border-l-4 border-slate-300">
                     <div><p class="text-[9px] font-black text-slate-400 uppercase">Sĩ số lớp</p><h4 class="text-3xl font-black">40</h4></div>
@@ -130,11 +142,13 @@
                 </div>
             </div>
 
+            <!-- Biểu đồ -->
             <div class="card p-5">
                 <h4 class="text-[10px] font-black text-slate-400 uppercase mb-4">Phân tích theo ca</h4>
                 <canvas id="attendanceChart" height="200"></canvas>
             </div>
 
+            <!-- Trạng thái Hệ thống -->
             <div class="card p-5 space-y-3 bg-slate-50">
                 <div class="flex items-center justify-between text-[10px] font-bold">
                     <span>ESP32 HARDWARE</span>
@@ -156,6 +170,7 @@
         const presentSet = new Set();
         let lastUid = ""; 
         let isProcessing = false;
+        let resetTimeout = null; // Biến quản lý timeout để tránh đụng độ
 
         // Setup Chart
         let ctx = document.getElementById('attendanceChart').getContext('2d');
@@ -185,8 +200,8 @@
                 const mssvVal = v[config.mssv?.id]?.value;
                 const classVal = v[config.class?.id]?.value;
 
-                // 1. Chỉ lọc tín hiệu hoàn toàn rỗng. Các giá trị "0" hoặc "None" thường là của thẻ chưa đăng ký
-                if (!uidVal || uidVal === "") return;
+                // 1. CHỐNG NHẢY CHỮ: Lọc BỎ HOÀN TOÀN các tín hiệu reset từ ESP32 ("0", "None", "")
+                if (!uidVal || uidVal === "" || uidVal === "0" || uidVal === "None") return;
 
                 // 2. Chống lặp (Debounce 3 giây cho mỗi lần quẹt)
                 if (uidVal === lastUid && isProcessing) return;
@@ -205,7 +220,7 @@
                     class: classVal
                 });
 
-                // Reset processing để nhận diện thẻ khác ngay lập tức, hoặc nhận diện lại thẻ cũ sau 3s
+                // Mở khóa processing sau 3s
                 setTimeout(() => { isProcessing = false; }, 3000);
             }
         });
@@ -219,29 +234,26 @@
             
             statusFeedback.innerText = "Status: Scanned";
 
-            // KIỂM TRA THẺ LẠ: Dựa trên dữ liệu tên từ thiết bị
+            // Nhận diện thẻ lạ
             const isUnknown = (!data.name || data.name === "0" || data.name === "None" || data.name === "NGUOI LA" || data.name === "nguoi la" || data.name === "Người lạ");
 
             if (isUnknown) {
-                // HIỂN THỊ THẺ LẠ TRÊN MÀN HÌNH CHÍNH
+                // Thẻ lạ
                 nameEl.innerText = "THẺ CHƯA ĐĂNG KÝ";
                 nameEl.classList.remove('text-slate-800');
-                nameEl.classList.add('text-orange-500'); // Màu cam cảnh báo
+                nameEl.classList.add('text-orange-500');
                 subEl.innerText = "UID: " + data.uid;
                 
-                // Đổi icon sang hình người lạ/dấu cộng
                 avatar.style.borderColor = "#f97316";
                 avatar.classList.add('pulse-orange');
                 avatarIcon.className = "fa-solid fa-user-plus text-7xl text-orange-400";
 
-                // Tự động điền UID vào ô đăng ký bên dưới
                 document.getElementById('reg-uid').value = data.uid;
 
-                // Đẩy vào nhật ký dưới dạng người lạ
                 addLog("THẺ CHƯA ĐĂNG KÝ", data.uid, "---", "THẺ LẠ", "bg-orange-50 text-orange-600");
 
             } else {
-                // HIỂN THỊ THÀNH VIÊN ĐÃ ĐĂNG KÝ
+                // Thẻ hợp lệ
                 nameEl.innerText = data.name;
                 nameEl.classList.remove('text-orange-500');
                 nameEl.classList.add('text-slate-800');
@@ -250,7 +262,6 @@
                 avatar.classList.remove('pulse-orange');
                 avatarIcon.className = "fa-solid fa-user-check text-7xl text-emerald-500";
                 
-                // Logic Vào/Ra
                 let isCheckOut = presentSet.has(data.mssv);
                 let statusText = isCheckOut ? "RA LỚP" : "VÀO LỚP";
                 
@@ -261,8 +272,11 @@
                 addLog(data.name, data.mssv, data.class, statusText, isCheckOut ? "bg-rose-50 text-rose-500" : "bg-emerald-50 text-emerald-600");
             }
             
-            // Tự động quay về trạng thái chờ sau 10 giây nếu không có thẻ mới
-            setTimeout(() => {
+            // Xóa bộ đếm ngược cũ nếu quẹt thẻ liên tiếp
+            if (resetTimeout) clearTimeout(resetTimeout);
+            
+            // Đặt lại bộ đếm ngược 10 giây mới
+            resetTimeout = setTimeout(() => {
                 if(lastUid === data.uid) resetDisplay();
             }, 10000);
         }
