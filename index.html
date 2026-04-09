@@ -79,7 +79,7 @@
                 <div class="flex justify-between mb-4">
                     <div class="flex items-center gap-2">
                         <i class="fa-solid fa-database text-orange-500"></i>
-                        <h3 class="font-black text-sm uppercase text-slate-700">Quản lý Thành Viên (Cloud)</h3>
+                        <h3 class="font-black text-sm uppercase text-slate-700">Quản lý Thành Viên (Hệ thống)</h3>
                     </div>
                     <span class="text-[10px] font-bold text-orange-400">QUÉT THẺ ĐỂ LẤY UID</span>
                 </div>
@@ -103,7 +103,7 @@
                 </div>
                 <div class="flex gap-3">
                     <button class="btn-save flex-1 flex items-center justify-center gap-2" onclick="window.saveNewMember()">
-                        <i class="fa-solid fa-cloud-arrow-up"></i> Lưu thẻ vào Cloud
+                        <i class="fa-solid fa-cloud-arrow-up"></i> Lưu thông tin thẻ
                     </button>
                     <button class="btn-delete flex items-center justify-center gap-2 px-6" onclick="window.deleteMember()">
                         <i class="fa-solid fa-trash"></i> Xóa thẻ
@@ -172,7 +172,7 @@
                     <span id="device-dot" class="w-2 h-2 rounded-full bg-emerald-500"></span>
                 </div>
                 <div class="bg-white p-3 rounded-xl border border-slate-200 text-[11px]">
-                    <p class="text-slate-400 font-black uppercase text-[8px] mb-1">Database Cloud</p>
+                    <p class="text-slate-400 font-black uppercase text-[8px] mb-1">Trạng thái Database</p>
                     <p id="cloud-status" class="font-bold text-slate-700">Đang khởi tạo...</p>
                 </div>
                 <button onclick="location.reload()" class="w-full py-3 bg-white border border-slate-200 rounded-xl text-[10px] font-black hover:bg-slate-100 transition-all">LÀM MỚI HỆ THỐNG</button>
@@ -206,19 +206,26 @@
             options: { plugins: { legend: { display: false } }, scales: { y: { display: false }, x: { grid: { display: false }, ticks: { font: { size: 8 } } } } }
         });
 
-        // --- FIREBASE INIT ---
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
-            // Dự phòng nếu chạy ngoài nền tảng
-            projectId: "demo-project"
-        };
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'demo-app';
-
+        // --- FIREBASE INIT (Chế độ an toàn chống sập) ---
+        let app, auth, db, appId;
+        let isCloudActive = false;
         let currentUser = null;
-        let membersDb = {}; // Lưu trữ thành viên: { "UID": {name, mssv, class} }
-        let logsDb = [];    // Lưu trữ toàn bộ log
+
+        try {
+            if (typeof __firebase_config !== 'undefined' && __firebase_config) {
+                const firebaseConfig = JSON.parse(__firebase_config);
+                app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
+                appId = typeof __app_id !== 'undefined' ? __app_id : 'demo-app';
+                isCloudActive = true;
+            }
+        } catch (error) {
+            console.warn("Không tìm thấy cấu hình Cloud, hệ thống tự động chuyển sang chế độ Nội bộ (Offline).");
+        }
+
+        let membersDb = {}; 
+        let logsDb = [];    
 
         let lastUid = ""; 
         let isProcessing = false;
@@ -240,43 +247,52 @@
         }
 
         // --- AUTHENTICATION ---
-        const initAuth = async () => {
-            try {
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
+        if (isCloudActive) {
+            const initAuth = async () => {
+                try {
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        await signInWithCustomToken(auth, __initial_auth_token);
+                    } else {
+                        await signInAnonymously(auth);
+                    }
+                } catch (error) {
+                    console.error("Auth Error:", error);
+                    setupLocalMode("Lỗi xác thực Cloud!");
                 }
-            } catch (error) {
-                console.error("Auth Error:", error);
-                document.getElementById('cloud-status').innerText = "Lỗi xác thực!";
-            }
-        };
+            };
 
-        onAuthStateChanged(auth, (user) => {
-            currentUser = user;
-            if (user) {
-                document.getElementById('cloud-status').innerText = "Đã kết nối Cloud";
-                document.getElementById('cloud-status').className = "font-bold text-emerald-600";
-                loadCloudData();
-            }
-        });
+            onAuthStateChanged(auth, (user) => {
+                currentUser = user;
+                if (user) {
+                    document.getElementById('cloud-status').innerText = "Đã kết nối Cloud (Online)";
+                    document.getElementById('cloud-status').className = "font-bold text-emerald-600";
+                    loadCloudData();
+                }
+            });
 
-        initAuth();
+            initAuth();
+        } else {
+            setupLocalMode("Bộ nhớ thiết bị (Offline)");
+        }
+
+        function setupLocalMode(message) {
+            document.getElementById('cloud-status').innerText = message;
+            document.getElementById('cloud-status').className = "font-bold text-orange-500";
+            // Render ban đầu cho chế độ local
+            processLogsAndRender();
+        }
 
         // --- DATA SYNC (FIRESTORE) ---
         function loadCloudData() {
-            if (!currentUser) return;
+            if (!currentUser || !isCloudActive) return;
 
-            // Lắng nghe danh sách thành viên
             const membersRef = collection(db, 'artifacts', appId, 'public', 'data', 'members');
             onSnapshot(membersRef, (snapshot) => {
                 membersDb = {};
                 snapshot.forEach(doc => { membersDb[doc.id] = doc.data(); });
                 document.getElementById('total-count').innerText = Object.keys(membersDb).length;
-            }, (error) => console.error("Lỗi tải members:", error));
+            });
 
-            // Lắng nghe lịch sử điểm danh
             const logsRef = collection(db, 'artifacts', appId, 'public', 'data', 'attendance_logs');
             onSnapshot(logsRef, (snapshot) => {
                 logsDb = [];
@@ -285,10 +301,9 @@
                     data.id = doc.id;
                     logsDb.push(data);
                 });
-                // Sắp xếp log mới nhất lên đầu
                 logsDb.sort((a, b) => b.timestamp - a.timestamp);
                 processLogsAndRender();
-            }, (error) => console.error("Lỗi tải logs:", error));
+            });
         }
 
         // --- XỬ LÝ LOGIC CA & HIỂN THỊ ---
@@ -301,33 +316,19 @@
             });
         }
 
+        // FIX TREO MÁY: Hàm này giờ chỉ chạy khi có cập nhật dữ liệu hoặc đổi Ca học (Không chạy mỗi giây nữa)
         function processLogsAndRender() {
             const now = new Date();
             const todayStr = now.toDateString();
-            currentShift = getShiftByTime(now);
             
-            // Xử lý qua ngày mới: Biểu đồ và dữ liệu coi như làm mới
-            if (todayStr !== currentDateString) {
-                currentDateString = todayStr;
-            }
-
             document.getElementById('current-shift-badge').innerText = currentShift ? currentShift.name.toUpperCase() : "NGOÀI CA";
+            document.getElementById('total-count').innerText = Object.keys(membersDb).length;
 
             let currentShiftLogs = [];
-            let todayChartData = [0,0,0,0,0];
             let presentInCurrentShift = new Set();
 
             logsDb.forEach(log => {
-                // Lọc theo ngày hôm nay
                 if (log.date === todayStr) {
-                    // Cập nhật dữ liệu biểu đồ cho mọi ca trong hôm nay
-                    if (log.shiftIndex !== undefined && log.status === "VÀO LỚP") {
-                        // Logic đơn giản: đếm số lượt vào lớp trong ngày cho biểu đồ
-                        // Nếu cần đếm chính xác số người duy nhất, cần map Set() cho từng ca.
-                        // Ở đây ta đếm số thẻ được quét VÀO LỚP.
-                    }
-
-                    // Lọc log cho bảng hiển thị (Chỉ hiện của Ca hiện tại để dễ nhìn)
                     if (currentShift && log.shiftId === currentShift.id) {
                         currentShiftLogs.push(log);
                         if (log.status === "VÀO LỚP") presentInCurrentShift.add(log.mssv);
@@ -336,7 +337,6 @@
                 }
             });
 
-            // Render Bảng
             const tbody = document.getElementById('log-body');
             tbody.innerHTML = currentShiftLogs.map(l => `
                 <tr class="hover:bg-slate-50 transition-colors">
@@ -348,13 +348,12 @@
                 </tr>
             `).join('');
 
-            // Thống kê Ca hiện tại
             const present = presentInCurrentShift.size;
             const total = Object.keys(membersDb).length;
             document.getElementById('present-count').innerText = present;
             document.getElementById('absent-count').innerText = Math.max(0, total - present);
 
-            // Tính toán lại biểu đồ chính xác theo người duy nhất mỗi ca
+            // Cập nhật biểu đồ nhẹ nhàng
             let chartSets = [new Set(), new Set(), new Set(), new Set(), new Set()];
             logsDb.forEach(log => {
                 if(log.date === todayStr && log.shiftIndex >= 0 && log.shiftIndex <= 4) {
@@ -384,7 +383,6 @@
             onValues: (v) => {
                 const uidVal = v[eConfig.uid?.id]?.value;
 
-                // Bỏ qua giá trị rác
                 if (!uidVal || uidVal === "" || uidVal === "0" || uidVal === "None") return;
                 if (uidVal === lastUid && isProcessing) return;
 
@@ -403,7 +401,6 @@
             const avatar = document.getElementById('avatar-container');
             const avatarIcon = document.getElementById('avatar-icon');
             
-            // KIỂM TRA DATABASE CLOUD thay vì code ESP32
             const member = membersDb[uid];
             const now = new Date();
             const timeStr = now.toLocaleTimeString('vi-VN', { hour12: false });
@@ -412,7 +409,6 @@
             document.getElementById('reg-uid').value = uid;
 
             if (!member) {
-                // THẺ LẠ
                 nameEl.innerText = "THẺ CHƯA ĐĂNG KÝ";
                 nameEl.classList.remove('text-slate-800');
                 nameEl.classList.add('text-orange-500');
@@ -423,13 +419,11 @@
                 
                 window.showToast(`Phát hiện thẻ mới: ${uid}`, 'warning');
                 
-                // Lấy thông tin có sẵn nếu ESP32 gửi lên
                 document.getElementById('reg-name').value = "";
                 document.getElementById('reg-mssv').value = "";
                 document.getElementById('reg-class').value = "";
 
             } else {
-                // THÀNH VIÊN ĐÃ ĐĂNG KÝ
                 nameEl.innerText = member.name;
                 nameEl.classList.remove('text-orange-500');
                 nameEl.classList.add('text-slate-800');
@@ -437,10 +431,8 @@
                 avatar.classList.remove('pulse-orange');
                 avatarIcon.className = "fa-solid fa-user-check text-7xl text-emerald-500";
 
-                // Kiểm tra trạng thái hiện tại trong ca
                 let isCheckOut = false;
                 if (currentShift) {
-                    // Xem trong current logs có người này đang VÀO không
                     let userLogsInShift = logsDb.filter(l => l.date === currentDateString && l.shiftId === currentShift.id && l.mssv === member.mssv);
                     if (userLogsInShift.length > 0 && userLogsInShift[0].status === "VÀO LỚP") {
                         isCheckOut = true;
@@ -451,27 +443,30 @@
                 let colorClass = isCheckOut ? "bg-rose-50 text-rose-500" : "bg-emerald-50 text-emerald-600";
                 avatar.style.borderColor = isCheckOut ? "#f43f5e" : "#10b981";
 
-                // LƯU LOG LÊN FIRESTORE
-                if (currentUser) {
+                let logEntry = {
+                    uid: uid,
+                    name: member.name,
+                    mssv: member.mssv,
+                    class: member.class,
+                    time: timeStr,
+                    timestamp: now.getTime(),
+                    date: currentDateString,
+                    status: statusStr,
+                    color: colorClass,
+                    shiftId: currentShift ? currentShift.id : "none",
+                    shiftIndex: currentShift ? currentShift.index : -1
+                };
+
+                if (isCloudActive && currentUser) {
                     const logRef = collection(db, 'artifacts', appId, 'public', 'data', 'attendance_logs');
-                    const newLogDoc = doc(logRef);
-                    setDoc(newLogDoc, {
-                        uid: uid,
-                        name: member.name,
-                        mssv: member.mssv,
-                        class: member.class,
-                        time: timeStr,
-                        timestamp: now.getTime(),
-                        date: currentDateString,
-                        status: statusStr,
-                        color: colorClass,
-                        shiftId: currentShift ? currentShift.id : "none",
-                        shiftIndex: currentShift ? currentShift.index : -1
-                    }).catch(err => console.error("Lỗi lưu log:", err));
+                    setDoc(doc(logRef), logEntry).catch(err => console.error("Lỗi lưu log:", err));
+                } else {
+                    logEntry.id = Date.now().toString();
+                    logsDb.unshift(logEntry);
+                    processLogsAndRender(); // Gọi cập nhật tay khi ở chế độ offline
                 }
             }
 
-            // Tự reset màn hình chính sau 8 giây
             setTimeout(() => {
                 if(lastUid === uid) {
                     nameEl.innerText = "SẴN SÀNG";
@@ -485,10 +480,7 @@
         }
 
         // --- CÁC HÀM TƯƠNG TÁC TỪ GIAO DIỆN ---
-
-        // Lưu thẻ
         window.saveNewMember = async function() {
-            if (!currentUser) return window.showToast("Hệ thống chưa kết nối Cloud!", "error");
             const uid = document.getElementById('reg-uid').value;
             const name = document.getElementById('reg-name').value;
             const mssv = document.getElementById('reg-mssv').value;
@@ -497,74 +489,80 @@
             if(!uid || uid === "Đang chờ thẻ...") return window.showToast("Quét thẻ lạ trước khi lưu!", "warning");
             if(!name) return window.showToast("Cần nhập Họ và Tên!", "warning");
 
-            try {
-                const memberRef = doc(db, 'artifacts', appId, 'public', 'data', 'members', uid);
-                await setDoc(memberRef, {
-                    name: name,
-                    mssv: mssv || "---",
-                    class: clazz || "---",
-                    registeredAt: Date.now()
-                });
-                window.showToast(`Đã lưu thành công: ${name}`);
-                
-                // Clear form
-                document.getElementById('reg-uid').value = "Đang chờ thẻ...";
-                document.getElementById('reg-name').value = "";
-                document.getElementById('reg-mssv').value = "";
-                document.getElementById('reg-class').value = "";
-                lastUid = ""; // Mở khóa quét lại thẻ này
-            } catch (error) {
-                console.error("Lỗi lưu:", error);
-                window.showToast("Lỗi khi lưu dữ liệu!", "error");
+            let memberData = { name: name, mssv: mssv || "---", class: clazz || "---", registeredAt: Date.now() };
+
+            if (isCloudActive && currentUser) {
+                try {
+                    const memberRef = doc(db, 'artifacts', appId, 'public', 'data', 'members', uid);
+                    await setDoc(memberRef, memberData);
+                    window.showToast(`Đã lưu Cloud thành công: ${name}`);
+                } catch (error) {
+                    window.showToast("Lỗi khi lưu lên Cloud!", "error");
+                }
+            } else {
+                membersDb[uid] = memberData;
+                window.showToast(`Đã lưu cục bộ thành công: ${name}`);
+                processLogsAndRender();
             }
+            
+            document.getElementById('reg-uid').value = "Đang chờ thẻ...";
+            document.getElementById('reg-name').value = "";
+            document.getElementById('reg-mssv').value = "";
+            document.getElementById('reg-class').value = "";
+            lastUid = ""; 
         };
 
-        // Xóa thẻ
         window.deleteMember = async function() {
-            if (!currentUser) return window.showToast("Hệ thống chưa kết nối Cloud!", "error");
             const uid = document.getElementById('reg-uid').value;
             if(!uid || uid === "Đang chờ thẻ...") return window.showToast("Quét thẻ cần xóa trước!", "warning");
 
             if(confirm("Bạn có chắc chắn muốn xóa thẻ này khỏi hệ thống?")) {
-                try {
-                    await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'members', uid));
-                    window.showToast("Đã xóa thẻ khỏi hệ thống!");
-                    document.getElementById('reg-uid').value = "Đang chờ thẻ...";
-                    document.getElementById('reg-name').value = "";
-                    document.getElementById('reg-mssv').value = "";
-                    document.getElementById('reg-class').value = "";
-                    lastUid = "";
-                } catch (error) {
-                    console.error("Lỗi xóa:", error);
-                    window.showToast("Lỗi khi xóa thẻ!", "error");
+                if (isCloudActive && currentUser) {
+                    try {
+                        await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'members', uid));
+                        window.showToast("Đã xóa thẻ khỏi Cloud!");
+                    } catch (error) {
+                        window.showToast("Lỗi khi xóa thẻ!", "error");
+                    }
+                } else {
+                    delete membersDb[uid];
+                    window.showToast("Đã xóa thẻ cục bộ!");
+                    processLogsAndRender();
                 }
+
+                document.getElementById('reg-uid').value = "Đang chờ thẻ...";
+                document.getElementById('reg-name').value = "";
+                document.getElementById('reg-mssv').value = "";
+                document.getElementById('reg-class').value = "";
+                lastUid = "";
             }
         };
 
-        // Xóa lịch sử (Xóa tất cả log)
         window.clearLogs = async function() {
-            if (!currentUser) return window.showToast("Hệ thống chưa kết nối Cloud!", "error");
             if (logsDb.length === 0) return window.showToast("Không có dữ liệu để xóa!", "warning");
 
-            if(confirm("Xóa toàn bộ lịch sử điểm danh trên Cloud? Quá trình này không thể hoàn tác!")) {
+            if(confirm("Xóa toàn bộ lịch sử điểm danh? Quá trình này không thể hoàn tác!")) {
                 window.showToast("Đang xóa dữ liệu...");
-                try {
-                    for (let log of logsDb) {
-                        await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'attendance_logs', log.id));
+                if (isCloudActive && currentUser) {
+                    try {
+                        for (let log of logsDb) {
+                            await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'attendance_logs', log.id));
+                        }
+                        window.showToast("Đã dọn dẹp lịch sử trên Cloud!");
+                    } catch (error) {
+                        window.showToast("Có lỗi xảy ra khi xóa!", "error");
                     }
-                    window.showToast("Đã dọn dẹp lịch sử thành công!");
-                } catch (error) {
-                    console.error("Lỗi xóa logs:", error);
-                    window.showToast("Có lỗi xảy ra khi xóa!", "error");
+                } else {
+                    logsDb = [];
+                    processLogsAndRender();
+                    window.showToast("Đã dọn dẹp lịch sử cục bộ!");
                 }
             }
         };
 
-        // Xuất Excel Chuyên nghiệp
         window.exportExcel = function() {
             if (logsDb.length === 0) return window.showToast("Không có dữ liệu để xuất!", "warning");
             
-            // Xây dựng mảng dữ liệu đẹp
             const exportData = logsDb.map((l, index) => ({
                 "STT": index + 1,
                 "Ngày": l.date,
@@ -577,33 +575,32 @@
             }));
 
             const ws = XLSX.utils.json_to_sheet(exportData);
-            
-            // Căn chỉnh độ rộng cột chuyên nghiệp
-            ws['!cols'] = [
-                {wch: 5},  // STT
-                {wch: 15}, // Ngày
-                {wch: 12}, // Thời Gian
-                {wch: 10}, // Ca
-                {wch: 25}, // Họ Tên
-                {wch: 15}, // MSSV
-                {wch: 15}, // Lớp
-                {wch: 15}  // Trạng Thái
-            ];
-
+            ws['!cols'] = [ {wch: 5}, {wch: 15}, {wch: 12}, {wch: 10}, {wch: 25}, {wch: 15}, {wch: 15}, {wch: 15} ];
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, "Báo Cáo Điểm Danh");
             XLSX.writeFile(wb, `Bao_Cao_Diem_Danh_${new Date().getTime()}.xlsx`);
             window.showToast("Xuất Excel thành công!");
         };
 
-        // Đồng hồ
+        // --- CẬP NHẬT ĐỒNG HỒ & SMART RENDER ---
         setInterval(() => {
             const now = new Date();
             document.getElementById('clock').innerText = now.toLocaleTimeString('vi-VN', { hour12: false });
             const days = ["CHỦ NHẬT", "THỨ HAI", "THỨ BA", "THỨ TƯ", "THỨ NĂM", "THỨ SÁU", "THỨ BẢY"];
             document.getElementById('date-now').innerText = `${days[now.getDay()]}, ${now.getDate()} THÁNG ${now.getMonth() + 1}, ${now.getFullYear()}`;
-            processLogsAndRender(); // Gọi lặp để tự động cập nhật nếu qua ca mới
+            
+            // Cập nhật giao diện tự động khi chuyển sang Ca mới
+            const newShift = getShiftByTime(now);
+            const todayStr = now.toDateString();
+            if (todayStr !== currentDateString || (newShift && currentShift && newShift.id !== currentShift.id)) {
+                currentDateString = todayStr;
+                currentShift = newShift;
+                processLogsAndRender();
+            }
         }, 1000);
+        
+        // Khởi động ban đầu
+        currentShift = getShiftByTime(new Date());
     </script>
 </body>
 </html>
