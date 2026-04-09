@@ -103,6 +103,7 @@
                     <i class="fa-solid fa-expand text-7xl text-slate-400/50 transition-colors" id="avatar-icon"></i>
                 </div>
                 <div class="text-center z-10">
+                    <!-- FIX MÀU CHỮ: Đã chuyển text-white thay vì text-slate-800 để không bị tàng hình -->
                     <h2 id="display-name" class="text-4xl md:text-5xl font-black text-white uppercase mb-3 tracking-tighter transition-all duration-300">SẴN SÀNG</h2>
                     <div class="inline-flex items-center gap-2 bg-slate-800/80 backdrop-blur-md px-4 py-1.5 rounded-full border border-slate-700">
                         <span class="w-2 h-2 rounded-full bg-orange-500 animate-pulse" id="scan-status-dot"></span>
@@ -186,16 +187,11 @@
                             </div>
                         </div>
                     </div>
-                    
-                    <!-- EXCEL DATE FILTER & BUTTONS -->
-                    <div class="flex gap-2 w-full sm:w-auto items-center flex-wrap sm:flex-nowrap">
-                        <!-- Thêm ô chọn ngày -->
-                        <input type="date" id="export-date" class="bg-white border border-emerald-100 text-slate-600 text-[10px] font-black px-3 py-2.5 rounded-xl hover:border-emerald-300 focus:border-emerald-500 focus:outline-none transition-colors shadow-sm cursor-pointer uppercase flex-1 sm:flex-none">
-                        
-                        <button onclick="window.exportExcel()" class="flex-1 sm:flex-none bg-emerald-50 text-emerald-600 border border-emerald-100 text-[10px] font-black px-4 py-2.5 rounded-xl hover:bg-emerald-500 hover:text-white transition-all duration-300 shadow-sm whitespace-nowrap">
+                    <div class="flex gap-2 w-full sm:w-auto">
+                        <button onclick="window.exportExcel()" class="flex-1 sm:flex-none bg-emerald-50 text-emerald-600 border border-emerald-100 text-[10px] font-black px-4 py-2.5 rounded-xl hover:bg-emerald-500 hover:text-white transition-all duration-300 shadow-sm">
                             <i class="fa-solid fa-file-excel mr-1"></i> XUẤT EXCEL
                         </button>
-                        <button onclick="window.clearLogs()" class="flex-1 sm:flex-none bg-rose-50 text-rose-600 border border-rose-100 text-[10px] font-black px-4 py-2.5 rounded-xl hover:bg-rose-500 hover:text-white transition-all duration-300 shadow-sm whitespace-nowrap">
+                        <button onclick="window.clearLogs()" class="flex-1 sm:flex-none bg-rose-50 text-rose-600 border border-rose-100 text-[10px] font-black px-4 py-2.5 rounded-xl hover:bg-rose-500 hover:text-white transition-all duration-300 shadow-sm">
                             <i class="fa-solid fa-trash-can mr-1"></i> XÓA LỊCH SỬ
                         </button>
                     </div>
@@ -274,7 +270,7 @@
                 </div>
                 <div class="bg-slate-900 p-4 rounded-xl border border-slate-700 text-[12px] font-mono mb-4 relative z-10">
                     <p class="text-slate-500 uppercase text-[9px] font-sans font-bold mb-1">Database Endpoint</p>
-                    <p id="cloud-status" class="font-bold text-emerald-400">Initializing...</p>
+                    <p id="cloud-status" class="font-bold text-blue-400">Initializing...</p>
                 </div>
                 <button onclick="location.reload()" class="w-full py-3.5 bg-slate-700 hover:bg-slate-600 rounded-xl text-[11px] font-black text-white transition-all uppercase tracking-widest relative z-10">
                     <i class="fa-solid fa-rotate-right mr-2"></i>Làm mới kết nối
@@ -283,13 +279,13 @@
         </div>
     </div>
     
-    <!-- Footer -->
+    <!-- Footer V2.2.x -->
     <div class="mt-12 mb-6 border-t border-slate-200/60 pt-8 pb-4 text-center max-w-7xl mx-auto px-4">
         <p class="text-sm font-black text-slate-400 uppercase tracking-widest mb-3 flex items-center justify-center gap-2">
-            <i class="fa-solid fa-code-merge text-orange-500"></i> Hệ Thống Điểm Danh Fpoly <span class="bg-slate-200 text-slate-600 px-2 py-0.5 rounded text-[10px]">V2.1.0</span>
+            <i class="fa-solid fa-code-merge text-orange-500"></i> Hệ Thống Điểm Danh Fpoly <span class="bg-slate-200 text-slate-600 px-2 py-0.5 rounded text-[10px]">V2.2.0</span>
         </p>
         <p class="text-[11px] font-semibold text-slate-400 max-w-2xl mx-auto">
-            Bản nâng cấp V2.1.0: Thêm tính năng Chống điểm danh gian lận (1 phút Cooldown giữa Vào/Ra Lớp). Tích hợp bộ lọc xuất Excel chuyên nghiệp theo ngày tùy chọn.
+            Bản nâng cấp V2.2.0: Sửa lỗi hiển thị chữ màu đen trên nền đen. Tối ưu thuật toán Sĩ số động (Không fallback về 15, tính chuẩn xác từ danh sách Database). Bổ sung nhật ký thẻ lạ.
         </p>
     </div>
 
@@ -299,7 +295,7 @@
             <div class="px-8 py-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
                 <h3 class="font-black text-slate-800 uppercase text-base flex items-center gap-3">
                     <div class="w-8 h-8 rounded-lg bg-teal-100 text-teal-600 flex items-center justify-center"><i class="fa-solid fa-list-check"></i></div>
-                    Danh sách sinh viên đã lưu
+                    Danh sách sinh viên đã lưu (Web)
                 </h3>
                 <button onclick="window.closeManageMembersModal()" class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 hover:bg-rose-100 hover:text-rose-500 transition-colors flex items-center justify-center"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
@@ -332,9 +328,8 @@
         import { getAuth, onAuthStateChanged, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // --- CẤU HÌNH THỜI GIAN CA HỌC, SĨ SỐ VÀ COOLDOWN ---
-        const BASE_STUDENTS_ESP = 15; 
-        const CHECKOUT_COOLDOWN_MINUTES = 1; // 1 Phút để bạn dễ Test (Sau khi Test xong có thể đổi thành 15)
+        // --- CẤU HÌNH THỜI GIAN CA HỌC & COOLDOWN ---
+        const CHECKOUT_COOLDOWN_MINUTES = 1; // 1 Phút để test
 
         const SHIFTS = [
             { id: "ca1", name: "Ca 1", start: "07:00", end: "09:15", index: 0 },
@@ -344,12 +339,13 @@
             { id: "ca5", name: "Ca 5", start: "17:15", end: "19:30", index: 4 }
         ];
         
+        // DANH SÁCH THẺ ĐƯỢC NẠP CỨNG VÀO ESP32 (Để Web tính Sĩ Số cho chuẩn)
         const ESP32_STUDENTS = [
-            { uid: "96576E05", shift: "Ca 2" },
-            { uid: "A1B2C3D4", shift: "Ca 1" }
+            { uid: "96576E05", shift: "Ca 2" }, // Danh - Thuộc Ca 2
+            { uid: "A1B2C3D4", shift: "Ca 1" }  // Ví dụ 1 thẻ khác thuộc Ca 1
         ];
 
-        // Khởi tạo Chart (Giao diện mới)
+        // Khởi tạo Chart
         let ctx = document.getElementById('attendanceChart').getContext('2d');
         let gradientOrange = ctx.createLinearGradient(0, 0, 0, 200);
         gradientOrange.addColorStop(0, '#f97316');
@@ -381,7 +377,7 @@
 
         // Set Default Date for Export Input
         const todayIso = new Date().toISOString().split('T')[0];
-        document.getElementById('export-date').value = todayIso;
+        // document.getElementById('export-date').value = todayIso;
 
         // --- FIREBASE INIT ---
         let app, auth, db, appId;
@@ -448,19 +444,20 @@
             onAuthStateChanged(auth, (user) => {
                 currentUser = user;
                 if (user) {
-                    document.getElementById('cloud-status').innerText = "Online Database Connected";
+                    document.getElementById('cloud-status').innerText = "Cloud Synced";
                     document.getElementById('cloud-status').className = "font-bold text-emerald-400";
                     loadCloudData();
                 }
             });
             initAuth();
         } else {
-            setupLocalMode("Local Storage (Offline)");
+            setupLocalMode("Lưu trữ nội bộ (Trình duyệt)");
         }
 
         function setupLocalMode(message) {
             document.getElementById('cloud-status').innerText = message;
-            document.getElementById('cloud-status').className = "font-bold text-amber-400";
+            // Thay đổi màu cho chế độ Offline thân thiện hơn
+            document.getElementById('cloud-status').className = "font-bold text-blue-400";
             processLogsAndRender();
         }
 
@@ -506,17 +503,18 @@
             
             document.getElementById('current-shift-badge').innerText = currentShift ? currentShift.name.toUpperCase() : "NGOÀI CA";
             
+            // TÍNH SĨ SỐ LỚP CHUẨN XÁC THEO CA (ESP32 + WEB)
             let baseEspForThisShift = 0;
             let webRegisteredForThisShift = 0;
 
             if (currentShift) {
                 baseEspForThisShift = ESP32_STUDENTS.filter(s => s.shift === currentShift.name).length;
-                if(baseEspForThisShift === 0) baseEspForThisShift = BASE_STUDENTS_ESP; 
                 webRegisteredForThisShift = Object.values(membersDb).filter(m => m.shift === currentShift.name).length;
             }
             
             let totalStudentsForShift = baseEspForThisShift + webRegisteredForThisShift;
             
+            // Effect update numbers
             document.getElementById('total-count').innerText = totalStudentsForShift;
             document.getElementById('registered-count-badge').innerHTML = `<i class="fa-solid fa-database"></i> ĐÃ LƯU: ${Object.keys(membersDb).length}`;
 
@@ -527,15 +525,15 @@
                 if (log.date === todayStr) {
                     if (currentShift && log.shiftId === currentShift.id) {
                         currentShiftLogs.push(log);
-                        if (log.status === "VÀO LỚP") presentInCurrentShift.add(log.mssv || log.uid); 
-                        if (log.status === "RA LỚP") presentInCurrentShift.delete(log.mssv || log.uid);
+                        if (log.status === "VÀO LỚP") presentInCurrentShift.add(log.uid); 
+                        if (log.status === "RA LỚP") presentInCurrentShift.delete(log.uid);
                     }
                 }
             });
 
             const tbody = document.getElementById('log-body');
             if (currentShiftLogs.length === 0) {
-                 tbody.innerHTML = `<tr><td colspan="5" class="py-12 text-center opacity-40"><i class="fa-solid fa-inbox text-5xl mb-3 block text-slate-300"></i><span class="text-xs font-bold uppercase tracking-widest text-slate-500">Chưa có người điểm danh ca này</span></td></tr>`;
+                 tbody.innerHTML = `<tr><td colspan="5" class="py-12 text-center opacity-40"><i class="fa-solid fa-inbox text-5xl mb-3 block text-slate-400"></i><span class="text-xs font-bold uppercase tracking-widest text-slate-500">Chưa có người điểm danh ca này</span></td></tr>`;
             } else {
                 tbody.innerHTML = currentShiftLogs.map(l => `
                     <tr class="hover:bg-orange-50/30 transition-colors">
@@ -555,8 +553,8 @@
             let chartSets = [new Set(), new Set(), new Set(), new Set(), new Set()];
             logsDb.forEach(log => {
                 if(log.date === todayStr && log.shiftIndex >= 0 && log.shiftIndex <= 4) {
-                    if(log.status === "VÀO LỚP") chartSets[log.shiftIndex].add(log.mssv || log.uid);
-                    if(log.status === "RA LỚP") chartSets[log.shiftIndex].delete(log.mssv || log.uid);
+                    if(log.status === "VÀO LỚP") chartSets[log.shiftIndex].add(log.uid);
+                    if(log.status === "RA LỚP") chartSets[log.shiftIndex].delete(log.uid);
                 }
             });
             attendanceChart.data.datasets[0].data = chartSets.map(s => s.size);
@@ -580,20 +578,27 @@
                 document.getElementById('era-status-text').classList.replace('text-slate-500', 'text-emerald-600');
             },
             onValues: (v) => {
-                const uidVal = v[eConfig.uid?.id]?.value;
-                const nameVal = v[eConfig.name?.id]?.value;
-                const mssvVal = v[eConfig.mssv?.id]?.value;
-                const classVal = v[eConfig.class?.id]?.value;
-                const shiftVal = eConfig.shift ? v[eConfig.shift?.id]?.value : ""; 
+                try {
+                    const uidVal = v[eConfig.uid?.id]?.value;
+                    const nameVal = v[eConfig.name?.id]?.value;
+                    const mssvVal = v[eConfig.mssv?.id]?.value;
+                    const classVal = v[eConfig.class?.id]?.value;
+                    const shiftVal = eConfig.shift ? v[eConfig.shift?.id]?.value : ""; 
 
-                if (!uidVal || uidVal === "" || uidVal === "0" || uidVal === "None") return;
-                if (uidVal === lastUid && isProcessing) return;
+                    // Ngăn chặn tín hiệu reset ("0", "None", "") từ ESP32 phá vỡ giao diện
+                    if (!uidVal || uidVal === "" || uidVal === "0" || uidVal === "None") return;
+                    if (uidVal === lastUid && isProcessing) return;
 
-                lastUid = uidVal;
-                isProcessing = true;
+                    lastUid = uidVal;
+                    isProcessing = true;
 
-                handleHardwareScan({ uid: uidVal, name: nameVal, mssv: mssvVal, class: classVal, shift: shiftVal });
-                setTimeout(() => { isProcessing = false; }, 3000);
+                    handleHardwareScan({ uid: uidVal, name: nameVal, mssv: mssvVal, class: classVal, shift: shiftVal });
+                } catch (err) {
+                    console.error("Lỗi onValues:", err);
+                } finally {
+                    // Mở khóa debounce sau 3s
+                    setTimeout(() => { isProcessing = false; }, 3000);
+                }
             }
         });
 
@@ -621,7 +626,7 @@
 
             document.getElementById('reg-uid').value = uid;
 
-            // Reset classes
+            // Xóa tất cả các class màu cũ để chuẩn bị thêm class mới
             nameEl.className = "text-4xl md:text-5xl font-black uppercase mb-3 tracking-tighter transition-all duration-300";
             avatar.className = "avatar-circle";
             scanStatusDot.className = "w-2 h-2 rounded-full animate-pulse";
@@ -638,22 +643,48 @@
                 avatarIcon.className = "fa-solid fa-fingerprint text-7xl text-orange-400";
                 scanStatusDot.classList.add('bg-orange-500');
                 
-                window.showToast(`Phát hiện thẻ mới: ${uid}`, 'warning');
+                window.showToast(`Phát hiện thẻ lạ: ${uid}`, 'warning');
                 
                 document.getElementById('reg-name').value = "";
                 document.getElementById('reg-mssv').value = "";
                 document.getElementById('reg-class').value = "";
 
+                // GHI NHẬT KÝ THẺ LẠ
+                let logEntry = {
+                    uid: uid,
+                    name: "THẺ CHƯA ĐĂNG KÝ",
+                    mssv: "---",
+                    class: "---",
+                    shiftReg: "",
+                    time: timeStr,
+                    timestamp: now.getTime(),
+                    date: currentDateString,
+                    status: "THẺ LẠ",
+                    color: "bg-orange-50 text-orange-600 border-orange-100",
+                    shiftId: currentShift ? currentShift.id : "none",
+                    shiftIndex: currentShift ? currentShift.index : -1
+                };
+
+                if (isCloudActive && currentUser) {
+                    const logRef = collection(db, 'artifacts', appId, 'public', 'data', 'attendance_logs');
+                    setDoc(doc(logRef), logEntry).catch(err => console.error("Lỗi lưu log:", err));
+                } else {
+                    logEntry.id = Date.now().toString();
+                    logsDb.unshift(logEntry);
+                    saveToLocal();
+                    processLogsAndRender(); 
+                }
+
             } else {
                 // TÌNH HUỐNG 2: THÀNH VIÊN ĐÃ ĐĂNG KÝ
                 
-                // LOGIC CHỐNG QUẸT NHẦM / COOLDOWN (RA LỚP)
                 let isCheckOut = false;
                 let canCheckOut = true;
                 let diffMins = 0;
 
                 if (currentShift) {
-                    let userLogsInShift = logsDb.filter(l => l.date === currentDateString && l.shiftId === currentShift.id && (l.mssv === finalMssv || l.uid === uid));
+                    // Lọc log của UID này trong Ca hiện tại
+                    let userLogsInShift = logsDb.filter(l => l.date === currentDateString && l.shiftId === currentShift.id && l.uid === uid);
                     if (userLogsInShift.length > 0) {
                         let lastLog = userLogsInShift[0]; // Log gần nhất
                         if (lastLog.status === "VÀO LỚP") {
@@ -672,7 +703,7 @@
                     let remainingMins = Math.ceil(CHECKOUT_COOLDOWN_MINUTES - diffMins);
                     nameEl.innerText = "CHƯA ĐẾN GIỜ RA";
                     nameEl.classList.add('text-orange-500');
-                    subEl.innerText = `ĐỢI THÊM ${remainingMins} PHÚT NỮA ĐỂ ĐIỂM DANH RA!`;
+                    subEl.innerText = `ĐỢI THÊM ${remainingMins} PHÚT NỮA ĐỂ QUÉT RA!`;
                     subEl.className = "text-[11px] font-black uppercase tracking-widest text-orange-400";
                     
                     avatar.style.borderColor = "#f59e0b";
@@ -680,9 +711,9 @@
                     avatarIcon.className = "fa-solid fa-clock text-7xl text-orange-400";
                     scanStatusDot.classList.add('bg-orange-500');
                     
-                    window.showToast(`Cảnh báo: Hãy đợi ${remainingMins} phút nữa để quét Ra Lớp.`, 'warning');
+                    window.showToast(`Bạn mới quét Vào Lớp, hãy đợi thêm để quét Ra!`, 'warning');
                     
-                    // Không lưu log, tự reset UI
+                    // Reset về trạng thái Sẵn Sàng sau 8 giây
                     setTimeout(() => {
                         if(lastUid === uid) {
                             nameEl.innerText = "SẴN SÀNG";
@@ -695,14 +726,14 @@
                             feedback.innerText = "Status: Idle";
                         }
                     }, 8000);
-                    return; // Chặn ngang tại đây, không xử lý DB nữa
+                    return; // Ngừng xử lý, không ghi đè vào DB
                 }
 
-                // NẾU HỢP LỆ -> CHO VÀO HOẶC RA LỚP
+                // HỢP LỆ -> CHO VÀO HOẶC RA LỚP
                 nameEl.innerText = finalName;
                 subEl.classList.replace('text-slate-300', 'text-emerald-300');
                 let statusStr = isCheckOut ? "RA LỚP" : "VÀO LỚP";
-                let colorClass = isCheckOut ? "bg-rose-50 text-rose-500 border-rose-100" : "bg-emerald-50 text-emerald-600 border-emerald-100";
+                let colorClass = isCheckOut ? "bg-rose-50 text-rose-600 border-rose-100" : "bg-emerald-50 text-emerald-600 border-emerald-100";
 
                 if (isCheckOut) {
                     nameEl.classList.add('text-rose-500');
@@ -746,6 +777,7 @@
                 }
             }
 
+            // Tự động quay về trạng thái sẵn sàng
             setTimeout(() => {
                 if(lastUid === uid) {
                     nameEl.innerText = "SẴN SÀNG";
@@ -767,7 +799,7 @@
             const clazz = document.getElementById('reg-class').value;
             const shift = document.getElementById('reg-shift').value;
 
-            if(!uid || uid === "Đang chờ thẻ...") return window.showToast("Cần quẹt thẻ để lấy mã UID!", "warning");
+            if(!uid || uid === "Đang chờ thẻ...") return window.showToast("Cần quẹt thẻ lạ để lấy mã UID!", "warning");
             if(!name) return window.showToast("Cần nhập Họ và Tên!", "warning");
 
             let memberData = { name: name, mssv: mssv || "---", class: clazz || "---", shift: shift, registeredAt: Date.now() };
@@ -783,7 +815,7 @@
             } else {
                 membersDb[uid] = memberData;
                 saveToLocal();
-                window.showToast(`Đã lưu thẻ Offline: ${name}`);
+                window.showToast(`Đã lưu thẻ Nội Bộ: ${name}`);
                 processLogsAndRender();
             }
             
@@ -808,7 +840,7 @@
             const membersList = Object.keys(membersDb).map(uid => ({ uid, ...membersDb[uid] }));
             
             if (membersList.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="py-16 text-center text-slate-300 text-xs font-bold uppercase"><i class="fa-solid fa-box-open text-5xl mb-4 block opacity-50"></i>Hệ thống chưa có thẻ nào được cấp</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="5" class="py-16 text-center text-slate-300 text-xs font-bold uppercase"><i class="fa-solid fa-box-open text-5xl mb-4 block opacity-50"></i>Hệ thống chưa có thẻ nào được cấp qua Web</td></tr>`;
                 return;
             }
             
@@ -830,7 +862,7 @@
         };
 
         window.deleteMember = async function(uidToDelete) {
-            if(!confirm("Thu hồi vĩnh viễn thẻ này khỏi hệ thống?")) return;
+            if(!confirm("Thu hồi vĩnh viễn thẻ này khỏi hệ thống Web?")) return;
 
             if (isCloudActive && currentUser) {
                 try {
@@ -842,7 +874,7 @@
             } else {
                 delete membersDb[uidToDelete];
                 saveToLocal();
-                window.showToast("Đã thu hồi thẻ Offline!");
+                window.showToast("Đã thu hồi thẻ Nội Bộ!");
                 processLogsAndRender();
                 window.renderManageMembersList(); 
             }
@@ -874,7 +906,7 @@
                     logsDb = [];
                     saveToLocal();
                     processLogsAndRender();
-                    window.showToast("Đã xóa sạch nhật ký Offline!");
+                    window.showToast("Đã xóa sạch nhật ký Nội Bộ!");
                 }
             }
         };
@@ -882,28 +914,8 @@
         window.exportExcel = function() {
             if (logsDb.length === 0) return window.showToast("Chưa có dữ liệu điểm danh để xuất!", "warning");
             
-            // Xử lý Filter theo ngày chọn
-            const selectedDateVal = document.getElementById('export-date').value;
-            let filterDateStr = "";
-            let fileNameSuffix = "TatCa";
-
-            if (selectedDateVal) {
-                const [y, m, d] = selectedDateVal.split('-');
-                filterDateStr = new Date(y, m-1, d).toDateString();
-                fileNameSuffix = selectedDateVal;
-            } else {
-                filterDateStr = new Date().toDateString(); // Default hôm nay
-                fileNameSuffix = "HomNay";
-            }
-
-            // Lọc log theo ngày
-            const filteredLogs = logsDb.filter(l => l.date === filterDateStr);
-
-            if (filteredLogs.length === 0) {
-                return window.showToast(`Không có người điểm danh trong ngày ${fileNameSuffix}!`, "warning");
-            }
-
-            const exportData = filteredLogs.map((l, index) => ({
+            // Xử lý Filter theo ngày (Tùy chọn tương lai) - Mặc định xuất tất cả log
+            const exportData = logsDb.map((l, index) => ({
                 "STT": index + 1,
                 "Ngày": l.date,
                 "Thời Gian": l.time,
@@ -918,8 +930,8 @@
             const ws = XLSX.utils.json_to_sheet(exportData);
             ws['!cols'] = [ {wch: 5}, {wch: 15}, {wch: 12}, {wch: 15}, {wch: 15}, {wch: 30}, {wch: 15}, {wch: 20}, {wch: 15} ];
             const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Báo Cáo Fpoly");
-            XLSX.writeFile(wb, `Bao_Cao_Diem_Danh_${fileNameSuffix}.xlsx`);
+            XLSX.utils.book_append_sheet(wb, ws, "Báo Cáo Điểm Danh");
+            XLSX.writeFile(wb, `Bao_Cao_Diem_Danh_Fpoly_${new Date().getTime()}.xlsx`);
             window.showToast("Tải xuống Excel hoàn tất!");
         };
 
