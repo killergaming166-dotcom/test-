@@ -3,419 +3,362 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Live Attendance System Dashboard</title>
+    <title>Dashboard Điểm Danh - Era</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Nhúng thư viện ERa JS SDK để kết nối Realtime -->
-    <script src="https://www.unpkg.com/@era-web/iot-sdk@latest/dist/era-iot.umd.js"></script>
+    <script src="https://www.unpkg.com/@eohjsc/era-widget@1.1.3/src/index.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
         
-        body {
-            font-family: 'Inter', sans-serif;
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background-color: #f8fafc;
+            color: #334155;
+            padding: 2rem;
+        }
+
+        /* Card styles */
+        .card-base {
+            background: #ffffff;
+            border-radius: 28px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.01);
+            border: 1px solid #f1f5f9;
+        }
+
+        /* Stat Cards với thanh màu bên trái */
+        .stat-card {
+            padding: 1.5rem 2rem;
+            position: relative;
+            background: #ffffff;
+            border-radius: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border: 1px solid #f1f5f9;
+            overflow: hidden;
+        }
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 15%;
+            height: 70%;
+            width: 5px;
+            border-radius: 0 10px 10px 0;
+        }
+        .stat-total::before { background-color: #cbd5e1; }
+        .stat-present::before { background-color: #10b981; }
+        .stat-absent::before { background-color: #f43f5e; }
+
+        .stat-icon-container {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             background-color: #f8fafc;
         }
 
-        .glass-card {
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 24px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-            border: 1px solid rgba(226, 232, 240, 0.8);
-        }
-
-        .status-dot {
-            width: 8px;
-            height: 8px;
+        /* Avatar Placeholder tròn */
+        .avatar-placeholder {
+            width: 180px;
+            height: 180px;
             border-radius: 50%;
-            display: inline-block;
+            background: #f1f5f9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 8px solid white;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+            color: #cbd5e1;
         }
 
-        .scanning-animation {
-            animation: pulse 2s infinite;
+        /* Input Styles */
+        .input-group label {
+            font-size: 10px;
+            font-weight: 700;
+            color: #94a3b8;
+            margin-bottom: 8px;
+            display: block;
+            text-transform: uppercase;
+        }
+        .custom-input {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 0.75rem 1rem;
+            width: 100%;
+            font-size: 13px;
         }
 
-        @keyframes pulse {
-            0% { opacity: 0.4; }
-            50% { opacity: 1; }
-            100% { opacity: 0.4; }
+        /* Nút màu cam chuẩn */
+        .btn-register {
+            background: linear-gradient(135deg, #ff9048 0%, #ff7d29 100%);
+            color: white;
+            font-weight: 800;
+            border-radius: 12px;
+            padding: 0.75rem 1.5rem;
+            text-transform: uppercase;
+            font-size: 12px;
+            box-shadow: 0 4px 12px rgba(255, 125, 41, 0.2);
+            width: 100%;
         }
 
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 6px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 10px;
-        }
-        
-        .badge {
-            white-space: nowrap;
+        /* Clock style */
+        .digital-clock {
+            font-size: 4rem;
+            font-weight: 900;
+            color: #1e293b;
+            letter-spacing: -2px;
         }
     </style>
 </head>
-<body class="p-4 md:p-8">
+<body>
 
     <!-- Header Section -->
     <div class="flex justify-between items-center mb-8">
         <div class="flex items-center gap-3">
-            <div class="w-12 h-12 bg-white shadow-sm rounded-2xl flex items-center justify-center border border-orange-100">
-                <span class="text-orange-500 font-bold text-2xl">F</span>
-            </div>
+            <div class="w-10 h-10 bg-white shadow-sm border border-slate-100 rounded-lg flex items-center justify-center font-black text-[#ff7d29]">F</div>
             <div>
-                <h1 class="text-xl font-bold text-slate-800 tracking-tight uppercase">Dashboard</h1>
+                <h1 class="text-xl font-extrabold text-slate-800 tracking-tight">DASHBOARD</h1>
                 <div class="flex items-center gap-2">
-                    <span id="conn-status-dot" class="status-dot bg-slate-300"></span>
-                    <span id="conn-status-text" class="text-xs text-slate-400 font-medium uppercase tracking-wider">Connecting to ERa...</span>
+                    <span id="era-dot" class="w-2 h-2 rounded-full bg-slate-300"></span>
+                    <span id="era-status" class="text-[9px] font-bold text-slate-400 uppercase tracking-widest italic">CONNECTING TO ERA...</span>
                 </div>
             </div>
         </div>
-        <div class="text-4xl md:text-6xl font-bold text-slate-700 font-mono tracking-tighter" id="clock">
-            00:00:00
-        </div>
+        <div class="digital-clock" id="clock">00:00:00</div>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+    <div class="grid grid-cols-12 gap-6">
         
-        <!-- Left Column: Main Controls -->
-        <div class="lg:col-span-8 space-y-6">
+        <!-- Left Section (Scanning & Registration) -->
+        <div class="col-span-8 space-y-6">
             
-            <!-- Scanning Area -->
-            <div class="glass-card p-8 flex flex-col items-center justify-center relative min-h-[400px]">
-                <div class="absolute top-6 left-6 flex items-center gap-2 px-3 py-1.5 bg-slate-50 rounded-full border border-slate-100">
-                    <span id="device-status-dot" class="status-dot bg-slate-400 animate-pulse"></span>
-                    <span class="text-[10px] font-bold text-slate-500 uppercase" id="device-status">Offline</span>
+            <!-- Main Display Area -->
+            <div class="card-base p-12 flex flex-col items-center justify-center relative min-h-[450px]">
+                <div class="absolute top-6 left-8 bg-slate-50 border border-slate-100 px-4 py-1 rounded-full flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-slate-300"></span>
+                    <span class="text-[10px] font-bold text-slate-400 uppercase">OFFLINE</span>
+                </div>
+                <div class="absolute top-6 right-8 bg-[#0f172a] text-white text-[10px] font-bold px-3 py-1 rounded-lg">CA --</div>
+
+                <div class="avatar-placeholder mb-8">
+                    <i class="fa-solid fa-user text-7xl"></i>
                 </div>
 
-                <div class="absolute top-6 right-6">
-                    <div id="shift-tag" class="px-3 py-1 bg-slate-900 text-white rounded-lg text-xs font-bold uppercase">CA --</div>
-                </div>
-
-                <div id="user-avatar" class="w-48 h-48 bg-slate-50 rounded-full flex items-center justify-center shadow-inner mb-6 relative overflow-hidden border-4 border-white transition-all duration-500">
-                    <i id="user-icon" class="fa-solid fa-user text-6xl text-slate-200"></i>
-                    <div id="scan-overlay" class="absolute inset-0 bg-blue-500/10 hidden items-center justify-center">
-                         <i class="fa-solid fa-qrcode text-blue-500 text-4xl animate-bounce"></i>
+                <div class="text-center">
+                    <div class="flex justify-center gap-2 mb-4">
+                        <div class="w-8 h-1.5 bg-[#1e293b] rounded-full"></div>
+                        <div class="w-8 h-1.5 bg-[#1e293b] rounded-full"></div>
+                        <div class="w-8 h-1.5 bg-[#1e293b] rounded-full"></div>
                     </div>
-                </div>
-
-                <div class="flex gap-2 mb-4">
-                    <div class="w-8 h-2 bg-slate-800 rounded-full"></div>
-                    <div class="w-8 h-2 bg-slate-800 rounded-full"></div>
-                    <div class="w-8 h-2 bg-slate-800 rounded-full"></div>
-                </div>
-
-                <h2 id="display-name" class="text-lg font-semibold text-slate-500 mb-2 uppercase tracking-wide">Đang đợi thẻ...</h2>
-                <div class="flex items-center gap-2 text-blue-500 font-medium">
-                    <span class="status-dot bg-blue-500 scanning-animation"></span>
-                    <span id="display-mssv" class="text-sm uppercase tracking-widest">Sẵn sàng</span>
+                    <h2 id="display-name" class="text-2xl font-black text-slate-800 uppercase tracking-widest mb-2">ĐANG ĐỢI THẺ...</h2>
+                    <div class="flex items-center justify-center gap-2 text-blue-500 font-bold text-[11px] uppercase tracking-widest">
+                        <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span> SẴN SÀNG
+                    </div>
                 </div>
             </div>
 
-            <!-- Registration Form -->
-            <div class="glass-card p-6 border-l-4 border-orange-400">
+            <!-- Registration Area -->
+            <div class="card-base p-6 border-l-8 border-[#ff7d29]">
                 <div class="flex items-center gap-3 mb-6">
-                    <div class="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center">
-                        <i class="fa-solid fa-id-card text-orange-500 text-sm"></i>
+                    <div class="w-8 h-8 rounded-full bg-orange-50 flex items-center justify-center text-[#ff7d29]">
+                        <i class="fa-solid fa-id-card-clip"></i>
                     </div>
-                    <h3 class="font-bold text-slate-800 uppercase text-sm tracking-wide">Đăng ký thẻ thành viên</h3>
+                    <h3 class="font-extrabold text-slate-800 text-[12px] uppercase">ĐĂNG KÝ THẺ THÀNH VIÊN</h3>
                 </div>
-                
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
-                    <div class="space-y-1">
-                        <label class="text-[10px] font-bold text-slate-400 uppercase ml-1 block truncate">Mã UID</label>
-                        <input type="text" id="reg-uid" placeholder="UID..." class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium">
+                <div class="grid grid-cols-5 gap-4 items-end">
+                    <div class="input-group">
+                        <label>MÃ UID</label>
+                        <input type="text" id="reg-uid" placeholder="UID..." class="custom-input">
                     </div>
-                    <div class="space-y-1">
-                        <label class="text-[10px] font-bold text-slate-400 uppercase ml-1 block truncate">Họ và Tên</label>
-                        <input type="text" id="reg-name" placeholder="Tên SV..." class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium">
+                    <div class="input-group">
+                        <label>HỌ VÀ TÊN</label>
+                        <input type="text" id="reg-name" placeholder="Tên SV..." class="custom-input">
                     </div>
-                    <div class="space-y-1">
-                        <label class="text-[10px] font-bold text-slate-400 uppercase ml-1 block truncate">MSSV / ID</label>
-                        <input type="text" id="reg-mssv" placeholder="MSSV..." class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium">
+                    <div class="input-group">
+                        <label>MSSV / ID</label>
+                        <input type="text" id="reg-mssv" placeholder="MSSV..." class="custom-input">
                     </div>
-                    <div class="space-y-1">
-                        <label class="text-[10px] font-bold text-slate-400 uppercase ml-1 block truncate">Lớp / Bộ phận</label>
-                        <input type="text" id="reg-class" placeholder="Lớp..." class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium">
+                    <div class="input-group">
+                        <label>LỚP / BỘ PHẬN</label>
+                        <input type="text" id="reg-class" placeholder="Lớp..." class="custom-input">
                     </div>
                     <div>
-                        <button onclick="handleRegister()" class="w-full h-[42px] px-4 bg-orange-500 text-white rounded-xl hover:bg-orange-600 transition-colors shadow-lg shadow-orange-100 font-bold text-[11px] uppercase whitespace-nowrap">
-                            Xác nhận ĐK
-                        </button>
+                        <button class="btn-register" onclick="alert('Đã gửi yêu cầu đăng ký!')">XÁC NHẬN ĐK</button>
                     </div>
                 </div>
             </div>
 
-            <!-- Attendance Log -->
-            <div class="glass-card overflow-hidden">
-                <div class="p-6 flex justify-between items-center border-b border-slate-50">
-                    <h3 class="font-bold text-slate-800 text-lg">Lịch sử điểm danh</h3>
+            <!-- Table Section -->
+            <div class="card-base overflow-hidden">
+                <div class="p-6 flex justify-between items-center">
+                    <h3 class="font-extrabold text-slate-800">Lịch sử điểm danh</h3>
                     <div class="flex gap-2">
-                        <button class="px-4 py-2 bg-emerald-500 text-white rounded-xl text-xs font-bold uppercase hover:bg-emerald-600 transition-all flex items-center gap-2">
-                            <i class="fa-solid fa-file-export"></i> Xuất Excel
+                        <button class="bg-[#10b981] text-white text-[10px] font-bold py-2 px-4 rounded-xl uppercase flex items-center gap-2">
+                            <i class="fa-solid fa-file-excel"></i> XUẤT EXCEL
                         </button>
-                        <button onclick="clearLog()" class="px-4 py-2 border border-rose-100 text-rose-500 rounded-xl text-xs font-bold uppercase hover:bg-rose-50 transition-all">
-                            Xóa dữ liệu
-                        </button>
+                        <button onclick="clearLogs()" class="bg-rose-50 text-rose-500 text-[10px] font-bold py-2 px-4 rounded-xl uppercase border border-rose-100">XÓA DỮ LIỆU</button>
                     </div>
                 </div>
-                <div class="overflow-x-auto custom-scrollbar" style="max-height: 300px;">
+                <div class="px-6 pb-6">
                     <table class="w-full text-left">
-                        <thead class="bg-slate-50 sticky top-0">
-                            <tr>
-                                <th class="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase">Thời gian</th>
-                                <th class="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase">Sinh viên</th>
-                                <th class="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase">MSSV</th>
-                                <th class="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase">Lớp</th>
-                                <th class="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase">Trạng thái</th>
+                        <thead>
+                            <tr class="text-[10px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-50">
+                                <th class="pb-4">THỜI GIAN</th>
+                                <th class="pb-4">SINH VIÊN</th>
+                                <th class="pb-4">MSSV</th>
+                                <th class="pb-4">LỚP</th>
+                                <th class="pb-4">TRẠNG THÁI</th>
                             </tr>
                         </thead>
-                        <tbody id="attendance-body" class="divide-y divide-slate-50"></tbody>
+                        <tbody id="log-body">
+                            <!-- Logs injected here -->
+                        </tbody>
                     </table>
                 </div>
             </div>
         </div>
 
-        <!-- Right Column -->
-        <div class="lg:col-span-4 space-y-6">
-            <div class="space-y-4">
-                <div class="glass-card p-6 flex justify-between items-center border-l-4 border-slate-300">
-                    <div>
-                        <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Sĩ số lớp</p>
-                        <h4 class="text-4xl font-bold text-slate-700">40</h4>
-                    </div>
-                    <div class="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-300">
-                        <i class="fa-solid fa-users text-xl"></i>
-                    </div>
+        <!-- Right Section (Stats) -->
+        <div class="col-span-4 space-y-6">
+            
+            <div class="stat-card stat-total">
+                <div>
+                    <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">SĨ SỐ LỚP</p>
+                    <h4 class="text-5xl font-black text-slate-800" id="total-students">40</h4>
                 </div>
-
-                <div class="glass-card p-6 flex justify-between items-center border-l-4 border-emerald-500">
-                    <div>
-                        <p class="text-[10px] font-bold text-emerald-500 uppercase mb-1">Hiện diện</p>
-                        <h4 class="text-4xl font-bold text-slate-700" id="present-count">0</h4>
-                    </div>
-                    <div class="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-500">
-                        <i class="fa-solid fa-circle-check text-xl"></i>
-                    </div>
-                </div>
-
-                <div class="glass-card p-6 flex justify-between items-center border-l-4 border-rose-500">
-                    <div>
-                        <p class="text-[10px] font-bold text-rose-500 uppercase mb-1">Vắng mặt</p>
-                        <h4 class="text-4xl font-bold text-slate-700" id="absent-count">40</h4>
-                    </div>
-                    <div class="w-12 h-12 bg-rose-50 rounded-2xl flex items-center justify-center text-rose-500">
-                        <i class="fa-solid fa-circle-xmark text-xl"></i>
-                    </div>
+                <div class="stat-icon-container">
+                    <i class="fa-solid fa-users text-slate-300"></i>
                 </div>
             </div>
 
-            <div class="glass-card p-6">
-                <div class="flex items-center gap-2 mb-6">
-                    <div class="w-1 h-6 bg-blue-600 rounded-full"></div>
-                    <h3 class="font-bold text-slate-800 uppercase text-sm">Thời gian biểu</h3>
+            <div class="stat-card stat-present">
+                <div>
+                    <p class="text-[10px] font-bold text-emerald-500 uppercase mb-1">HIỆN DIỆN</p>
+                    <h4 class="text-5xl font-black text-slate-800" id="present-count">0</h4>
+                </div>
+                <div class="stat-icon-container bg-emerald-50">
+                    <i class="fa-solid fa-circle-check text-emerald-500"></i>
+                </div>
+            </div>
+
+            <div class="stat-card stat-absent">
+                <div>
+                    <p class="text-[10px] font-bold text-rose-500 uppercase mb-1">VẮNG MẶT</p>
+                    <h4 class="text-5xl font-black text-rose-500" id="absent-count">40</h4>
+                </div>
+                <div class="stat-icon-container bg-rose-50">
+                    <i class="fa-solid fa-circle-xmark text-rose-500"></i>
+                </div>
+            </div>
+
+            <!-- Timeline -->
+            <div class="card-base p-8">
+                <div class="flex items-center gap-2 mb-8">
+                    <div class="w-1 h-5 bg-blue-600 rounded-full"></div>
+                    <h3 class="font-extrabold text-slate-800 uppercase text-[12px]">THỜI GIAN BIỂU</h3>
                 </div>
                 
-                <div class="grid grid-cols-2 gap-4 mb-6">
-                    <div class="bg-blue-50/50 p-4 rounded-2xl text-center">
-                        <p class="text-[10px] font-bold text-blue-400 uppercase mb-2">Bắt đầu</p>
-                        <p class="text-xl font-bold text-slate-600" id="start-time">--:--</p>
+                <div class="grid grid-cols-2 gap-4 mb-8">
+                    <div class="bg-slate-50 p-4 rounded-2xl text-center border border-slate-100">
+                        <p class="text-[9px] font-bold text-blue-500 uppercase mb-1">BẮT ĐẦU</p>
+                        <p class="text-2xl font-black text-slate-700">--:--</p>
                     </div>
-                    <div class="bg-blue-50/50 p-4 rounded-2xl text-center">
-                        <p class="text-[10px] font-bold text-blue-400 uppercase mb-2">Kết thúc</p>
-                        <p class="text-xl font-bold text-slate-600" id="end-time">--:--</p>
+                    <div class="bg-slate-50 p-4 rounded-2xl text-center border border-slate-100">
+                        <p class="text-[9px] font-bold text-blue-500 uppercase mb-1">KẾT THÚC</p>
+                        <p class="text-2xl font-black text-slate-700">--:--</p>
                     </div>
                 </div>
 
-                <div class="bg-emerald-50 p-3 rounded-xl border border-emerald-100 flex items-center justify-between mb-4">
-                    <span class="text-[10px] font-bold text-emerald-600 uppercase" id="system-status-text">Đang kết nối ERa...</span>
-                    <span id="era-indicator" class="status-dot bg-slate-300"></span>
+                <div class="bg-emerald-50 border border-emerald-100 p-3 rounded-xl flex justify-between items-center mb-4">
+                    <span class="text-[9px] font-black text-emerald-600 uppercase">ESP32: ONLINE</span>
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                 </div>
 
-                <button onclick="initERa()" class="w-full py-4 bg-slate-900 text-white rounded-2xl font-bold uppercase tracking-widest text-xs hover:bg-slate-800 transition-all shadow-xl shadow-slate-200">
-                    Kết nối thủ công
+                <button class="w-full bg-[#0f172a] text-white font-bold py-4 rounded-xl uppercase text-[10px] tracking-widest shadow-lg shadow-slate-200">
+                    KẾT NỐI THỦ CÔNG
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- Notification Toast -->
-    <div id="toast" class="fixed bottom-8 right-8 bg-slate-900 text-white px-6 py-4 rounded-2xl shadow-2xl transition-all transform translate-y-24 opacity-0 flex items-center gap-3 z-50">
-        <div id="toast-icon" class="w-8 h-8 rounded-full flex items-center justify-center"></div>
-        <div id="toast-message" class="text-sm font-medium"></div>
-    </div>
-
     <script>
-        // Cấu hình ERa
-        const ERA_CONFIG = {
-            token: "53f7b5a4-c19e-4760-9940-ff280ac07374" // Token từ file .ino của bạn
-        };
+        const eraWidget = new EraWidget();
+        let configPins = { uid: null, name: null, mssv: null, class: null };
+        const logs = [];
 
-        // Lưu trữ tạm dữ liệu từ các chân trước khi trigger V0
-        let tempAttendance = {
-            uid: "",
-            name: "",
-            mssv: "",
-            class: "",
-            time: ""
-        };
-
-        // Khởi tạo ERa Connection
-        const era = new EraIoT();
-
-        async function initERa() {
-            try {
-                document.getElementById('system-status-text').innerText = "Đang kết nối ERa...";
+        eraWidget.init({
+            needRealtimeConfigs: true,
+            maxRealtimeConfigsCount: 4,
+            onConfiguration: (config) => {
+                configPins.uid = config.realtime_configs[0];
+                configPins.name = config.realtime_configs[1];
+                configPins.mssv = config.realtime_configs[2];
+                configPins.class = config.realtime_configs[3];
                 
-                await era.init({
-                    token: ERA_CONFIG.token,
-                    onConnect: () => {
-                        console.log("Connected to ERa");
-                        document.getElementById('conn-status-dot').className = "status-dot bg-green-500";
-                        document.getElementById('conn-status-text').innerText = "Connected to ERa Cloud";
-                        document.getElementById('era-indicator').className = "status-dot bg-green-500";
-                        document.getElementById('system-status-text').innerText = "Hệ thống trực tuyến";
-                        showToast("Đã kết nối với ERa Cloud", "success");
-                    },
-                    onDisconnect: () => {
-                        document.getElementById('conn-status-dot').className = "status-dot bg-rose-500";
-                        document.getElementById('conn-status-text').innerText = "ERa Disconnected";
-                        document.getElementById('system-status-text').innerText = "Mất kết nối";
-                        showToast("Mất kết nối ERa", "error");
-                    },
-                    onDeviceStatus: (status) => {
-                        const isOnline = status === "online";
-                        document.getElementById('device-status-dot').className = `status-dot ${isOnline ? 'bg-green-500' : 'bg-rose-500'}`;
-                        document.getElementById('device-status').innerText = isOnline ? "Online" : "Offline";
-                    }
-                });
+                document.getElementById('era-dot').className = "w-2 h-2 rounded-full bg-emerald-500";
+                document.getElementById('era-status').innerText = "ONLINE";
+            },
+            onValues: (values) => {
+                const uid = values[configPins.uid?.id]?.value;
+                const name = values[configPins.name?.id]?.value;
+                const mssv = values[configPins.mssv?.id]?.value;
+                const className = values[configPins.class?.id]?.value;
 
-                // Lắng nghe dữ liệu từ Virtual Pins
-                era.onPinWrite((pin, value) => {
-                    console.log(`Pin ${pin} updated: ${value}`);
-                    
-                    switch(pin) {
-                        case 'V1': tempAttendance.name = value; break;
-                        case 'V2': tempAttendance.mssv = value; break;
-                        case 'V10': tempAttendance.class = value; break;
-                        case 'V11': tempAttendance.time = value; break;
-                        case 'V0': // Pin Trigger - Khi nhận được UID là lúc chốt dữ liệu
-                            tempAttendance.uid = value;
-                            processAttendance(tempAttendance);
-                            break;
-                    }
-                });
-
-            } catch (error) {
-                console.error("ERa Init Error:", error);
-                showToast("Lỗi kết nối ERa", "error");
+                if (uid && uid !== "0" && uid !== "") {
+                    processAttendance({ uid, name, mssv, className });
+                }
             }
-        }
+        });
 
         function processAttendance(data) {
-            // Hiệu ứng quét thẻ
-            const overlay = document.getElementById('scan-overlay');
-            const avatar = document.getElementById('user-avatar');
-            overlay.classList.remove('hidden');
-            overlay.classList.add('flex');
-            avatar.classList.add('border-blue-500', 'scale-105');
+            document.getElementById('display-name').innerText = data.name || "CHƯA ĐĂNG KÝ";
+            
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('vi-VN', { hour12: false });
+            
+            logs.unshift({
+                time: timeStr,
+                name: data.name || "N/A",
+                mssv: data.mssv || "---",
+                class: data.className || "---"
+            });
 
-            // Cập nhật giao diện chính
-            document.getElementById('display-name').innerText = data.name || "NGƯỜI LẠ";
-            document.getElementById('display-mssv').innerText = data.mssv || "---";
-
-            // Thêm vào log
-            addAttendanceToTable(data);
-
-            setTimeout(() => {
-                overlay.classList.add('hidden');
-                overlay.classList.remove('flex');
-                avatar.classList.remove('border-blue-500', 'scale-105');
-            }, 2000);
-        }
-
-        let presentCount = 0;
-        const totalStudents = 40;
-        const attendanceList = [];
-
-        function addAttendanceToTable(data) {
-            const timeNow = new Date().toLocaleTimeString('vi-VN');
-            const entry = {
-                time: timeNow,
-                name: data.name || "Chưa đăng ký",
-                id: data.mssv || "---",
-                className: data.class || "---",
-                status: 'Thành công'
-            };
-
-            attendanceList.unshift(entry);
-            presentCount++;
             updateUI();
-            showToast(`Điểm danh: ${entry.name}`, 'success');
         }
 
         function updateUI() {
-            const body = document.getElementById('attendance-body');
-            body.innerHTML = attendanceList.map(entry => `
-                <tr class="hover:bg-slate-50 transition-colors animate-fade-in">
-                    <td class="px-6 py-4 text-xs text-slate-500 font-mono">${entry.time}</td>
-                    <td class="px-6 py-4 text-sm font-semibold text-slate-700">${entry.name}</td>
-                    <td class="px-6 py-4 text-sm text-slate-500">${entry.id}</td>
-                    <td class="px-6 py-4 text-sm text-slate-500">${entry.className}</td>
-                    <td class="px-6 py-4">
-                        <span class="px-2 py-1 bg-emerald-50 text-emerald-600 text-[10px] font-bold rounded-lg uppercase badge">Thành công</span>
+            const body = document.getElementById('log-body');
+            body.innerHTML = logs.map(l => `
+                <tr class="border-b border-slate-50 last:border-0">
+                    <td class="py-4 text-[11px] font-bold text-slate-400 font-mono">${l.time}</td>
+                    <td class="py-4 text-[13px] font-black text-slate-700 uppercase">${l.name}</td>
+                    <td class="py-4 text-[13px] font-medium text-slate-500">${l.mssv}</td>
+                    <td class="py-4 text-[13px] font-medium text-slate-500">${l.class}</td>
+                    <td class="py-4">
+                        <span class="bg-emerald-50 text-emerald-600 text-[9px] font-black px-3 py-1 rounded-full uppercase">Thành công</span>
                     </td>
                 </tr>
             `).join('');
-            document.getElementById('present-count').innerText = presentCount;
-            document.getElementById('absent-count').innerText = totalStudents - presentCount;
+
+            const present = logs.length;
+            document.getElementById('present-count').innerText = present;
+            document.getElementById('absent-count').innerText = Math.max(0, 40 - present);
         }
 
-        // Logic đồng hồ và ca học (giữ nguyên)
-        const shifts = [
-            { name: "Ca 1", start: "07:30", end: "09:30" },
-            { name: "Ca 2", start: "09:30", end: "11:30" },
-            { name: "Ca 3", start: "13:30", end: "15:30" },
-            { name: "Ca 4", start: "15:30", end: "17:30" },
-            { name: "Ca 5", start: "18:00", end: "20:00" }
-        ];
+        function clearLogs() {
+            logs.length = 0;
+            updateUI();
+            document.getElementById('display-name').innerText = "ĐANG ĐỢI THẺ...";
+        }
 
-        function updateClock() {
+        setInterval(() => {
             const now = new Date();
             document.getElementById('clock').innerText = now.toLocaleTimeString('vi-VN', { hour12: false });
-            const currentMinutes = now.getHours() * 60 + now.getMinutes();
-            let currentShift = shifts.find(s => {
-                const [sH, sM] = s.start.split(':').map(Number);
-                const [eH, eM] = s.end.split(':').map(Number);
-                return currentMinutes >= (sH * 60 + sM) && currentMinutes <= (eH * 60 + eM);
-            });
-            if (currentShift) {
-                document.getElementById('shift-tag').innerText = currentShift.name;
-                document.getElementById('start-time').innerText = currentShift.start;
-                document.getElementById('end-time').innerText = currentShift.end;
-            }
-        }
-
-        function showToast(message, type) {
-            const toast = document.getElementById('toast');
-            const msgEl = document.getElementById('toast-message');
-            const iconEl = document.getElementById('toast-icon');
-            msgEl.innerText = message;
-            iconEl.className = `w-8 h-8 rounded-full flex items-center justify-center text-white ${type === 'success' ? 'bg-emerald-500' : type === 'error' ? 'bg-rose-500' : 'bg-blue-500'}`;
-            iconEl.innerHTML = `<i class="fa-solid fa-${type === 'success' ? 'check' : type === 'error' ? 'xmark' : 'info'}"></i>`;
-            toast.classList.remove('translate-y-24', 'opacity-0');
-            setTimeout(() => toast.classList.add('translate-y-24', 'opacity-0'), 3000);
-        }
-
-        function clearLog() {
-            attendanceList.length = 0;
-            presentCount = 0;
-            updateUI();
-        }
-
-        setInterval(updateClock, 1000);
-        window.onload = initERa;
+        }, 1000);
     </script>
 </body>
 </html>
