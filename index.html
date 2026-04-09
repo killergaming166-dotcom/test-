@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ERA LIVE ATTENDANCE SYSTEM</title>
+    <title>FPOLY LIVE ATTENDANCE SYSTEM</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://www.unpkg.com/@eohjsc/era-widget@1.1.3/src/index.js"></script>
@@ -11,14 +11,18 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; color: #334155; margin: 0; padding: 20px; }
+        
+        /* Fpoly Colors: Primary Orange #f97316 */
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #334155; margin: 0; padding: 20px; }
         .card { background: white; border-radius: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.02); border: 1px solid #e2e8f0; transition: all 0.3s ease; }
         .stat-card { background: white; border-radius: 20px; padding: 16px; display: flex; align-items: center; justify-content: space-between; border: 1px solid #eef2f6; position: relative; overflow: hidden; }
-        .avatar-circle { width: 140px; height: 140px; border-radius: 50%; background: #f8fafc; display: flex; align-items: center; justify-content: center; border: 4px solid #f1f5f9; margin: 0 auto 20px; transition: 0.3s; }
-        .input-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 10px 14px; font-size: 13px; width: 100%; transition: 0.2s; font-weight: 500; }
-        .input-box:focus { border-color: #3b82f6; outline: none; background: white; }
+        .avatar-circle { width: 140px; height: 140px; border-radius: 50%; background: #ffffff; display: flex; align-items: center; justify-content: center; border: 4px solid #fff; margin: 0 auto 20px; transition: 0.3s; box-shadow: 0 10px 25px rgba(249, 115, 22, 0.1); }
         
-        .btn-save { background: linear-gradient(135deg, #ff7e20, #f97316); color: white; border-radius: 12px; font-weight: 800; padding: 12px; transition: 0.3s; cursor: pointer; text-transform: uppercase; font-size: 11px; }
+        .input-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 10px 14px; font-size: 13px; width: 100%; transition: 0.2s; font-weight: 500; color: #1e293b; }
+        .input-box:focus { border-color: #f97316; outline: none; background: white; box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1); }
+        select.input-box { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; background-size: 16px; padding-right: 30px; }
+        
+        .btn-save { background: linear-gradient(135deg, #f97316, #ea580c); color: white; border-radius: 12px; font-weight: 800; padding: 12px; transition: 0.3s; cursor: pointer; text-transform: uppercase; font-size: 11px; }
         .btn-save:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3); }
         .btn-delete { background: #fef2f2; color: #ef4444; border: 1px solid #fecdd3; border-radius: 12px; font-weight: 800; padding: 12px; transition: 0.3s; cursor: pointer; text-transform: uppercase; font-size: 11px; }
         .btn-delete:hover { background: #fee2e2; transform: translateY(-2px); }
@@ -27,12 +31,13 @@
         .log-table { width: 100%; border-collapse: collapse; }
         .log-table th { font-size: 10px; color: #64748b; text-transform: uppercase; padding: 12px; border-bottom: 2px solid #f1f5f9; text-align: left; position: sticky; top: 0; background: white; z-index: 10; }
         .log-table td { padding: 14px 12px; font-size: 13px; border-bottom: 1px solid #f8fafc; }
+        
         .pulse-orange { animation: pulse-orange 2s infinite; }
         @keyframes pulse-orange { 0% { box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(249, 115, 22, 0); } 100% { box-shadow: 0 0 0 0 rgba(249, 115, 22, 0); } }
 
         /* Toast Notification */
         #toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
-        .toast { background: white; border-radius: 12px; padding: 12px 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border-left: 4px solid #3b82f6; display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 600; animation: slideIn 0.3s ease-out forwards; }
+        .toast { background: white; border-radius: 12px; padding: 12px 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border-left: 4px solid #f97316; display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 600; animation: slideIn 0.3s ease-out forwards; }
         .toast.success { border-color: #10b981; }
         .toast.error { border-color: #ef4444; }
         .toast.warning { border-color: #f59e0b; }
@@ -44,9 +49,9 @@
 
     <div class="flex justify-between items-center mb-6 px-2">
         <div class="flex items-center gap-4">
-            <div class="w-12 h-12 bg-white rounded-2xl shadow-sm flex items-center justify-center text-orange-500 font-black text-2xl border border-orange-100">F</div>
+            <div class="w-12 h-12 bg-orange-500 rounded-2xl shadow-lg shadow-orange-500/30 flex items-center justify-center text-white font-black text-2xl">F</div>
             <div>
-                <h1 class="text-xl font-black text-[#0f172a]">ERA ATTENDANCE <span class="text-orange-500">PRO</span></h1>
+                <h1 class="text-xl font-black text-[#0f172a]">FPOLY ATTENDANCE <span class="text-orange-500">PRO</span></h1>
                 <div class="flex items-center gap-2">
                     <span id="era-status-dot" class="w-2 h-2 rounded-full bg-slate-300"></span>
                     <span id="era-status-text" class="text-[9px] font-bold text-slate-400 uppercase">ĐANG KẾT NỐI...</span>
@@ -54,7 +59,7 @@
             </div>
         </div>
         <div class="text-right">
-            <div class="text-4xl font-black text-[#1e293b]" id="clock">00:00:00</div>
+            <div class="text-4xl font-black text-orange-500" id="clock">00:00:00</div>
             <div class="text-[10px] font-bold text-slate-400 uppercase" id="date-now">...</div>
         </div>
     </div>
@@ -62,8 +67,8 @@
     <div class="grid grid-cols-12 gap-5">
         <!-- Cột Trái -->
         <div class="col-span-8 space-y-5">
-            <!-- Màn hình quét chính -->
-            <div class="card p-8 flex flex-col items-center justify-center relative min-h-[380px]" id="main-display-card">
+            <!-- Màn hình quét chính (Đã thêm nền Cam nhẹ) -->
+            <div class="card p-8 flex flex-col items-center justify-center relative min-h-[380px] bg-gradient-to-b from-orange-50 to-white border-orange-100" id="main-display-card">
                 <div class="avatar-circle" id="avatar-container">
                     <i class="fa-solid fa-user-circle text-7xl text-slate-200" id="avatar-icon"></i>
                 </div>
@@ -71,26 +76,26 @@
                     <h2 id="display-name" class="text-4xl font-black text-slate-800 uppercase mb-1">SẴN SÀNG</h2>
                     <p id="display-sub" class="text-slate-400 text-[10px] font-bold uppercase tracking-widest">MỜI ĐẶT THẺ VÀO ĐẦU ĐỌC</p>
                 </div>
-                <div id="scan-feedback" class="absolute top-6 right-8 text-[10px] font-black text-slate-300 uppercase">Status: Idle</div>
+                <div id="scan-feedback" class="absolute top-6 right-8 text-[10px] font-black text-orange-300 uppercase">Status: Idle</div>
             </div>
 
-            <!-- Panel Đăng Ký / Xóa Thẻ -->
-            <div class="card p-7 border-l-8 border-orange-500 bg-orange-50/30">
+            <!-- Panel Đăng Ký Sinh Viên Muốn Học -->
+            <div class="card p-7 border-l-8 border-orange-500 bg-white">
                 <div class="flex justify-between mb-4">
                     <div class="flex items-center gap-2">
-                        <i class="fa-solid fa-database text-orange-500"></i>
-                        <h3 class="font-black text-sm uppercase text-slate-700">Quản lý Thành Viên</h3>
+                        <i class="fa-solid fa-graduation-cap text-orange-500"></i>
+                        <h3 class="font-black text-sm uppercase text-slate-700">Đăng ký sinh viên muốn học</h3>
                     </div>
-                    <span class="text-[10px] font-bold text-orange-400">QUÉT THẺ ĐỂ LẤY UID</span>
+                    <span id="registered-count-badge" class="text-[10px] font-bold text-orange-500 bg-orange-50 px-3 py-1 rounded-lg">ĐÃ LƯU: 0 THẺ</span>
                 </div>
-                <div class="grid grid-cols-4 gap-4 mb-4">
+                <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-4">
                     <div class="space-y-1">
                         <label class="text-[9px] font-black text-slate-400 uppercase">Mã thẻ UID</label>
-                        <input type="text" id="reg-uid" placeholder="Đang chờ thẻ..." class="input-box font-mono text-orange-600 font-bold bg-white" readonly>
+                        <input type="text" id="reg-uid" placeholder="Đang chờ thẻ..." class="input-box font-mono text-orange-600 font-bold bg-orange-50 border-orange-100" readonly>
                     </div>
                     <div class="space-y-1">
                         <label class="text-[9px] font-black text-slate-400 uppercase">Họ và Tên</label>
-                        <input type="text" id="reg-name" placeholder="Ví dụ: Nguyễn Văn A" class="input-box bg-white">
+                        <input type="text" id="reg-name" placeholder="Nguyễn Văn A" class="input-box bg-white">
                     </div>
                     <div class="space-y-1">
                         <label class="text-[9px] font-black text-slate-400 uppercase">MSSV / ID</label>
@@ -100,10 +105,20 @@
                         <label class="text-[9px] font-black text-slate-400 uppercase">Lớp / Bộ phận</label>
                         <input type="text" id="reg-class" placeholder="WD18301" class="input-box bg-white">
                     </div>
+                    <div class="space-y-1">
+                        <label class="text-[9px] font-black text-slate-400 uppercase">Ca Học</label>
+                        <select id="reg-shift" class="input-box bg-white">
+                            <option value="Ca 1">Ca 1</option>
+                            <option value="Ca 2">Ca 2</option>
+                            <option value="Ca 3">Ca 3</option>
+                            <option value="Ca 4">Ca 4</option>
+                            <option value="Ca 5">Ca 5</option>
+                        </select>
+                    </div>
                 </div>
-                <div class="flex gap-3">
+                <div class="flex gap-3 mt-2">
                     <button class="btn-save flex-1 flex items-center justify-center gap-2" onclick="window.saveNewMember()">
-                        <i class="fa-solid fa-cloud-arrow-up"></i> Lưu thông tin thẻ
+                        <i class="fa-solid fa-cloud-arrow-up"></i> Lưu thông tin sinh viên
                     </button>
                     <button class="btn-delete flex items-center justify-center gap-2 px-6" onclick="window.deleteMember()">
                         <i class="fa-solid fa-trash"></i> Xóa thẻ
@@ -116,10 +131,10 @@
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="font-black text-sm text-slate-800 uppercase flex items-center gap-2">
                         Nhật ký điểm danh
-                        <span id="current-shift-badge" class="bg-blue-100 text-blue-600 px-2 py-0.5 rounded text-[9px]">CA --</span>
+                        <span id="current-shift-badge" class="bg-orange-100 text-orange-600 px-2 py-0.5 rounded text-[9px]">CA --</span>
                     </h3>
                     <div class="flex gap-2">
-                        <button onclick="window.exportExcel()" class="bg-emerald-50 text-emerald-600 text-[10px] font-black px-4 py-2 rounded-xl hover:bg-emerald-100 transition-colors">
+                        <button onclick="window.exportExcel()" class="bg-orange-50 text-orange-600 text-[10px] font-black px-4 py-2 rounded-xl hover:bg-orange-100 transition-colors">
                             <i class="fa-solid fa-file-excel mr-1"></i> XUẤT EXCEL
                         </button>
                         <button onclick="window.clearLogs()" class="bg-rose-50 text-rose-600 text-[10px] font-black px-4 py-2 rounded-xl hover:bg-rose-100 transition-colors">
@@ -148,7 +163,7 @@
         <div class="col-span-4 space-y-5">
             <div class="space-y-3">
                 <div class="stat-card">
-                    <div><p class="text-[9px] font-black text-slate-400 uppercase">Sĩ số lớp</p><h4 class="text-3xl font-black" id="total-count">0</h4></div>
+                    <div><p class="text-[9px] font-black text-slate-400 uppercase">Sĩ số lớp (Cố định)</p><h4 class="text-3xl font-black text-orange-500" id="total-count">15</h4></div>
                     <i class="fa-solid fa-users text-slate-200 text-2xl"></i>
                 </div>
                 <div class="stat-card border-l-4 border-emerald-500">
@@ -156,7 +171,7 @@
                     <i class="fa-solid fa-user-check text-emerald-100 text-2xl"></i>
                 </div>
                 <div class="stat-card border-l-4 border-rose-500">
-                    <div><p class="text-[9px] font-black text-rose-500 uppercase">Vắng mặt (Ca này)</p><h4 class="text-3xl font-black" id="absent-count">0</h4></div>
+                    <div><p class="text-[9px] font-black text-rose-500 uppercase">Vắng mặt (Ca này)</p><h4 class="text-3xl font-black" id="absent-count">15</h4></div>
                     <i class="fa-solid fa-user-xmark text-rose-100 text-2xl"></i>
                 </div>
             </div>
@@ -166,7 +181,7 @@
                 <canvas id="attendanceChart" height="200"></canvas>
             </div>
 
-            <div class="card p-5 space-y-3 bg-slate-50">
+            <div class="card p-5 space-y-3 bg-slate-50 border-orange-100">
                 <div class="flex items-center justify-between text-[10px] font-bold">
                     <span>ESP32 HARDWARE</span>
                     <span id="device-dot" class="w-2 h-2 rounded-full bg-emerald-500"></span>
@@ -175,17 +190,33 @@
                     <p class="text-slate-400 font-black uppercase text-[8px] mb-1">Trạng thái Database</p>
                     <p id="cloud-status" class="font-bold text-slate-700">Đang khởi tạo...</p>
                 </div>
-                <button onclick="location.reload()" class="w-full py-3 bg-white border border-slate-200 rounded-xl text-[10px] font-black hover:bg-slate-100 transition-all">LÀM MỚI HỆ THỐNG</button>
+                <button onclick="location.reload()" class="w-full py-3 bg-white border border-slate-200 rounded-xl text-[10px] font-black hover:bg-slate-100 transition-all text-orange-500">LÀM MỚI HỆ THỐNG</button>
             </div>
         </div>
     </div>
+    
+    <!-- Footer V1.x.x -->
+    <div class="mt-8 mb-4 border-t border-slate-200 pt-6 pb-2 text-center max-w-7xl mx-auto">
+        <p class="text-sm font-black text-slate-500 uppercase tracking-widest mb-2"><i class="fa-solid fa-code-merge mr-1"></i> Phiên bản V1.2.1 (Ổn định)</p>
+        <div class="inline-block text-left text-[11px] text-slate-400 bg-white px-6 py-3 rounded-xl border border-slate-100 shadow-sm max-w-2xl">
+            <p class="font-bold text-slate-500 mb-1">Lỗi đã Fix / Tính năng mới:</p>
+            <ul class="list-disc pl-4 space-y-1">
+                <li>Sửa lỗi treo hệ thống (iFrame Freeze) do vòng lặp vẽ lại giao diện.</li>
+                <li>Xử lý lỗi nhảy thẻ, mất UID khi quét thẻ lạ. Khóa UID cố định trên Form đăng ký.</li>
+                <li>Sĩ số lớp được quy định cố định (15 Sinh viên). Thêm đếm số lượng thẻ đã lưu.</li>
+                <li>Giao diện bổ sung tông Cam nhẹ chuẩn Fpoly. Thêm cột Ca học trong Form đăng ký.</li>
+            </ul>
+        </div>
+    </div>
 
+    <!-- Firebase & Logic -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // --- CẤU HÌNH THỜI GIAN CA HỌC ---
+        // --- CẤU HÌNH THỜI GIAN CA HỌC & SĨ SỐ ---
+        const TOTAL_STUDENTS = 15; // Sĩ số cố định theo yêu cầu
         const SHIFTS = [
             { id: "ca1", name: "Ca 1", start: "07:00", end: "09:15", index: 0 },
             { id: "ca2", name: "Ca 2", start: "09:30", end: "11:45", index: 1 },
@@ -200,7 +231,7 @@
             type: 'bar',
             data: {
                 labels: ['Ca 1', 'Ca 2', 'Ca 3', 'Ca 4', 'Ca 5'],
-                datasets: [{ label: 'Hiện diện', data: [0,0,0,0,0], backgroundColor: '#3b82f6', borderRadius: 4 }]
+                datasets: [{ label: 'Hiện diện', data: [0,0,0,0,0], backgroundColor: '#f97316', borderRadius: 4 }]
             },
             options: { plugins: { legend: { display: false } }, scales: { y: { display: false }, x: { grid: { display: false }, ticks: { font: { size: 8 } } } } }
         });
@@ -223,7 +254,6 @@
             console.warn("Chạy ở chế độ nội bộ (Local Storage).");
         }
 
-        // Khởi tạo Database từ LocalStorage để lưu giữ khi F5/Reset (Chế độ Offline)
         let membersDb = JSON.parse(localStorage.getItem('era_members')) || {}; 
         let logsDb = JSON.parse(localStorage.getItem('era_logs')) || [];    
 
@@ -239,7 +269,6 @@
         let currentShift = null;
         let currentDateString = new Date().toDateString();
 
-        // Toast Helper
         window.showToast = function(msg, type = 'success') {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
@@ -286,7 +315,6 @@
             processLogsAndRender();
         }
 
-        // --- DATA SYNC (FIRESTORE) ---
         function loadCloudData() {
             if (!currentUser || !isCloudActive) return;
 
@@ -294,7 +322,8 @@
             onSnapshot(membersRef, (snapshot) => {
                 membersDb = {};
                 snapshot.forEach(doc => { membersDb[doc.id] = doc.data(); });
-                document.getElementById('total-count').innerText = Object.keys(membersDb).length;
+                document.getElementById('registered-count-badge').innerText = `ĐÃ LƯU: ${Object.keys(membersDb).length} THẺ`;
+                processLogsAndRender();
             });
 
             const logsRef = collection(db, 'artifacts', appId, 'public', 'data', 'attendance_logs');
@@ -310,7 +339,6 @@
             });
         }
 
-        // --- XỬ LÝ LOGIC CA & HIỂN THỊ ---
         function getShiftByTime(now) {
             const time = now.getHours() * 60 + now.getMinutes();
             return SHIFTS.find(s => {
@@ -325,10 +353,8 @@
             const todayStr = now.toDateString();
             
             document.getElementById('current-shift-badge').innerText = currentShift ? currentShift.name.toUpperCase() : "NGOÀI CA";
-            
-            // Nếu có card cứng từ ESP32 chưa đăng ký Web, đếm có thể sai, tốt nhất đếm trên membersDb
-            let totalMembers = Object.keys(membersDb).length;
-            document.getElementById('total-count').innerText = totalMembers > 0 ? totalMembers : 40; // Fallback 40 nếu chưa có ai
+            document.getElementById('total-count').innerText = TOTAL_STUDENTS; 
+            document.getElementById('registered-count-badge').innerText = `ĐÃ LƯU: ${Object.keys(membersDb).length} THẺ`;
 
             let currentShiftLogs = [];
             let presentInCurrentShift = new Set();
@@ -337,7 +363,7 @@
                 if (log.date === todayStr) {
                     if (currentShift && log.shiftId === currentShift.id) {
                         currentShiftLogs.push(log);
-                        if (log.status === "VÀO LỚP") presentInCurrentShift.add(log.mssv || log.uid); // Dùng UID nếu MSSV trống
+                        if (log.status === "VÀO LỚP") presentInCurrentShift.add(log.mssv || log.uid); 
                         if (log.status === "RA LỚP") presentInCurrentShift.delete(log.mssv || log.uid);
                     }
                 }
@@ -349,16 +375,15 @@
                     <td class="font-mono text-[11px] text-slate-400 font-bold">${l.time}</td>
                     <td class="font-black text-slate-700 uppercase">${l.name}</td>
                     <td class="text-slate-500 font-bold">${l.mssv}</td>
-                    <td class="text-slate-400">${l.class}</td>
+                    <td class="text-slate-400">${l.class} ${l.shiftReg ? `<span class="text-[9px] text-blue-500 bg-blue-50 px-1 ml-1 rounded">${l.shiftReg}</span>` : ''}</td>
                     <td><span class="px-3 py-1 rounded-full text-[10px] font-black ${l.color}">${l.status}</span></td>
                 </tr>
             `).join('');
 
             const present = presentInCurrentShift.size;
             document.getElementById('present-count').innerText = present;
-            document.getElementById('absent-count').innerText = Math.max(0, (totalMembers > 0 ? totalMembers : 40) - present);
+            document.getElementById('absent-count').innerText = Math.max(0, TOTAL_STUDENTS - present);
 
-            // Cập nhật biểu đồ
             let chartSets = [new Set(), new Set(), new Set(), new Set(), new Set()];
             logsDb.forEach(log => {
                 if(log.date === todayStr && log.shiftIndex >= 0 && log.shiftIndex <= 4) {
@@ -370,7 +395,6 @@
             attendanceChart.update();
         }
 
-        // --- ERA WIDGET VÀ NHẬN DIỆN ---
         const eraWidgetConfig = new EraWidget();
         let eConfig = { uid: null, name: null, mssv: null, class: null };
 
@@ -397,13 +421,7 @@
                 lastUid = uidVal;
                 isProcessing = true;
 
-                handleHardwareScan({
-                    uid: uidVal,
-                    name: nameVal,
-                    mssv: mssvVal,
-                    class: classVal
-                });
-
+                handleHardwareScan({ uid: uidVal, name: nameVal, mssv: mssvVal, class: classVal });
                 setTimeout(() => { isProcessing = false; }, 3000);
             }
         });
@@ -417,13 +435,12 @@
             const uid = data.uid;
             const cloudMember = membersDb[uid];
             
-            // XÁC NHẬN THẺ GỐC TỪ ESP32 HOẶC WEB DB
-            // Nếu có tên từ ESP32 (Không phải rỗng, không phải "None", "NGUOI LA")
             const espNameValid = data.name && data.name !== "None" && data.name !== "0" && data.name !== "NGUOI LA" && data.name !== "nguoi la" && data.name !== "Người lạ";
             
             let finalName = cloudMember ? cloudMember.name : (espNameValid ? data.name : null);
             let finalMssv = cloudMember ? cloudMember.mssv : (espNameValid ? data.mssv : "---");
             let finalClass = cloudMember ? cloudMember.class : (espNameValid ? data.class : "---");
+            let finalShiftReg = cloudMember ? cloudMember.shift : ""; // Ca đã đăng ký (nếu có)
 
             const now = new Date();
             const timeStr = now.toLocaleTimeString('vi-VN', { hour12: false });
@@ -448,7 +465,7 @@
                 document.getElementById('reg-class').value = "";
 
             } else {
-                // THÀNH VIÊN ĐÃ ĐĂNG KÝ (Cloud hoặc ESP32)
+                // THÀNH VIÊN ĐÃ ĐĂNG KÝ
                 nameEl.innerText = finalName;
                 nameEl.classList.remove('text-orange-500');
                 nameEl.classList.add('text-slate-800');
@@ -473,6 +490,7 @@
                     name: finalName,
                     mssv: finalMssv,
                     class: finalClass,
+                    shiftReg: finalShiftReg,
                     time: timeStr,
                     timestamp: now.getTime(),
                     date: currentDateString,
@@ -489,34 +507,33 @@
                     logEntry.id = Date.now().toString();
                     logsDb.unshift(logEntry);
                     saveToLocal();
-                    processLogsAndRender(); // Gọi cập nhật tay khi ở chế độ offline
+                    processLogsAndRender(); 
                 }
             }
 
-            // Tự reset màn hình chính sau 8 giây
             setTimeout(() => {
                 if(lastUid === uid) {
                     nameEl.innerText = "SẴN SÀNG";
                     nameEl.className = "text-4xl font-black text-slate-800 uppercase mb-1";
                     subEl.innerText = "MỜI ĐẶT THẺ VÀO ĐẦU ĐỌC";
-                    avatar.style.borderColor = "#f1f5f9";
+                    avatar.style.borderColor = "#fff";
                     avatar.classList.remove('pulse-orange');
                     avatarIcon.className = "fa-solid fa-user-circle text-7xl text-slate-200";
                 }
             }, 8000);
         }
 
-        // --- CÁC HÀM TƯƠNG TÁC TỪ GIAO DIỆN ---
         window.saveNewMember = async function() {
             const uid = document.getElementById('reg-uid').value;
             const name = document.getElementById('reg-name').value;
             const mssv = document.getElementById('reg-mssv').value;
             const clazz = document.getElementById('reg-class').value;
+            const shift = document.getElementById('reg-shift').value;
 
             if(!uid || uid === "Đang chờ thẻ...") return window.showToast("Quét thẻ lạ trước khi lưu!", "warning");
             if(!name) return window.showToast("Cần nhập Họ và Tên!", "warning");
 
-            let memberData = { name: name, mssv: mssv || "---", class: clazz || "---", registeredAt: Date.now() };
+            let memberData = { name: name, mssv: mssv || "---", class: clazz || "---", shift: shift, registeredAt: Date.now() };
 
             if (isCloudActive && currentUser) {
                 try {
@@ -597,7 +614,8 @@
                 "STT": index + 1,
                 "Ngày": l.date,
                 "Thời Gian": l.time,
-                "Ca Học": SHIFTS.find(s => s.id === l.shiftId)?.name || "Ngoài ca",
+                "Ca Quét Thẻ": SHIFTS.find(s => s.id === l.shiftId)?.name || "Ngoài ca",
+                "Ca Đăng Ký": l.shiftReg || "---",
                 "Họ Tên": l.name,
                 "MSSV": l.mssv,
                 "Lớp": l.class,
@@ -605,21 +623,19 @@
             }));
 
             const ws = XLSX.utils.json_to_sheet(exportData);
-            ws['!cols'] = [ {wch: 5}, {wch: 15}, {wch: 12}, {wch: 10}, {wch: 25}, {wch: 15}, {wch: 15}, {wch: 15} ];
+            ws['!cols'] = [ {wch: 5}, {wch: 15}, {wch: 12}, {wch: 15}, {wch: 15}, {wch: 25}, {wch: 15}, {wch: 15}, {wch: 15} ];
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, "Báo Cáo Điểm Danh");
-            XLSX.writeFile(wb, `Bao_Cao_Diem_Danh_${new Date().getTime()}.xlsx`);
+            XLSX.writeFile(wb, `Bao_Cao_Diem_Danh_Fpoly_${new Date().getTime()}.xlsx`);
             window.showToast("Xuất Excel thành công!");
         };
 
-        // --- CẬP NHẬT ĐỒNG HỒ & SMART RENDER ---
         setInterval(() => {
             const now = new Date();
             document.getElementById('clock').innerText = now.toLocaleTimeString('vi-VN', { hour12: false });
             const days = ["CHỦ NHẬT", "THỨ HAI", "THỨ BA", "THỨ TƯ", "THỨ NĂM", "THỨ SÁU", "THỨ BẢY"];
             document.getElementById('date-now').innerText = `${days[now.getDay()]}, ${now.getDate()} THÁNG ${now.getMonth() + 1}, ${now.getFullYear()}`;
             
-            // Cập nhật giao diện tự động khi chuyển sang Ca mới
             const newShift = getShiftByTime(now);
             const todayStr = now.toDateString();
             if (todayStr !== currentDateString || (newShift && currentShift && newShift.id !== currentShift.id)) {
@@ -629,7 +645,6 @@
             }
         }, 1000);
         
-        // Khởi động ban đầu
         currentShift = getShiftByTime(new Date());
     </script>
 </body>
