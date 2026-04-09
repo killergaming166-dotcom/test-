@@ -41,26 +41,11 @@
             font-size: 4rem;
         }
 
-        .btn-config {
-            background: linear-gradient(135deg, #f27024 0%, #ff8c42 100%);
-            transition: transform 0.2s;
-        }
-
-        .btn-config:hover {
-            transform: scale(1.02);
-        }
-
         .stat-card {
             border-radius: 1.5rem;
             padding: 1.5rem;
             background: white;
             border: 1px solid #e2e8f0;
-        }
-
-        .table-container {
-            border-radius: 2rem;
-            background: white;
-            padding: 2rem;
         }
 
         @keyframes scanPulse {
@@ -72,12 +57,17 @@
         .scanning {
             animation: scanPulse 1.5s infinite;
         }
+
+        .modal-overlay {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
+        }
     </style>
 </head>
 
 <body>
 
-    <!-- Top Header -->
+    <!-- Header -->
     <div class="flex justify-between items-start mb-8">
         <div class="flex items-center gap-4">
             <div class="w-12 h-12 bg-orange-500 rounded-xl flex items-center justify-center shadow-lg">
@@ -91,44 +81,41 @@
         <div id="clock" class="digital-clock leading-none">00:00:00</div>
     </div>
 
-    <!-- Main Content Grid -->
     <div class="grid grid-cols-12 gap-6">
         
-        <!-- LEFT COLUMN: Main Display -->
+        <!-- Cột Trái: Hiển thị chính -->
         <div class="col-span-12 lg:col-span-8 space-y-6">
-            
             <div id="main-card" class="modern-card p-12 flex flex-col items-center justify-center relative min-h-[450px]">
                 <div class="absolute top-8 left-10 flex items-center gap-2">
                     <span class="w-2.5 h-2.5 bg-emerald-400 rounded-full animate-pulse"></span>
                     <span class="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Live Stream</span>
                 </div>
-                
-                <div id="shift-badge" class="absolute top-8 right-10 px-4 py-1.5 rounded-full bg-slate-50 text-slate-400 text-[11px] font-bold uppercase border border-slate-100">
-                    CA 5
-                </div>
 
+                <div id="shift-label" class="absolute top-8 right-10 px-4 py-1 rounded-full bg-slate-100 text-slate-500 text-[10px] font-bold uppercase tracking-widest">
+                    Đang xác định ca...
+                </div>
+                
                 <div class="flex flex-col items-center text-center">
                     <div class="w-32 h-32 bg-slate-50 rounded-full flex items-center justify-center text-5xl mb-8 border border-slate-100 shadow-inner">
                         <span id="focus-icon">👤</span>
                     </div>
                     <h2 id="focus-name" class="text-6xl font-black text-slate-800 mb-4 uppercase tracking-tighter">---</h2>
-                    <p id="focus-status-text" class="text-2xl font-semibold text-slate-400 mb-8">Hệ thống sẵn sàng</p>
+                    <p id="focus-mssv" class="text-2xl font-semibold text-slate-400 mb-2">Hệ thống sẵn sàng</p>
+                    <p id="focus-class" class="text-lg font-bold text-blue-500 uppercase mb-8">---</p>
                     
-                    <button id="status-button" class="px-10 py-3 rounded-full bg-slate-50 text-slate-400 border border-slate-100 font-bold text-sm uppercase tracking-widest">
+                    <button id="status-button" class="px-10 py-3 rounded-full bg-slate-50 text-slate-400 border border-slate-100 font-bold text-sm uppercase tracking-widest transition-all">
                         Đợi quẹt thẻ...
                     </button>
                 </div>
             </div>
 
-            <!-- TABLE SECTION -->
-            <div class="table-container shadow-sm border border-slate-200/50">
+            <!-- Bảng Lịch sử -->
+            <div class="modern-card p-8 shadow-sm border border-slate-200/50">
                 <div class="flex justify-between items-center mb-8">
                     <h3 class="text-xs font-black text-slate-400 uppercase tracking-[0.2em]">Lịch sử điểm danh</h3>
                     <div class="flex gap-3">
-                        <button onclick="exportToExcel()" class="bg-[#10b981] text-white text-[11px] font-bold px-5 py-2 rounded-xl flex items-center gap-2 shadow-sm">
-                            <span>📄</span> XUẤT EXCEL
-                        </button>
-                        <button onclick="clearHistory()" class="text-[11px] text-slate-300 font-bold uppercase hover:text-rose-500 transition-colors">Xóa</button>
+                        <button onclick="exportToExcel()" class="bg-[#10b981] text-white text-[11px] font-bold px-5 py-2 rounded-xl shadow-sm">XUẤT EXCEL</button>
+                        <button onclick="clearHistory()" class="text-[11px] text-slate-300 font-bold uppercase hover:text-rose-500">Xóa</button>
                     </div>
                 </div>
                 
@@ -143,27 +130,15 @@
                                 <th class="pb-5 text-right">TT</th>
                             </tr>
                         </thead>
-                        <tbody id="history-rows" class="divide-y divide-slate-50">
-                            <!-- Rows dynamic -->
-                        </tbody>
+                        <tbody id="history-rows" class="divide-y divide-slate-50"></tbody>
                     </table>
                 </div>
             </div>
         </div>
 
-        <!-- RIGHT COLUMN: Stats & Config -->
+        <!-- Cột Phải: Thống kê & Thông tin ca -->
         <div class="col-span-12 lg:col-span-4 space-y-6">
-            
-            <!-- Config Card -->
-            <button onclick="openRegistrationManual()" class="btn-config w-full p-8 rounded-[2rem] flex items-center justify-between text-white shadow-xl shadow-orange-200/50">
-                <div class="text-left">
-                    <p class="text-[10px] font-black opacity-70 uppercase tracking-widest mb-1">Cấu hình</p>
-                    <h4 class="text-2xl font-black uppercase tracking-tight">Đăng ký thẻ mới</h4>
-                </div>
-                <div class="text-4xl opacity-80">🪪</div>
-            </button>
-
-            <!-- Stats Row 1 -->
+            <!-- Thống kê nhanh -->
             <div class="grid grid-cols-2 gap-4">
                 <div class="stat-card">
                     <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Sĩ số</p>
@@ -174,24 +149,22 @@
                     <h4 id="stat-present" class="text-5xl font-black text-emerald-500">0</h4>
                 </div>
             </div>
-
-            <!-- Stats Row 2 -->
             <div class="stat-card border-rose-500 border-2">
                 <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Vắng</p>
                 <h4 id="stat-absent" class="text-5xl font-black text-rose-500">40</h4>
             </div>
 
-            <!-- Shift Info Card -->
+            <!-- Thông tin ca học -->
             <div class="modern-card p-8">
                 <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-6 text-center">Thông tin ca</p>
                 <div class="grid grid-cols-2 gap-4 mb-8">
                     <div class="bg-slate-50 p-4 rounded-2xl text-center border border-slate-100">
                         <div class="text-[10px] font-bold text-slate-400 uppercase mb-1">Vào</div>
-                        <span id="shift-start" class="text-2xl font-black text-blue-500">16:00</span>
+                        <span id="shift-start" class="text-2xl font-black text-blue-500">--:--</span>
                     </div>
                     <div class="bg-slate-50 p-4 rounded-2xl text-center border border-slate-100">
                         <div class="text-[10px] font-bold text-slate-400 uppercase mb-1">Ra</div>
-                        <span id="shift-end" class="text-2xl font-black text-blue-500">18:00</span>
+                        <span id="shift-end" class="text-2xl font-black text-blue-500">--:--</span>
                     </div>
                 </div>
                 <div class="flex flex-col items-center gap-3 pt-4 border-t border-slate-50">
@@ -199,165 +172,227 @@
                         <div id="connection-dot" class="w-2 h-2 rounded-full bg-slate-300"></div>
                         <span id="connection-text" class="text-[10px] font-black text-slate-400 uppercase tracking-widest">ESP32: Offline</span>
                     </div>
-                    <div id="sync-status" class="text-[9px] font-bold text-sky-400 uppercase">Cloud Sync: Loading...</div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- ERA & FIREBASE LOGIC -->
+    <!-- Modal Đăng ký -->
+    <div id="register-modal" class="fixed inset-0 modal-overlay z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-white rounded-[2rem] w-full max-w-md p-8 shadow-2xl">
+            <h3 class="text-2xl font-black text-slate-800 mb-2 uppercase tracking-tight">Đăng ký thẻ mới</h3>
+            <p id="modal-uid-display" class="text-xs font-bold text-blue-500 mb-6 uppercase tracking-widest">UID: ---</p>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 block">Họ và Tên</label>
+                    <input id="reg-name" type="text" class="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 font-bold uppercase focus:outline-none focus:ring-2 focus:ring-orange-500/20" placeholder="NGUYEN VAN A">
+                </div>
+                <div>
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 block">MSSV</label>
+                    <input id="reg-mssv" type="text" class="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 font-bold uppercase focus:outline-none focus:ring-2 focus:ring-orange-500/20" placeholder="PS12345">
+                </div>
+                <div>
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 block">Lớp</label>
+                    <input id="reg-class" type="text" class="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 font-bold uppercase focus:outline-none focus:ring-2 focus:ring-orange-500/20" placeholder="UD1234">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3 mt-8">
+                <button onclick="closeModal()" class="py-3 rounded-xl bg-slate-100 text-slate-500 font-bold text-sm uppercase">Hủy</button>
+                <button onclick="saveRegistration()" class="py-3 rounded-xl bg-orange-500 text-white font-bold text-sm uppercase shadow-lg shadow-orange-200">Lưu lại</button>
+            </div>
+        </div>
+    </div>
+
     <script src="https://www.unpkg.com/@eohjsc/era-widget@1.1.3/src/index.js"></script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
         import { getFirestore, doc, setDoc, collection, onSnapshot, deleteDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 
-        // Constants & Global State
-        let configUid, configName, configMssv, configClass;
-        let lastScannedUID = "";
+        let configUid, lastScannedUID = "";
         let attendanceHistory = [];
+        let studentDirectory = {};
         const totalInClass = 40;
 
-        // Firebase Configuration
         const firebaseConfig = JSON.parse(__firebase_config);
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'attendance-pro-system';
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'attendance-persistent-v2';
 
-        // 1. Firebase Authentication & Firestore Sync
+        // Lịch ca học đã cập nhật Giải lao
+        const shiftSchedule = [
+            { name: "CA 1", start: "07:15", end: "09:30", startMin: 435, endMin: 570, type: 'class' },
+            { name: "CA 2", start: "09:45", end: "12:00", startMin: 585, endMin: 720, type: 'class' },
+            { name: "GIẢI LAO", start: "12:00", end: "13:00", startMin: 720, endMin: 780, type: 'break' },
+            { name: "CA 3", start: "13:00", end: "15:15", startMin: 780, endMin: 915, type: 'class' },
+            { name: "CA 4", start: "15:30", end: "17:45", startMin: 930, endMin: 1065, type: 'class' }
+        ];
+
+        function getCurrentShift() {
+            const now = new Date();
+            const minutes = now.getHours() * 60 + now.getMinutes();
+            return shiftSchedule.find(s => minutes >= s.startMin && minutes < s.endMin) || null;
+        }
+
+        function updateShiftUI() {
+            const currentShift = getCurrentShift();
+            const label = document.getElementById('shift-label');
+            const startText = document.getElementById('shift-start');
+            const endText = document.getElementById('shift-end');
+
+            if (currentShift) {
+                label.innerText = currentShift.name;
+                if (currentShift.type === 'break') {
+                    label.className = "absolute top-8 right-10 px-4 py-1 rounded-full bg-amber-50 text-amber-500 text-[10px] font-bold uppercase tracking-widest border border-amber-100 animate-pulse";
+                } else {
+                    label.className = "absolute top-8 right-10 px-4 py-1 rounded-full bg-blue-50 text-blue-500 text-[10px] font-bold uppercase tracking-widest border border-blue-100";
+                }
+                startText.innerText = currentShift.start;
+                endText.innerText = currentShift.end;
+            } else {
+                label.innerText = "NGOÀI GIỜ";
+                label.className = "absolute top-8 right-10 px-4 py-1 rounded-full bg-slate-50 text-slate-400 text-[10px] font-bold uppercase tracking-widest border border-slate-100";
+                startText.innerText = "--:--";
+                endText.innerText = "--:--";
+            }
+        }
+
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                const historyRef = collection(db, 'artifacts', appId, 'public', 'data', 'history');
-                onSnapshot(historyRef, (snapshot) => {
-                    attendanceHistory = [];
-                    snapshot.forEach(doc => attendanceHistory.push(doc.data()));
-                    attendanceHistory.sort((a, b) => b.timestamp - a.timestamp);
+                onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'history'), (snap) => {
+                    attendanceHistory = snap.docs.map(d => d.data()).sort((a,b) => b.timestamp - a.timestamp);
                     renderUI();
                     updateStats();
-                    document.getElementById('sync-status').innerText = "Cloud Sync: Online";
-                });
+                }, (err) => console.error(err));
+                
+                onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'directory'), (snap) => {
+                    studentDirectory = {};
+                    snap.forEach(doc => studentDirectory[doc.id] = doc.data());
+                }, (err) => console.error(err));
             } else {
                 signInAnonymously(auth);
             }
         });
 
-        // 2. Era Widget Original Logic (KEEPING CONNECTION)
         const eraWidget = new EraWidget();
         eraWidget.init({
             needRealtimeConfigs: true,
             maxRealtimeConfigsCount: 5,
-            onConfiguration: (configuration) => {
-                configUid = configuration.realtime_configs[0];
-                configName = configuration.realtime_configs[1];
-                configMssv = configuration.realtime_configs[2];
-                configClass = configuration.realtime_configs[3];
-                document.getElementById('connection-dot').className = "w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]";
+            onConfiguration: (conf) => {
+                configUid = conf.realtime_configs[0];
+                document.getElementById('connection-dot').className = "w-2 h-2 rounded-full bg-emerald-500";
                 document.getElementById('connection-text').innerText = "ESP32: Online";
             },
             onValues: (values) => {
                 const uidVal = values[configUid?.id]?.value;
-                const nameVal = values[configName?.id]?.value;
-                const mssvVal = values[configMssv?.id]?.value;
-                const classVal = values[configClass?.id]?.value;
-
                 if (uidVal && uidVal !== "0" && uidVal !== "" && uidVal !== lastScannedUID) {
                     lastScannedUID = uidVal;
-                    processNewAttendance(nameVal, mssvVal, classVal, uidVal);
+                    handleScan(uidVal);
                 }
             }
         });
 
-        // 3. Process Attendance
-        async function processNewAttendance(name, mssv, className, uid) {
-            // Data Cleaning
-            let cleanName = (name && name !== "None" && name !== "") ? name : "NGƯỜI LẠ";
-            let cleanMssv = (mssv && mssv !== "None" && mssv !== "") ? mssv : "---";
-            let cleanClass = (className && className !== "None" && className !== "NONE" && className !== "") ? className : "---";
+        async function handleScan(uid) {
+            const student = studentDirectory[uid];
+            if (student) {
+                await recordAttendance(student.name, student.mssv, student.class, uid);
+            } else {
+                showModal(uid);
+            }
+        }
 
-            // Update UI Card
-            document.getElementById('focus-name').innerText = cleanName;
-            document.getElementById('focus-status-text').innerText = (cleanName === "NGƯỜI LẠ") ? "Chưa nhận diện sinh viên" : "Điểm danh thành công";
-            document.getElementById('status-button').innerText = "Đã nhận thẻ";
+        async function recordAttendance(name, mssv, className, uid) {
+            document.getElementById('focus-name').innerText = name;
+            document.getElementById('focus-mssv').innerText = mssv;
+            document.getElementById('focus-class').innerText = className;
+            document.getElementById('status-button').innerText = "Đã nhận diện";
             document.getElementById('status-button').className = "px-10 py-3 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-100 font-bold text-sm uppercase tracking-widest";
             
-            const mainCard = document.getElementById('main-card');
-            mainCard.classList.add('scanning');
-            
+            const card = document.getElementById('main-card');
+            card.classList.add('scanning');
             setTimeout(() => {
-                mainCard.classList.remove('scanning');
+                card.classList.remove('scanning');
                 document.getElementById('status-button').innerText = "Đợi quẹt thẻ...";
                 document.getElementById('status-button').className = "px-10 py-3 rounded-full bg-slate-50 text-slate-400 border border-slate-100 font-bold text-sm uppercase tracking-widest";
             }, 3000);
 
-            // Cloud Save
             const timestamp = Date.now();
             const record = {
                 time: new Date().toLocaleTimeString('vi-VN', { hour12: false }),
-                name: cleanName,
-                mssv: cleanMssv,
-                class: cleanClass,
-                uid: uid,
-                timestamp: timestamp
+                name, mssv, class: className, uid, timestamp
             };
-
-            try {
-                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'history', `${timestamp}-${uid}`);
-                await setDoc(docRef, record);
-            } catch (e) { console.error("Cloud Save Error", e); }
+            await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'history', `${timestamp}-${uid}`), record);
         }
 
-        // 4. Render UI Table
+        window.showModal = (uid) => {
+            document.getElementById('modal-uid-display').innerText = `UID: ${uid}`;
+            document.getElementById('register-modal').classList.remove('hidden');
+            document.getElementById('reg-name').focus();
+        };
+
+        window.closeModal = () => {
+            document.getElementById('register-modal').classList.add('hidden');
+            lastScannedUID = "";
+        };
+
+        window.saveRegistration = async () => {
+            const uid = document.getElementById('modal-uid-display').innerText.replace('UID: ', '');
+            const name = document.getElementById('reg-name').value.trim().toUpperCase();
+            const mssv = document.getElementById('reg-mssv').value.trim().toUpperCase();
+            const className = document.getElementById('reg-class').value.trim().toUpperCase();
+
+            if (!name || !mssv) return;
+
+            await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'directory', uid), { name, mssv, class: className });
+            await recordAttendance(name, mssv, className, uid);
+            closeModal();
+            document.getElementById('reg-name').value = "";
+            document.getElementById('reg-mssv').value = "";
+            document.getElementById('reg-class').value = "";
+        };
+
         function renderUI() {
             const tbody = document.getElementById('history-rows');
             tbody.innerHTML = attendanceHistory.map(item => `
-                <tr class="hover:bg-slate-50/50 transition-colors">
+                <tr class="hover:bg-slate-50 transition-colors">
                     <td class="py-5 text-blue-500 font-bold text-sm">${item.time}</td>
                     <td class="py-5 font-bold text-slate-700 uppercase text-sm">${item.name}</td>
-                    <td class="py-5 text-slate-400 font-semibold tracking-wide">${item.mssv}</td>
+                    <td class="py-5 text-slate-400 font-semibold">${item.mssv}</td>
                     <td class="py-5 text-slate-400 font-bold uppercase text-[11px]">${item.class || '---'}</td>
-                    <td class="py-5 text-right"><span class="bg-emerald-50 text-emerald-600 px-3 py-1 rounded-lg font-black text-[10px] tracking-widest">OK</span></td>
+                    <td class="py-5 text-right"><span class="bg-emerald-50 text-emerald-600 px-3 py-1 rounded-lg font-black text-[10px]">OK</span></td>
                 </tr>
             `).join('');
         }
 
-        // 5. Update Stats
         function updateStats() {
-            // Count unique students by MSSV
-            const present = new Set(attendanceHistory.filter(h => h.mssv !== "---").map(h => h.mssv)).size;
+            const present = new Set(attendanceHistory.map(h => h.mssv)).size;
             document.getElementById('stat-present').innerText = present;
             document.getElementById('stat-absent').innerText = Math.max(0, totalInClass - present);
         }
 
-        // 6. External Functions
         window.exportToExcel = () => {
-            if (attendanceHistory.length === 0) return;
-            const ws = XLSX.utils.json_to_sheet(attendanceHistory.map(h => ({
-                "GIỜ": h.time,
-                "SINH VIÊN": h.name,
-                "MSSV": h.mssv,
-                "LỚP": h.class,
-                "UID": h.uid
-            })));
+            const ws = XLSX.utils.json_to_sheet(attendanceHistory);
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, "AttendanceHistory");
-            XLSX.writeFile(wb, `Attendance_Log_${new Date().toISOString().split('T')[0]}.xlsx`);
+            XLSX.writeFile(wb, "DiemDanh_CoGiaiLao.xlsx");
         };
 
         window.clearHistory = async () => {
-            if (confirm("Bạn có chắc muốn xóa sạch lịch sử trên Cloud?")) {
-                attendanceHistory.forEach(async (h) => {
+            if (confirm("Xóa lịch sử trên Cloud?")) {
+                attendanceHistory.forEach(async h => {
                     await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'history', `${h.timestamp}-${h.uid}`));
                 });
-                lastScannedUID = "";
             }
         };
 
-        // 7. Timer
         setInterval(() => {
             document.getElementById('clock').innerText = new Date().toLocaleTimeString('vi-VN', { hour12: false });
+            updateShiftUI();
         }, 1000);
-
+        updateShiftUI();
     </script>
 </body>
 
