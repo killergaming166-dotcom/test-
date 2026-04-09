@@ -6,6 +6,8 @@
     <title>Live Attendance System Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Nhúng thư viện ERa JS SDK để kết nối Realtime -->
+    <script src="https://www.unpkg.com/@era-web/iot-sdk@latest/dist/era-iot.umd.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
         
@@ -49,7 +51,6 @@
             border-radius: 10px;
         }
         
-        /* Chống tràn chữ cho các thẻ badge */
         .badge {
             white-space: nowrap;
         }
@@ -66,8 +67,8 @@
             <div>
                 <h1 class="text-xl font-bold text-slate-800 tracking-tight uppercase">Dashboard</h1>
                 <div class="flex items-center gap-2">
-                    <span class="status-dot bg-green-500"></span>
-                    <span class="text-xs text-slate-400 font-medium uppercase tracking-wider">Live Attendance System</span>
+                    <span id="conn-status-dot" class="status-dot bg-slate-300"></span>
+                    <span id="conn-status-text" class="text-xs text-slate-400 font-medium uppercase tracking-wider">Connecting to ERa...</span>
                 </div>
             </div>
         </div>
@@ -84,16 +85,16 @@
             <!-- Scanning Area -->
             <div class="glass-card p-8 flex flex-col items-center justify-center relative min-h-[400px]">
                 <div class="absolute top-6 left-6 flex items-center gap-2 px-3 py-1.5 bg-slate-50 rounded-full border border-slate-100">
-                    <span id="conn-dot" class="status-dot bg-green-500 animate-pulse"></span>
-                    <span class="text-[10px] font-bold text-slate-500 uppercase" id="connection-status">Connected</span>
+                    <span id="device-status-dot" class="status-dot bg-slate-400 animate-pulse"></span>
+                    <span class="text-[10px] font-bold text-slate-500 uppercase" id="device-status">Offline</span>
                 </div>
 
                 <div class="absolute top-6 right-6">
                     <div id="shift-tag" class="px-3 py-1 bg-slate-900 text-white rounded-lg text-xs font-bold uppercase">CA --</div>
                 </div>
 
-                <div class="w-48 h-48 bg-slate-50 rounded-full flex items-center justify-center shadow-inner mb-6 relative group cursor-pointer overflow-hidden border-4 border-white">
-                    <i class="fa-solid fa-user text-6xl text-slate-200"></i>
+                <div id="user-avatar" class="w-48 h-48 bg-slate-50 rounded-full flex items-center justify-center shadow-inner mb-6 relative overflow-hidden border-4 border-white transition-all duration-500">
+                    <i id="user-icon" class="fa-solid fa-user text-6xl text-slate-200"></i>
                     <div id="scan-overlay" class="absolute inset-0 bg-blue-500/10 hidden items-center justify-center">
                          <i class="fa-solid fa-qrcode text-blue-500 text-4xl animate-bounce"></i>
                     </div>
@@ -105,14 +106,14 @@
                     <div class="w-8 h-2 bg-slate-800 rounded-full"></div>
                 </div>
 
-                <h2 class="text-lg font-semibold text-slate-500 mb-2 uppercase tracking-wide">Sẵn sàng nhận tín hiệu</h2>
+                <h2 id="display-name" class="text-lg font-semibold text-slate-500 mb-2 uppercase tracking-wide">Đang đợi thẻ...</h2>
                 <div class="flex items-center gap-2 text-blue-500 font-medium">
                     <span class="status-dot bg-blue-500 scanning-animation"></span>
-                    <span class="text-sm uppercase tracking-widest">Scanning Area</span>
+                    <span id="display-mssv" class="text-sm uppercase tracking-widest">Sẵn sàng</span>
                 </div>
             </div>
 
-            <!-- Registration Form - ĐÃ SỬA LỖI RỚT CHỮ -->
+            <!-- Registration Form -->
             <div class="glass-card p-6 border-l-4 border-orange-400">
                 <div class="flex items-center gap-3 mb-6">
                     <div class="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center">
@@ -124,19 +125,19 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
                     <div class="space-y-1">
                         <label class="text-[10px] font-bold text-slate-400 uppercase ml-1 block truncate">Mã UID</label>
-                        <input type="text" id="reg-uid" placeholder="UID..." class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-200 transition-all text-sm font-medium">
+                        <input type="text" id="reg-uid" placeholder="UID..." class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium">
                     </div>
                     <div class="space-y-1">
                         <label class="text-[10px] font-bold text-slate-400 uppercase ml-1 block truncate">Họ và Tên</label>
-                        <input type="text" id="reg-name" placeholder="Tên SV..." class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-200 transition-all text-sm font-medium">
+                        <input type="text" id="reg-name" placeholder="Tên SV..." class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium">
                     </div>
                     <div class="space-y-1">
                         <label class="text-[10px] font-bold text-slate-400 uppercase ml-1 block truncate">MSSV / ID</label>
-                        <input type="text" id="reg-mssv" placeholder="MSSV..." class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-200 transition-all text-sm font-medium">
+                        <input type="text" id="reg-mssv" placeholder="MSSV..." class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium">
                     </div>
                     <div class="space-y-1">
                         <label class="text-[10px] font-bold text-slate-400 uppercase ml-1 block truncate">Lớp / Bộ phận</label>
-                        <input type="text" id="reg-class" placeholder="Lớp..." class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-200 transition-all text-sm font-medium">
+                        <input type="text" id="reg-class" placeholder="Lớp..." class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium">
                     </div>
                     <div>
                         <button onclick="handleRegister()" class="w-full h-[42px] px-4 bg-orange-500 text-white rounded-xl hover:bg-orange-600 transition-colors shadow-lg shadow-orange-100 font-bold text-[11px] uppercase whitespace-nowrap">
@@ -170,18 +171,14 @@
                                 <th class="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase">Trạng thái</th>
                             </tr>
                         </thead>
-                        <tbody id="attendance-body" class="divide-y divide-slate-50">
-                            <!-- Dữ liệu -->
-                        </tbody>
+                        <tbody id="attendance-body" class="divide-y divide-slate-50"></tbody>
                     </table>
                 </div>
             </div>
         </div>
 
-        <!-- Right Column: Stats & Timeline -->
+        <!-- Right Column -->
         <div class="lg:col-span-4 space-y-6">
-            
-            <!-- Stats -->
             <div class="space-y-4">
                 <div class="glass-card p-6 flex justify-between items-center border-l-4 border-slate-300">
                     <div>
@@ -214,7 +211,6 @@
                 </div>
             </div>
 
-            <!-- Timeline -->
             <div class="glass-card p-6">
                 <div class="flex items-center gap-2 mb-6">
                     <div class="w-1 h-6 bg-blue-600 rounded-full"></div>
@@ -233,15 +229,14 @@
                 </div>
 
                 <div class="bg-emerald-50 p-3 rounded-xl border border-emerald-100 flex items-center justify-between mb-4">
-                    <span class="text-[10px] font-bold text-emerald-600 uppercase" id="system-status-text">Hệ thống đang hoạt động...</span>
-                    <span class="status-dot bg-emerald-500"></span>
+                    <span class="text-[10px] font-bold text-emerald-600 uppercase" id="system-status-text">Đang kết nối ERa...</span>
+                    <span id="era-indicator" class="status-dot bg-slate-300"></span>
                 </div>
 
-                <button onclick="reconnect()" class="w-full py-4 bg-slate-900 text-white rounded-2xl font-bold uppercase tracking-widest text-xs hover:bg-slate-800 transition-all shadow-xl shadow-slate-200">
-                    Reconnect System
+                <button onclick="initERa()" class="w-full py-4 bg-slate-900 text-white rounded-2xl font-bold uppercase tracking-widest text-xs hover:bg-slate-800 transition-all shadow-xl shadow-slate-200">
+                    Kết nối thủ công
                 </button>
             </div>
-
         </div>
     </div>
 
@@ -252,74 +247,118 @@
     </div>
 
     <script>
-        // Cấu hình ca học
-        const shifts = [
-            { name: "Ca 1", start: "07:30", end: "09:30" },
-            { name: "Ca 2", start: "09:30", end: "11:30" },
-            { name: "Ca 3", start: "13:30", end: "15:30" },
-            { name: "Ca 4", start: "15:30", end: "17:30" },
-            { name: "Ca 5", start: "18:00", end: "20:00" }
-        ];
+        // Cấu hình ERa
+        const ERA_CONFIG = {
+            token: "53f7b5a4-c19e-4760-9940-ff280ac07374" // Token từ file .ino của bạn
+        };
 
-        function updateClock() {
-            const now = new Date();
-            const timeStr = now.toLocaleTimeString('vi-VN', { hour12: false });
-            document.getElementById('clock').innerText = timeStr;
+        // Lưu trữ tạm dữ liệu từ các chân trước khi trigger V0
+        let tempAttendance = {
+            uid: "",
+            name: "",
+            mssv: "",
+            class: "",
+            time: ""
+        };
 
-            const currentMinutes = now.getHours() * 60 + now.getMinutes();
-            let currentShift = null;
+        // Khởi tạo ERa Connection
+        const era = new EraIoT();
 
-            for (const s of shifts) {
-                const [sH, sM] = s.start.split(':').map(Number);
-                const [eH, eM] = s.end.split(':').map(Number);
-                if (currentMinutes >= (sH * 60 + sM) && currentMinutes <= (eH * 60 + eM)) {
-                    currentShift = s;
-                    break;
-                }
-            }
+        async function initERa() {
+            try {
+                document.getElementById('system-status-text').innerText = "Đang kết nối ERa...";
+                
+                await era.init({
+                    token: ERA_CONFIG.token,
+                    onConnect: () => {
+                        console.log("Connected to ERa");
+                        document.getElementById('conn-status-dot').className = "status-dot bg-green-500";
+                        document.getElementById('conn-status-text').innerText = "Connected to ERa Cloud";
+                        document.getElementById('era-indicator').className = "status-dot bg-green-500";
+                        document.getElementById('system-status-text').innerText = "Hệ thống trực tuyến";
+                        showToast("Đã kết nối với ERa Cloud", "success");
+                    },
+                    onDisconnect: () => {
+                        document.getElementById('conn-status-dot').className = "status-dot bg-rose-500";
+                        document.getElementById('conn-status-text').innerText = "ERa Disconnected";
+                        document.getElementById('system-status-text').innerText = "Mất kết nối";
+                        showToast("Mất kết nối ERa", "error");
+                    },
+                    onDeviceStatus: (status) => {
+                        const isOnline = status === "online";
+                        document.getElementById('device-status-dot').className = `status-dot ${isOnline ? 'bg-green-500' : 'bg-rose-500'}`;
+                        document.getElementById('device-status').innerText = isOnline ? "Online" : "Offline";
+                    }
+                });
 
-            if (currentShift) {
-                document.getElementById('shift-tag').innerText = currentShift.name;
-                document.getElementById('start-time').innerText = currentShift.start;
-                document.getElementById('end-time').innerText = currentShift.end;
-            } else {
-                document.getElementById('shift-tag').innerText = "Nghỉ";
-                document.getElementById('start-time').innerText = "--:--";
-                document.getElementById('end-time').innerText = "--:--";
+                // Lắng nghe dữ liệu từ Virtual Pins
+                era.onPinWrite((pin, value) => {
+                    console.log(`Pin ${pin} updated: ${value}`);
+                    
+                    switch(pin) {
+                        case 'V1': tempAttendance.name = value; break;
+                        case 'V2': tempAttendance.mssv = value; break;
+                        case 'V10': tempAttendance.class = value; break;
+                        case 'V11': tempAttendance.time = value; break;
+                        case 'V0': // Pin Trigger - Khi nhận được UID là lúc chốt dữ liệu
+                            tempAttendance.uid = value;
+                            processAttendance(tempAttendance);
+                            break;
+                    }
+                });
+
+            } catch (error) {
+                console.error("ERa Init Error:", error);
+                showToast("Lỗi kết nối ERa", "error");
             }
         }
 
-        setInterval(updateClock, 1000);
-        updateClock();
+        function processAttendance(data) {
+            // Hiệu ứng quét thẻ
+            const overlay = document.getElementById('scan-overlay');
+            const avatar = document.getElementById('user-avatar');
+            overlay.classList.remove('hidden');
+            overlay.classList.add('flex');
+            avatar.classList.add('border-blue-500', 'scale-105');
+
+            // Cập nhật giao diện chính
+            document.getElementById('display-name').innerText = data.name || "NGƯỜI LẠ";
+            document.getElementById('display-mssv').innerText = data.mssv || "---";
+
+            // Thêm vào log
+            addAttendanceToTable(data);
+
+            setTimeout(() => {
+                overlay.classList.add('hidden');
+                overlay.classList.remove('flex');
+                avatar.classList.remove('border-blue-500', 'scale-105');
+            }, 2000);
+        }
 
         let presentCount = 0;
         const totalStudents = 40;
-        const log = [];
+        const attendanceList = [];
 
-        function addAttendance(name, id, className) {
-            const time = new Date().toLocaleTimeString('vi-VN');
-            log.unshift({ time, name, id, className, status: 'Thành công' });
+        function addAttendanceToTable(data) {
+            const timeNow = new Date().toLocaleTimeString('vi-VN');
+            const entry = {
+                time: timeNow,
+                name: data.name || "Chưa đăng ký",
+                id: data.mssv || "---",
+                className: data.class || "---",
+                status: 'Thành công'
+            };
+
+            attendanceList.unshift(entry);
             presentCount++;
             updateUI();
-            showToast(`Điểm danh: ${name}`, 'success');
-        }
-
-        function handleRegister() {
-            const name = document.getElementById('reg-name').value;
-            const mssv = document.getElementById('reg-mssv').value;
-            if(!name || !mssv) {
-                showToast("Thiếu thông tin đăng ký!", "error");
-                return;
-            }
-            showToast(`Đã lưu: ${name}`, "success");
-            document.getElementById('reg-name').value = "";
-            document.getElementById('reg-mssv').value = "";
+            showToast(`Điểm danh: ${entry.name}`, 'success');
         }
 
         function updateUI() {
             const body = document.getElementById('attendance-body');
-            body.innerHTML = log.map(entry => `
-                <tr class="hover:bg-slate-50 transition-colors">
+            body.innerHTML = attendanceList.map(entry => `
+                <tr class="hover:bg-slate-50 transition-colors animate-fade-in">
                     <td class="px-6 py-4 text-xs text-slate-500 font-mono">${entry.time}</td>
                     <td class="px-6 py-4 text-sm font-semibold text-slate-700">${entry.name}</td>
                     <td class="px-6 py-4 text-sm text-slate-500">${entry.id}</td>
@@ -333,15 +372,29 @@
             document.getElementById('absent-count').innerText = totalStudents - presentCount;
         }
 
-        function clearLog() {
-            log.length = 0;
-            presentCount = 0;
-            updateUI();
-            showToast("Dữ liệu đã được dọn sạch", "info");
-        }
+        // Logic đồng hồ và ca học (giữ nguyên)
+        const shifts = [
+            { name: "Ca 1", start: "07:30", end: "09:30" },
+            { name: "Ca 2", start: "09:30", end: "11:30" },
+            { name: "Ca 3", start: "13:30", end: "15:30" },
+            { name: "Ca 4", start: "15:30", end: "17:30" },
+            { name: "Ca 5", start: "18:00", end: "20:00" }
+        ];
 
-        function reconnect() {
-            showToast("Đang đồng bộ lại hệ thống...", "info");
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('clock').innerText = now.toLocaleTimeString('vi-VN', { hour12: false });
+            const currentMinutes = now.getHours() * 60 + now.getMinutes();
+            let currentShift = shifts.find(s => {
+                const [sH, sM] = s.start.split(':').map(Number);
+                const [eH, eM] = s.end.split(':').map(Number);
+                return currentMinutes >= (sH * 60 + sM) && currentMinutes <= (eH * 60 + eM);
+            });
+            if (currentShift) {
+                document.getElementById('shift-tag').innerText = currentShift.name;
+                document.getElementById('start-time').innerText = currentShift.start;
+                document.getElementById('end-time').innerText = currentShift.end;
+            }
         }
 
         function showToast(message, type) {
@@ -349,30 +402,20 @@
             const msgEl = document.getElementById('toast-message');
             const iconEl = document.getElementById('toast-icon');
             msgEl.innerText = message;
-            if(type === 'success') {
-                iconEl.innerHTML = '<i class="fa-solid fa-check"></i>';
-                iconEl.className = 'w-8 h-8 rounded-full flex items-center justify-center bg-emerald-500 text-white';
-            } else if(type === 'error') {
-                iconEl.innerHTML = '<i class="fa-solid fa-xmark"></i>';
-                iconEl.className = 'w-8 h-8 rounded-full flex items-center justify-center bg-rose-500 text-white';
-            } else {
-                iconEl.innerHTML = '<i class="fa-solid fa-info"></i>';
-                iconEl.className = 'w-8 h-8 rounded-full flex items-center justify-center bg-blue-500 text-white';
-            }
+            iconEl.className = `w-8 h-8 rounded-full flex items-center justify-center text-white ${type === 'success' ? 'bg-emerald-500' : type === 'error' ? 'bg-rose-500' : 'bg-blue-500'}`;
+            iconEl.innerHTML = `<i class="fa-solid fa-${type === 'success' ? 'check' : type === 'error' ? 'xmark' : 'info'}"></i>`;
             toast.classList.remove('translate-y-24', 'opacity-0');
             setTimeout(() => toast.classList.add('translate-y-24', 'opacity-0'), 3000);
         }
 
-        document.querySelector('.group').addEventListener('click', () => {
-            const overlay = document.getElementById('scan-overlay');
-            overlay.classList.remove('hidden');
-            overlay.classList.add('flex');
-            setTimeout(() => {
-                overlay.classList.add('hidden');
-                addAttendance("Nguyen Dinh Danh", "PS45028", "Ứng dụng phần mềm");
-            }, 800);
-        });
-        updateUI();
+        function clearLog() {
+            attendanceList.length = 0;
+            presentCount = 0;
+            updateUI();
+        }
+
+        setInterval(updateClock, 1000);
+        window.onload = initERa;
     </script>
 </body>
 </html>
