@@ -31,10 +31,10 @@
         .avatar-circle { width: 150px; height: 150px; border-radius: 50%; background: rgba(255,255,255,0.05); backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: center; border: 4px solid rgba(255,255,255,0.1); margin: 0 auto 24px; transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); box-shadow: 0 0 40px rgba(0,0,0,0.2); }
         
         /* Glowing states for Avatar */
-        .glow-idle { box-shadow: 0 0 30px rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); }
-        .glow-unknown { box-shadow: 0 0 50px rgba(249, 115, 22, 0.4), inset 0 0 20px rgba(249, 115, 22, 0.2); border-color: #f97316; animation: pulse-orange 2s infinite; }
-        .glow-in { box-shadow: 0 0 50px rgba(16, 185, 129, 0.4), inset 0 0 20px rgba(16, 185, 129, 0.2); border-color: #10b981; }
-        .glow-out { box-shadow: 0 0 50px rgba(244, 63, 94, 0.4), inset 0 0 20px rgba(244, 63, 94, 0.2); border-color: #f43f5e; }
+        .glow-idle { box-shadow: 0 0 30px rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.2); }
+        .glow-unknown { box-shadow: 0 0 60px rgba(249, 115, 22, 0.5), inset 0 0 20px rgba(249, 115, 22, 0.3); border-color: #f97316; animation: pulse-orange 2s infinite; background: rgba(249, 115, 22, 0.1); }
+        .glow-in { box-shadow: 0 0 60px rgba(16, 185, 129, 0.5), inset 0 0 20px rgba(16, 185, 129, 0.3); border-color: #10b981; background: rgba(16, 185, 129, 0.1); }
+        .glow-out { box-shadow: 0 0 60px rgba(244, 63, 94, 0.5), inset 0 0 20px rgba(244, 63, 94, 0.3); border-color: #f43f5e; background: rgba(244, 63, 94, 0.1); }
 
         /* Inputs & Buttons */
         .input-box { background: #f8fafc; border: 2px solid transparent; border-radius: 16px; padding: 12px 16px; font-size: 13px; width: 100%; transition: 0.3s; font-weight: 600; color: #1e293b; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); }
@@ -100,18 +100,25 @@
             <!-- Màn hình quét chính (DARK MODE THEME) -->
             <div class="card-dark p-10 flex flex-col items-center justify-center min-h-[400px]" id="main-display-card">
                 <div class="avatar-circle glow-idle" id="avatar-container">
-                    <i class="fa-solid fa-expand text-7xl text-slate-400/50 transition-colors" id="avatar-icon"></i>
+                    <i class="fa-solid fa-expand text-7xl text-slate-400 transition-colors" id="avatar-icon"></i>
                 </div>
-                <div class="text-center z-10">
-                    <!-- FIX MÀU CHỮ: Đã chuyển text-white thay vì text-slate-800 để không bị tàng hình -->
-                    <h2 id="display-name" class="text-4xl md:text-5xl font-black text-white uppercase mb-3 tracking-tighter transition-all duration-300">SẴN SÀNG</h2>
-                    <div class="inline-flex items-center gap-2 bg-slate-800/80 backdrop-blur-md px-4 py-1.5 rounded-full border border-slate-700">
+                <div class="text-center z-10 w-full">
+                    <h2 id="display-name" class="text-4xl md:text-5xl font-black text-white uppercase mb-4 tracking-tighter transition-all duration-300 drop-shadow-md">SẴN SÀNG</h2>
+                    
+                    <!-- Khối thông tin chi tiết (MSSV + UID) rõ ràng, nổi bật -->
+                    <div id="display-details" class="flex flex-wrap items-center justify-center gap-3 mb-5 hidden">
+                        <span id="display-mssv" class="px-5 py-2 rounded-xl text-sm font-black tracking-wider bg-slate-800 text-slate-100 border border-slate-600 shadow-inner"></span>
+                        <span id="display-uid" class="px-5 py-2 rounded-xl text-sm font-black font-mono tracking-wider bg-orange-500/20 text-orange-400 border border-orange-500/50"></span>
+                    </div>
+
+                    <div class="inline-flex items-center gap-2 bg-slate-800/80 backdrop-blur-md px-5 py-2 rounded-full border border-slate-600 shadow-xl">
                         <span class="w-2 h-2 rounded-full bg-orange-500 animate-pulse" id="scan-status-dot"></span>
-                        <p id="display-sub" class="text-slate-300 text-[11px] font-bold uppercase tracking-widest">HÃY ĐẶT THẺ VÀO ĐẦU ĐỌC</p>
+                        <p id="display-sub" class="text-slate-200 text-[11px] font-bold uppercase tracking-widest">HÃY ĐẶT THẺ VÀO ĐẦU ĐỌC</p>
                     </div>
                 </div>
-                <div class="absolute top-0 right-0 p-6 opacity-20">
-                    <i class="fa-solid fa-fingerprint text-9xl text-white"></i>
+                <!-- Background decoration -->
+                <div class="absolute top-0 right-0 p-6 opacity-10 pointer-events-none">
+                    <i class="fa-solid fa-fingerprint text-[150px] text-white"></i>
                 </div>
             </div>
 
@@ -187,12 +194,17 @@
                             </div>
                         </div>
                     </div>
-                    <div class="flex gap-2 w-full sm:w-auto">
-                        <button onclick="window.exportExcel()" class="flex-1 sm:flex-none bg-emerald-50 text-emerald-600 border border-emerald-100 text-[10px] font-black px-4 py-2.5 rounded-xl hover:bg-emerald-500 hover:text-white transition-all duration-300 shadow-sm">
+                    
+                    <!-- EXCEL DATE FILTER & BUTTONS -->
+                    <div class="flex gap-2 w-full sm:w-auto items-center flex-wrap sm:flex-nowrap">
+                        <!-- Chọn ngày -->
+                        <input type="date" id="export-date" class="bg-white border border-emerald-100 text-slate-600 text-[10px] font-black px-3 py-2.5 rounded-xl hover:border-emerald-300 focus:border-emerald-500 focus:outline-none transition-colors shadow-sm cursor-pointer uppercase flex-1 sm:flex-none">
+                        
+                        <button onclick="window.exportExcel()" class="flex-1 sm:flex-none bg-emerald-50 text-emerald-600 border border-emerald-100 text-[10px] font-black px-4 py-2.5 rounded-xl hover:bg-emerald-500 hover:text-white transition-all duration-300 shadow-sm whitespace-nowrap">
                             <i class="fa-solid fa-file-excel mr-1"></i> XUẤT EXCEL
                         </button>
-                        <button onclick="window.clearLogs()" class="flex-1 sm:flex-none bg-rose-50 text-rose-600 border border-rose-100 text-[10px] font-black px-4 py-2.5 rounded-xl hover:bg-rose-500 hover:text-white transition-all duration-300 shadow-sm">
-                            <i class="fa-solid fa-trash-can mr-1"></i> XÓA LỊCH SỬ
+                        <button onclick="window.clearLogs()" class="flex-1 sm:flex-none bg-rose-50 text-rose-600 border border-rose-100 text-[10px] font-black px-4 py-2.5 rounded-xl hover:bg-rose-500 hover:text-white transition-all duration-300 shadow-sm whitespace-nowrap">
+                            <i class="fa-solid fa-trash-can mr-1"></i> XÓA
                         </button>
                     </div>
                 </div>
@@ -279,13 +291,13 @@
         </div>
     </div>
     
-    <!-- Footer V2.2.x -->
+    <!-- Footer V2.x.x -->
     <div class="mt-12 mb-6 border-t border-slate-200/60 pt-8 pb-4 text-center max-w-7xl mx-auto px-4">
         <p class="text-sm font-black text-slate-400 uppercase tracking-widest mb-3 flex items-center justify-center gap-2">
-            <i class="fa-solid fa-code-merge text-orange-500"></i> Hệ Thống Điểm Danh Fpoly <span class="bg-slate-200 text-slate-600 px-2 py-0.5 rounded text-[10px]">V2.2.0</span>
+            <i class="fa-solid fa-code-merge text-orange-500"></i> Hệ Thống Điểm Danh Fpoly <span class="bg-slate-200 text-slate-600 px-2 py-0.5 rounded text-[10px]">V2.4.0</span>
         </p>
         <p class="text-[11px] font-semibold text-slate-400 max-w-2xl mx-auto">
-            Bản nâng cấp V2.2.0: Sửa lỗi hiển thị chữ màu đen trên nền đen. Tối ưu thuật toán Sĩ số động (Không fallback về 15, tính chuẩn xác từ danh sách Database). Bổ sung nhật ký thẻ lạ.
+            Bản nâng cấp V2.4.0: Sửa lỗi đếm sĩ số. Sĩ số giờ đây = Số thẻ nạp sẵn + Số thẻ lưu trên Web. Cảnh báo rõ ràng và ghi lại nhật ký nếu Sinh viên quét thẻ <b>SAI CA</b>.
         </p>
     </div>
 
@@ -339,7 +351,7 @@
             { id: "ca5", name: "Ca 5", start: "17:15", end: "19:30", index: 4 }
         ];
         
-        // DANH SÁCH THẺ ĐƯỢC NẠP CỨNG VÀO ESP32 (Để Web tính Sĩ Số cho chuẩn)
+        // DANH SÁCH THẺ ĐƯỢC NẠP CỨNG VÀO ESP32
         const ESP32_STUDENTS = [
             { uid: "96576E05", shift: "Ca 2" }, // Danh - Thuộc Ca 2
             { uid: "A1B2C3D4", shift: "Ca 1" }  // Ví dụ 1 thẻ khác thuộc Ca 1
@@ -375,9 +387,9 @@
             }
         });
 
-        // Set Default Date for Export Input
+        // Đặt ngày hiện tại cho Input Xuất Excel
         const todayIso = new Date().toISOString().split('T')[0];
-        // document.getElementById('export-date').value = todayIso;
+        document.getElementById('export-date').value = todayIso;
 
         // --- FIREBASE INIT ---
         let app, auth, db, appId;
@@ -420,6 +432,8 @@
             if (type === 'warning') icon = 'triangle-exclamation';
             
             let colorTheme = type === 'warning' ? 'orange' : (type === 'error' ? 'rose' : 'emerald');
+            // Cập nhật dùng cho báo lỗi VÀNG
+            if (type === 'warning') colorTheme = 'amber';
             
             toast.className = `toast ${type}`;
             toast.innerHTML = `<div class="w-8 h-8 rounded-full bg-${colorTheme}-100 flex items-center justify-center text-${colorTheme}-500"><i class="fa-solid fa-${icon} text-lg"></i></div> ${msg}`;
@@ -451,12 +465,11 @@
             });
             initAuth();
         } else {
-            setupLocalMode("Lưu trữ nội bộ (Trình duyệt)");
+            setupLocalMode("Local Storage (Offline)");
         }
 
         function setupLocalMode(message) {
             document.getElementById('cloud-status').innerText = message;
-            // Thay đổi màu cho chế độ Offline thân thiện hơn
             document.getElementById('cloud-status').className = "font-bold text-blue-400";
             processLogsAndRender();
         }
@@ -503,28 +516,30 @@
             
             document.getElementById('current-shift-badge').innerText = currentShift ? currentShift.name.toUpperCase() : "NGOÀI CA";
             
-            // TÍNH SĨ SỐ LỚP CHUẨN XÁC THEO CA (ESP32 + WEB)
-            let baseEspForThisShift = 0;
+            // TÍNH SĨ SỐ CHÍNH XÁC (Không dùng số cứng 15 nữa)
+            let esp32RegisteredForThisShift = 0;
             let webRegisteredForThisShift = 0;
 
             if (currentShift) {
-                baseEspForThisShift = ESP32_STUDENTS.filter(s => s.shift === currentShift.name).length;
+                esp32RegisteredForThisShift = ESP32_STUDENTS.filter(s => s.shift === currentShift.name).length;
                 webRegisteredForThisShift = Object.values(membersDb).filter(m => m.shift === currentShift.name).length;
             }
             
-            let totalStudentsForShift = baseEspForThisShift + webRegisteredForThisShift;
+            let totalStudentsForShift = esp32RegisteredForThisShift + webRegisteredForThisShift;
             
-            // Effect update numbers
             document.getElementById('total-count').innerText = totalStudentsForShift;
             document.getElementById('registered-count-badge').innerHTML = `<i class="fa-solid fa-database"></i> ĐÃ LƯU: ${Object.keys(membersDb).length}`;
 
-            let currentShiftLogs = [];
+            let todayLogsForTable = [];
             let presentInCurrentShift = new Set();
 
+            // Hiển thị TOÀN BỘ log trong ngày
             logsDb.forEach(log => {
                 if (log.date === todayStr) {
+                    todayLogsForTable.push(log);
+                    
+                    // Sĩ số (Stats) chỉ đếm ca hiện tại và không đếm "SAI CA"
                     if (currentShift && log.shiftId === currentShift.id) {
-                        currentShiftLogs.push(log);
                         if (log.status === "VÀO LỚP") presentInCurrentShift.add(log.uid); 
                         if (log.status === "RA LỚP") presentInCurrentShift.delete(log.uid);
                     }
@@ -532,18 +547,25 @@
             });
 
             const tbody = document.getElementById('log-body');
-            if (currentShiftLogs.length === 0) {
-                 tbody.innerHTML = `<tr><td colspan="5" class="py-12 text-center opacity-40"><i class="fa-solid fa-inbox text-5xl mb-3 block text-slate-400"></i><span class="text-xs font-bold uppercase tracking-widest text-slate-500">Chưa có người điểm danh ca này</span></td></tr>`;
+            if (todayLogsForTable.length === 0) {
+                 tbody.innerHTML = `<tr><td colspan="5" class="py-12 text-center opacity-40"><i class="fa-solid fa-inbox text-5xl mb-3 block text-slate-400"></i><span class="text-xs font-bold uppercase tracking-widest text-slate-500">Chưa có ai điểm danh hôm nay</span></td></tr>`;
             } else {
-                tbody.innerHTML = currentShiftLogs.map(l => `
-                    <tr class="hover:bg-orange-50/30 transition-colors">
+                tbody.innerHTML = todayLogsForTable.map(l => {
+                    let borderCol = '';
+                    if (l.status === 'VÀO LỚP') borderCol = 'border-emerald-200 bg-emerald-50 text-emerald-600';
+                    else if (l.status === 'RA LỚP') borderCol = 'border-rose-200 bg-rose-50 text-rose-600';
+                    else if (l.status === 'SAI CA') borderCol = 'border-amber-200 bg-amber-50 text-amber-600';
+                    else borderCol = 'border-orange-200 bg-orange-50 text-orange-600'; // THẺ LẠ
+                    
+                    return `
+                    <tr class="hover:bg-slate-50 transition-colors">
                         <td class="font-mono text-[11px] text-slate-400 font-bold whitespace-nowrap"><i class="fa-regular fa-clock mr-1 text-slate-300"></i> ${l.time}</td>
                         <td class="font-black text-slate-800 uppercase min-w-[120px]">${l.name}</td>
                         <td class="text-slate-500 font-bold whitespace-nowrap">${l.mssv}</td>
                         <td class="text-slate-500 font-semibold min-w-[100px]">${l.class} ${l.shiftReg ? `<span class="text-[9px] font-black text-orange-600 bg-orange-100 px-2 py-0.5 ml-2 rounded-md whitespace-nowrap border border-orange-200">${l.shiftReg}</span>` : ''}</td>
-                        <td class="whitespace-nowrap"><span class="px-4 py-1.5 rounded-lg text-[10px] font-black tracking-widest border ${l.status === 'VÀO LỚP' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : (l.status === 'RA LỚP' ? 'bg-rose-50 text-rose-600 border-rose-100' : 'bg-orange-50 text-orange-600 border-orange-100')}">${l.status}</span></td>
+                        <td class="whitespace-nowrap"><span class="px-4 py-1.5 rounded-lg text-[10px] font-black tracking-widest border ${borderCol}">${l.status}</span></td>
                     </tr>
-                `).join('');
+                `}).join('');
             }
 
             const present = presentInCurrentShift.size;
@@ -585,7 +607,6 @@
                     const classVal = v[eConfig.class?.id]?.value;
                     const shiftVal = eConfig.shift ? v[eConfig.shift?.id]?.value : ""; 
 
-                    // Ngăn chặn tín hiệu reset ("0", "None", "") từ ESP32 phá vỡ giao diện
                     if (!uidVal || uidVal === "" || uidVal === "0" || uidVal === "None") return;
                     if (uidVal === lastUid && isProcessing) return;
 
@@ -596,7 +617,6 @@
                 } catch (err) {
                     console.error("Lỗi onValues:", err);
                 } finally {
-                    // Mở khóa debounce sau 3s
                     setTimeout(() => { isProcessing = false; }, 3000);
                 }
             }
@@ -608,7 +628,10 @@
             const avatar = document.getElementById('avatar-container');
             const avatarIcon = document.getElementById('avatar-icon');
             const scanStatusDot = document.getElementById('scan-status-dot');
-            const feedback = document.getElementById('scan-feedback');
+            
+            const displayDetails = document.getElementById('display-details');
+            const displayMssv = document.getElementById('display-mssv');
+            const displayUid = document.getElementById('display-uid');
             
             const uid = data.uid;
             const cloudMember = membersDb[uid];
@@ -626,21 +649,25 @@
 
             document.getElementById('reg-uid').value = uid;
 
-            // Xóa tất cả các class màu cũ để chuẩn bị thêm class mới
+            // Reset classes
             nameEl.className = "text-4xl md:text-5xl font-black uppercase mb-3 tracking-tighter transition-all duration-300";
             avatar.className = "avatar-circle";
             scanStatusDot.className = "w-2 h-2 rounded-full animate-pulse";
-            feedback.innerText = "Status: Scanned";
+            
+            // Hiển thị rõ MSSV và UID
+            displayDetails.classList.remove('hidden');
+            displayMssv.innerText = "MSSV: " + finalMssv;
+            displayUid.innerText = "UID: " + uid;
 
             if (!finalName) {
                 // TÌNH HUỐNG 1: THẺ LẠ
-                nameEl.innerText = "THẺ CHƯA LƯU";
+                nameEl.innerText = "THẺ CHƯA ĐĂNG KÝ";
                 nameEl.classList.add('text-orange-500');
-                subEl.innerText = "UID: " + uid;
+                subEl.innerText = "HÃY NHẬP THÔNG TIN BÊN DƯỚI";
                 subEl.classList.replace('text-slate-300', 'text-orange-300');
                 
                 avatar.classList.add('glow-unknown');
-                avatarIcon.className = "fa-solid fa-fingerprint text-7xl text-orange-400";
+                avatarIcon.className = "fa-solid fa-fingerprint text-7xl text-orange-500";
                 scanStatusDot.classList.add('bg-orange-500');
                 
                 window.showToast(`Phát hiện thẻ lạ: ${uid}`, 'warning');
@@ -649,7 +676,6 @@
                 document.getElementById('reg-mssv').value = "";
                 document.getElementById('reg-class').value = "";
 
-                // GHI NHẬT KÝ THẺ LẠ
                 let logEntry = {
                     uid: uid,
                     name: "THẺ CHƯA ĐĂNG KÝ",
@@ -678,106 +704,148 @@
             } else {
                 // TÌNH HUỐNG 2: THÀNH VIÊN ĐÃ ĐĂNG KÝ
                 
-                let isCheckOut = false;
-                let canCheckOut = true;
-                let diffMins = 0;
+                let isWrongShift = false;
+                // KIỂM TRA QUÉT ĐÚNG CA HAY KHÔNG
+                if (currentShift && finalShiftReg && finalShiftReg !== currentShift.name) {
+                    isWrongShift = true;
+                }
 
-                if (currentShift) {
-                    // Lọc log của UID này trong Ca hiện tại
-                    let userLogsInShift = logsDb.filter(l => l.date === currentDateString && l.shiftId === currentShift.id && l.uid === uid);
-                    if (userLogsInShift.length > 0) {
-                        let lastLog = userLogsInShift[0]; // Log gần nhất
-                        if (lastLog.status === "VÀO LỚP") {
-                            isCheckOut = true;
-                            // Tính thời gian từ lúc Vào Lớp đến hiện tại (phút)
-                            diffMins = (now.getTime() - lastLog.timestamp) / 60000;
-                            if (diffMins < CHECKOUT_COOLDOWN_MINUTES) {
-                                canCheckOut = false;
+                if (isWrongShift) {
+                    // UI Điểm danh SAI CA
+                    nameEl.innerText = finalName;
+                    nameEl.classList.add('text-amber-500');
+                    subEl.innerText = `THẺ LỚP ${finalShiftReg.toUpperCase()} - QUÉT SAI CA`;
+                    subEl.className = "text-[11px] font-black uppercase tracking-widest text-amber-500";
+                    
+                    avatar.style.borderColor = "#f59e0b";
+                    avatar.classList.add('glow-unknown'); // Dùng Glow vàng
+                    avatarIcon.className = "fa-solid fa-triangle-exclamation text-7xl text-amber-500";
+                    scanStatusDot.classList.add('bg-amber-500');
+                    
+                    window.showToast(`Quét sai ca! Sinh viên thuộc ${finalShiftReg}.`, 'warning');
+
+                    let logEntry = {
+                        uid: uid,
+                        name: finalName,
+                        mssv: finalMssv,
+                        class: finalClass,
+                        shiftReg: finalShiftReg,
+                        time: timeStr,
+                        timestamp: now.getTime(),
+                        date: currentDateString,
+                        status: "SAI CA",
+                        color: "bg-amber-50 text-amber-600 border-amber-200",
+                        shiftId: currentShift ? currentShift.id : "none",
+                        shiftIndex: currentShift ? currentShift.index : -1
+                    };
+
+                    if (isCloudActive && currentUser) {
+                        const logRef = collection(db, 'artifacts', appId, 'public', 'data', 'attendance_logs');
+                        setDoc(doc(logRef), logEntry).catch(err => console.error("Lỗi lưu log:", err));
+                    } else {
+                        logEntry.id = Date.now().toString();
+                        logsDb.unshift(logEntry);
+                        saveToLocal();
+                        processLogsAndRender(); 
+                    }
+
+                } else {
+                    // ĐIỂM DANH HỢP LỆ VÀO/RA LỚP
+                    let isCheckOut = false;
+                    let canCheckOut = true;
+                    let diffMins = 0;
+
+                    if (currentShift) {
+                        let userLogsInShift = logsDb.filter(l => l.date === currentDateString && l.shiftId === currentShift.id && l.uid === uid && l.status !== "SAI CA");
+                        if (userLogsInShift.length > 0) {
+                            let lastLog = userLogsInShift[0]; 
+                            if (lastLog.status === "VÀO LỚP") {
+                                isCheckOut = true;
+                                diffMins = (now.getTime() - lastLog.timestamp) / 60000;
+                                if (diffMins < CHECKOUT_COOLDOWN_MINUTES) {
+                                    canCheckOut = false;
+                                }
                             }
                         }
                     }
-                }
 
-                if (isCheckOut && !canCheckOut) {
-                    // CẢNH BÁO CHƯA TỚI GIỜ RA LỚP
-                    let remainingMins = Math.ceil(CHECKOUT_COOLDOWN_MINUTES - diffMins);
-                    nameEl.innerText = "CHƯA ĐẾN GIỜ RA";
-                    nameEl.classList.add('text-orange-500');
-                    subEl.innerText = `ĐỢI THÊM ${remainingMins} PHÚT NỮA ĐỂ QUÉT RA!`;
-                    subEl.className = "text-[11px] font-black uppercase tracking-widest text-orange-400";
-                    
-                    avatar.style.borderColor = "#f59e0b";
-                    avatar.classList.add('glow-unknown');
-                    avatarIcon.className = "fa-solid fa-clock text-7xl text-orange-400";
-                    scanStatusDot.classList.add('bg-orange-500');
-                    
-                    window.showToast(`Bạn mới quét Vào Lớp, hãy đợi thêm để quét Ra!`, 'warning');
-                    
-                    // Reset về trạng thái Sẵn Sàng sau 8 giây
-                    setTimeout(() => {
-                        if(lastUid === uid) {
-                            nameEl.innerText = "SẴN SÀNG";
-                            nameEl.className = "text-4xl md:text-5xl font-black text-white uppercase mb-3 tracking-tighter transition-all duration-300";
-                            subEl.innerText = "HÃY ĐẶT THẺ VÀO ĐẦU ĐỌC";
-                            subEl.className = "text-slate-300 text-[11px] font-bold uppercase tracking-widest";
-                            avatar.className = "avatar-circle glow-idle";
-                            avatarIcon.className = "fa-solid fa-expand text-7xl text-slate-400/50 transition-colors";
-                            scanStatusDot.className = "w-2 h-2 rounded-full bg-orange-500 animate-pulse";
-                            feedback.innerText = "Status: Idle";
-                        }
-                    }, 8000);
-                    return; // Ngừng xử lý, không ghi đè vào DB
-                }
+                    if (isCheckOut && !canCheckOut) {
+                        let remainingMins = Math.ceil(CHECKOUT_COOLDOWN_MINUTES - diffMins);
+                        nameEl.innerText = "CHƯA ĐẾN GIỜ RA";
+                        nameEl.classList.add('text-orange-500');
+                        subEl.innerText = `ĐỢI THÊM ${remainingMins} PHÚT NỮA ĐỂ QUÉT RA!`;
+                        subEl.className = "text-[11px] font-black uppercase tracking-widest text-orange-400";
+                        
+                        avatar.style.borderColor = "#f59e0b";
+                        avatar.classList.add('glow-unknown');
+                        avatarIcon.className = "fa-solid fa-clock text-7xl text-orange-500";
+                        scanStatusDot.classList.add('bg-orange-500');
+                        
+                        window.showToast(`Bạn mới quét Vào Lớp, hãy đợi thêm để quét Ra!`, 'warning');
+                        
+                        setTimeout(() => {
+                            if(lastUid === uid) {
+                                nameEl.innerText = "SẴN SÀNG";
+                                nameEl.className = "text-4xl md:text-5xl font-black text-white uppercase mb-3 tracking-tighter transition-all duration-300";
+                                subEl.innerText = "HÃY ĐẶT THẺ VÀO ĐẦU ĐỌC";
+                                subEl.className = "text-slate-300 text-[11px] font-bold uppercase tracking-widest";
+                                avatar.className = "avatar-circle glow-idle";
+                                avatarIcon.className = "fa-solid fa-expand text-7xl text-slate-400/50 transition-colors";
+                                scanStatusDot.className = "w-2 h-2 rounded-full bg-orange-500 animate-pulse";
+                                displayDetails.classList.add('hidden');
+                            }
+                        }, 8000);
+                        return; 
+                    }
 
-                // HỢP LỆ -> CHO VÀO HOẶC RA LỚP
-                nameEl.innerText = finalName;
-                subEl.classList.replace('text-slate-300', 'text-emerald-300');
-                let statusStr = isCheckOut ? "RA LỚP" : "VÀO LỚP";
-                let colorClass = isCheckOut ? "bg-rose-50 text-rose-600 border-rose-100" : "bg-emerald-50 text-emerald-600 border-emerald-100";
+                    nameEl.innerText = finalName;
+                    subEl.classList.replace('text-slate-300', 'text-emerald-300');
+                    let statusStr = isCheckOut ? "RA LỚP" : "VÀO LỚP";
+                    let colorClass = isCheckOut ? "bg-rose-50 text-rose-600 border-rose-100" : "bg-emerald-50 text-emerald-600 border-emerald-100";
 
-                if (isCheckOut) {
-                    nameEl.classList.add('text-rose-500');
-                    subEl.innerText = "TẠM BIỆT! ĐÃ ĐIỂM DANH RA LỚP";
-                    subEl.className = "text-[11px] font-black uppercase tracking-widest text-rose-300";
-                    avatar.classList.add('glow-out');
-                    avatarIcon.className = "fa-solid fa-person-walking-arrow-right text-7xl text-rose-500";
-                    scanStatusDot.classList.add('bg-rose-500');
-                } else {
-                    nameEl.classList.add('text-emerald-400');
-                    subEl.innerText = "XIN CHÀO! ĐÃ ĐIỂM DANH VÀO LỚP";
-                    subEl.className = "text-[11px] font-black uppercase tracking-widest text-emerald-300";
-                    avatar.classList.add('glow-in');
-                    avatarIcon.className = "fa-solid fa-user-shield text-7xl text-emerald-400";
-                    scanStatusDot.classList.add('bg-emerald-400');
-                }
+                    if (isCheckOut) {
+                        nameEl.classList.add('text-rose-500');
+                        subEl.innerText = "TẠM BIỆT! ĐÃ ĐIỂM DANH RA LỚP";
+                        subEl.className = "text-[11px] font-black uppercase tracking-widest text-rose-300";
+                        avatar.classList.add('glow-out');
+                        avatarIcon.className = "fa-solid fa-person-walking-arrow-right text-7xl text-rose-500";
+                        scanStatusDot.classList.add('bg-rose-500');
+                    } else {
+                        nameEl.classList.add('text-emerald-400');
+                        subEl.innerText = "XIN CHÀO! ĐÃ ĐIỂM DANH VÀO LỚP";
+                        subEl.className = "text-[11px] font-black uppercase tracking-widest text-emerald-300";
+                        avatar.classList.add('glow-in');
+                        avatarIcon.className = "fa-solid fa-user-shield text-7xl text-emerald-500";
+                        scanStatusDot.classList.add('bg-emerald-400');
+                    }
 
-                let logEntry = {
-                    uid: uid,
-                    name: finalName,
-                    mssv: finalMssv,
-                    class: finalClass,
-                    shiftReg: finalShiftReg,
-                    time: timeStr,
-                    timestamp: now.getTime(),
-                    date: currentDateString,
-                    status: statusStr,
-                    color: colorClass,
-                    shiftId: currentShift ? currentShift.id : "none",
-                    shiftIndex: currentShift ? currentShift.index : -1
-                };
+                    let logEntry = {
+                        uid: uid,
+                        name: finalName,
+                        mssv: finalMssv,
+                        class: finalClass,
+                        shiftReg: finalShiftReg,
+                        time: timeStr,
+                        timestamp: now.getTime(),
+                        date: currentDateString,
+                        status: statusStr,
+                        color: colorClass,
+                        shiftId: currentShift ? currentShift.id : "none",
+                        shiftIndex: currentShift ? currentShift.index : -1
+                    };
 
-                if (isCloudActive && currentUser) {
-                    const logRef = collection(db, 'artifacts', appId, 'public', 'data', 'attendance_logs');
-                    setDoc(doc(logRef), logEntry).catch(err => console.error("Lỗi lưu log:", err));
-                } else {
-                    logEntry.id = Date.now().toString();
-                    logsDb.unshift(logEntry);
-                    saveToLocal();
-                    processLogsAndRender(); 
+                    if (isCloudActive && currentUser) {
+                        const logRef = collection(db, 'artifacts', appId, 'public', 'data', 'attendance_logs');
+                        setDoc(doc(logRef), logEntry).catch(err => console.error("Lỗi lưu log:", err));
+                    } else {
+                        logEntry.id = Date.now().toString();
+                        logsDb.unshift(logEntry);
+                        saveToLocal();
+                        processLogsAndRender(); 
+                    }
                 }
             }
 
-            // Tự động quay về trạng thái sẵn sàng
             setTimeout(() => {
                 if(lastUid === uid) {
                     nameEl.innerText = "SẴN SÀNG";
@@ -787,7 +855,7 @@
                     avatar.className = "avatar-circle glow-idle";
                     avatarIcon.className = "fa-solid fa-expand text-7xl text-slate-400/50 transition-colors";
                     scanStatusDot.className = "w-2 h-2 rounded-full bg-orange-500 animate-pulse";
-                    feedback.innerText = "Status: Idle";
+                    displayDetails.classList.add('hidden');
                 }
             }, 8000);
         }
