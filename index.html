@@ -46,7 +46,6 @@
     <div class="grid grid-cols-12 gap-5">
         <!-- Cột Trái -->
         <div class="col-span-8 space-y-5">
-            <!-- Màn hình quét chính -->
             <div class="card p-8 flex flex-col items-center justify-center relative min-h-[380px]" id="main-display-card">
                 <div class="avatar-circle" id="avatar-container">
                     <i class="fa-solid fa-user-circle text-7xl text-slate-200" id="avatar-icon"></i>
@@ -58,7 +57,6 @@
                 <div id="scan-feedback" class="absolute top-6 right-8 text-[10px] font-black text-slate-300 uppercase">Status: Idle</div>
             </div>
 
-            <!-- Panel Đăng Ký -->
             <div class="card p-7 border-l-8 border-orange-500 bg-orange-50/30">
                 <div class="flex justify-between mb-4">
                     <div class="flex items-center gap-2">
@@ -90,7 +88,6 @@
                 </button>
             </div>
 
-            <!-- Bảng Lịch Sử -->
             <div class="card p-6">
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="font-black text-sm text-slate-800 uppercase">Nhật ký điểm danh</h3>
@@ -115,7 +112,6 @@
 
         <!-- Cột Phải -->
         <div class="col-span-4 space-y-5">
-            <!-- Thống kê -->
             <div class="space-y-3">
                 <div class="card p-4 flex justify-between items-center border-l-4 border-slate-300">
                     <div><p class="text-[9px] font-black text-slate-400 uppercase">Sĩ số lớp</p><h4 class="text-3xl font-black">40</h4></div>
@@ -131,13 +127,11 @@
                 </div>
             </div>
 
-            <!-- Biểu đồ -->
             <div class="card p-5">
                 <h4 class="text-[10px] font-black text-slate-400 uppercase mb-4">Phân tích theo ca</h4>
                 <canvas id="attendanceChart" height="200"></canvas>
             </div>
 
-            <!-- Trạng thái ESP32 -->
             <div class="card p-5 space-y-3 bg-slate-50">
                 <div class="flex items-center justify-between text-[10px] font-bold">
                     <span>ESP32 HARDWARE</span>
@@ -157,7 +151,8 @@
         let config = { uid: null, name: null, mssv: null, class: null };
         const logs = [];
         const presentSet = new Set();
-        let lastUid = ""; // Lưu trữ UID hiện tại để tránh nhảy
+        let lastUid = ""; 
+        let isProcessing = false;
 
         // Setup Chart
         let ctx = document.getElementById('attendanceChart').getContext('2d');
@@ -165,7 +160,7 @@
             type: 'bar',
             data: {
                 labels: ['Ca 1', 'Ca 2', 'Ca 3', 'Ca 4', 'Ca 5'],
-                datasets: [{ label: 'Hiện diện', data: [0,0,0,0,0], backgroundColor: '#3b82f6', borderRadius: 4 }]
+                datasets: [{ label: 'Hiện diện', data: [0,0,0,0,0], backgroundColor: '#f97316', borderRadius: 4 }]
             },
             options: { plugins: { legend: { display: false } }, scales: { y: { display: false }, x: { grid: { display: false }, ticks: { font: { size: 8 } } } } }
         });
@@ -187,26 +182,27 @@
                 const mssvVal = v[config.mssv?.id]?.value;
                 const classVal = v[config.class?.id]?.value;
 
-                // FIX 1: Chỉ xử lý nếu UID thực sự có giá trị và khác giá trị cũ
-                // Không tự động gọi reset khi nhận "None" từ thiết bị
-                if (uidVal && uidVal !== "0" && uidVal !== "None") {
-                    document.getElementById('last-uid-debug').innerText = uidVal;
-                    
-                    if (uidVal !== lastUid) {
-                        lastUid = uidVal;
-                        
-                        // FIX 2: "Chốt" UID vào ô đăng ký ngay lập tức
-                        document.getElementById('reg-uid').value = uidVal;
-                        
-                        handleScan({
-                            uid: uidVal,
-                            name: nameVal,
-                            mssv: mssvVal,
-                            class: classVal
-                        });
-                    }
-                }
-                // Chú ý: Không gọi resetDisplay ở đây để tránh bị nhảy màn hình khi thẻ rời đầu đọc
+                // Lọc tín hiệu rác
+                if (!uidVal || uidVal === "0" || uidVal === "None" || uidVal === "") return;
+
+                // Chống lặp (Debounce)
+                if (uidVal === lastUid && isProcessing) return;
+
+                lastUid = uidVal;
+                isProcessing = true;
+
+                // Cập nhật debug panel
+                document.getElementById('last-uid-debug').innerText = uidVal;
+                
+                handleScan({
+                    uid: uidVal,
+                    name: nameVal,
+                    mssv: mssvVal,
+                    class: classVal
+                });
+
+                // Reset debounce sau 3 giây để nhận diện lại
+                setTimeout(() => { isProcessing = false; }, 3000);
             }
         });
 
@@ -220,9 +216,12 @@
             statusFeedback.innerText = "Status: Scanned";
 
             // Nhận diện thẻ lạ
-            const isUnknown = (!data.name || data.name === "None" || data.name === "NGUOI LA" || data.name === "Người lạ");
+            const isUnknown = (!data.name || data.name === "None" || data.name === "NGUOI LA" || data.name === "nguoi la" || data.name === "Người lạ");
 
             if (isUnknown) {
+                // KHÓA UID vào ô đăng ký ngay lập tức
+                document.getElementById('reg-uid').value = data.uid;
+                
                 nameEl.innerText = "THẺ CHƯA ĐĂNG KÝ";
                 nameEl.classList.remove('text-slate-800');
                 nameEl.classList.add('text-orange-500');
@@ -231,10 +230,7 @@
                 avatar.style.borderColor = "#f97316";
                 avatar.classList.add('pulse-orange');
                 avatarIcon.className = "fa-solid fa-user-plus text-7xl text-orange-200";
-
-                addLog("THẺ LẠ", "---", "---", "CHƯA ĐĂNG KÝ", "bg-orange-50 text-orange-600");
             } else {
-                // Thẻ đã có tên
                 nameEl.innerText = data.name;
                 nameEl.classList.remove('text-orange-500');
                 nameEl.classList.add('text-slate-800');
@@ -250,16 +246,23 @@
                 else presentSet.add(data.mssv);
 
                 avatar.style.borderColor = isCheckOut ? "#f43f5e" : "#10b981";
-
                 addLog(data.name, data.mssv, data.class, statusText, isCheckOut ? "bg-rose-50 text-rose-500" : "bg-emerald-50 text-emerald-600");
             }
             
-            // Tự động quay về trạng thái chờ sau 5 giây nếu không có thẻ mới
+            // Tự động quay về trạng thái chờ sau 8 giây
             setTimeout(() => {
-                if(lastUid === data.uid) {
-                    statusFeedback.innerText = "Status: Idle";
-                }
-            }, 5000);
+                if(lastUid === data.uid) resetDisplay();
+            }, 8000);
+        }
+
+        function resetDisplay() {
+            document.getElementById('display-name').innerText = "SẴN SÀNG";
+            document.getElementById('display-name').className = "text-4xl font-black text-slate-800 uppercase mb-1";
+            document.getElementById('display-sub').innerText = "MỜI ĐẶT THẺ VÀO ĐẦU ĐỌC";
+            document.getElementById('avatar-container').style.borderColor = "#f1f5f9";
+            document.getElementById('avatar-container').classList.remove('pulse-orange');
+            document.getElementById('avatar-icon').className = "fa-solid fa-user-circle text-7xl text-slate-200";
+            document.getElementById('scan-feedback').innerText = "Status: Idle";
         }
 
         function addLog(name, mssv, clazz, status, colorClass) {
@@ -305,29 +308,18 @@
         function saveNewMember() {
             const uid = document.getElementById('reg-uid').value;
             const name = document.getElementById('reg-name').value;
-            if(!uid || uid === "Đang chờ thẻ...") {
-                alertCustom("Vui lòng quẹt thẻ trước khi đăng ký!");
-                return;
-            }
-            if(!name) {
-                alertCustom("Vui lòng nhập tên thành viên!");
-                return;
-            }
+            if(!uid || uid === "Đang chờ thẻ...") return;
+            if(!name) return;
             
-            // Giả lập lưu
-            alertCustom("Đã đăng ký thành công: " + name);
+            addLog(name, document.getElementById('reg-mssv').value, document.getElementById('reg-class').value, "ĐÃ LƯU", "bg-blue-50 text-blue-600");
             
-            // Xóa form sau khi lưu
             document.getElementById('reg-uid').value = "Đang chờ thẻ...";
             document.getElementById('reg-name').value = "";
             document.getElementById('reg-mssv').value = "";
             document.getElementById('reg-class').value = "";
-            lastUid = ""; // Reset chốt để cho phép quẹt lại chính thẻ đó
-        }
-
-        function alertCustom(msg) {
-            // Thay vì dùng alert() làm đứng trình duyệt, ta log ra debug panel
-            console.log("System Alert: " + msg);
+            lastUid = ""; 
+            isProcessing = false;
+            resetDisplay();
         }
 
         function updateClock() {
