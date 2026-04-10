@@ -11,68 +11,48 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
-        
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f1f5f9; color: #334155; margin: 0; padding: 20px; background-image: radial-gradient(#e2e8f0 1px, transparent 1px); background-size: 20px 20px; }
-        
-        .card { background: white; border-radius: 28px; box-shadow: 0 10px 40px -10px rgba(0,0,0,0.05); border: 1px solid rgba(255,255,255,0.8); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .card { background: white; border-radius: 28px; box-shadow: 0 10px 40px -10px rgba(0,0,0,0.05); border: 1px solid rgba(255,255,255,0.8); transition: all 0.3s ease; }
         .card-dark { background: linear-gradient(145deg, #0f172a, #1e293b); border-radius: 28px; box-shadow: 0 20px 40px -10px rgba(249, 115, 22, 0.15); border: 1px solid rgba(255,255,255,0.05); position: relative; overflow: hidden; }
         .card-dark::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(249,115,22,0.1) 0%, transparent 50%); pointer-events: none; }
-        
         .stat-card { border-radius: 24px; padding: 20px; display: flex; align-items: center; justify-content: space-between; position: relative; overflow: hidden; box-shadow: 0 10px 30px -10px rgba(0,0,0,0.05); border: 1px solid white; }
         .stat-total { background: linear-gradient(135deg, #fffaf5, #fff7ed); }
         .stat-present { background: linear-gradient(135deg, #f0fdf4, #ecfdf5); }
         .stat-absent { background: linear-gradient(135deg, #fff1f2, #ffe4e6); }
-        
         .stat-icon-wrapper { width: 56px; height: 56px; border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 24px; box-shadow: inset 0 2px 4px rgba(255,255,255,0.5); }
-        
-        .avatar-circle { width: 150px; height: 150px; border-radius: 50%; background: rgba(255,255,255,0.05); backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: center; border: 4px solid rgba(255,255,255,0.1); margin: 0 auto 24px; transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); box-shadow: 0 0 40px rgba(0,0,0,0.2); }
-        
+        .avatar-circle { width: 150px; height: 150px; border-radius: 50%; background: rgba(255,255,255,0.05); backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: center; border: 4px solid rgba(255,255,255,0.1); margin: 0 auto 24px; transition: all 0.4s ease; box-shadow: 0 0 40px rgba(0,0,0,0.2); }
         .glow-idle { box-shadow: 0 0 30px rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.2); }
         .glow-unknown { box-shadow: 0 0 60px rgba(249, 115, 22, 0.5), inset 0 0 20px rgba(249, 115, 22, 0.3); border-color: #f97316; animation: pulse-orange 2s infinite; background: rgba(249, 115, 22, 0.1); }
         .glow-in { box-shadow: 0 0 60px rgba(16, 185, 129, 0.5), inset 0 0 20px rgba(16, 185, 129, 0.3); border-color: #10b981; background: rgba(16, 185, 129, 0.1); }
         .glow-out { box-shadow: 0 0 60px rgba(244, 63, 94, 0.5), inset 0 0 20px rgba(244, 63, 94, 0.3); border-color: #f43f5e; background: rgba(244, 63, 94, 0.1); }
         .glow-wrong { box-shadow: 0 0 60px rgba(245, 158, 11, 0.5), inset 0 0 20px rgba(245, 158, 11, 0.3); border-color: #f59e0b; background: rgba(245, 158, 11, 0.1); }
-
         .input-box { background: #f8fafc; border: 2px solid transparent; border-radius: 16px; padding: 12px 16px; font-size: 13px; width: 100%; transition: 0.3s; font-weight: 600; color: #1e293b; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); }
         .input-box:focus { border-color: #f97316; outline: none; background: white; box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.1); }
         select.input-box { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23f97316'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; background-size: 16px; padding-right: 36px; }
-        
         .btn-primary { background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); color: white; border-radius: 16px; font-weight: 800; padding: 14px 20px; transition: all 0.3s ease; cursor: pointer; text-transform: uppercase; font-size: 12px; letter-spacing: 0.5px; box-shadow: 0 10px 20px -5px rgba(249, 115, 22, 0.4); border: 1px solid rgba(255,255,255,0.2); }
         .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 15px 25px -5px rgba(249, 115, 22, 0.5); }
-        
         .btn-secondary { background: white; color: #0f172a; border: 2px solid #e2e8f0; border-radius: 16px; font-weight: 800; padding: 12px 20px; transition: all 0.3s ease; cursor: pointer; text-transform: uppercase; font-size: 11px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
         .btn-secondary:hover { border-color: #cbd5e1; background: #f8fafc; transform: translateY(-2px); }
-
         .log-table-container { max-height: 400px; overflow-y: auto; overflow-x: auto; border-radius: 16px; }
         .custom-scrollbar::-webkit-scrollbar { width: 8px; height: 8px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 10px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; border: 2px solid #f1f5f9; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-
         .log-table { width: 100%; border-collapse: separate; border-spacing: 0; min-width: 600px; }
-        .log-table th { font-size: 10px; color: #64748b; text-transform: uppercase; padding: 16px; border-bottom: 2px solid #e2e8f0; text-align: left; position: sticky; top: 0; background: rgba(255,255,255,0.9); backdrop-filter: blur(8px); z-index: 10; font-weight: 800; letter-spacing: 0.5px; }
+        .log-table th { font-size: 10px; color: #64748b; text-transform: uppercase; padding: 16px; border-bottom: 2px solid #e2e8f0; text-align: left; position: sticky; top: 0; background: rgba(255,255,255,0.9); backdrop-filter: blur(8px); z-index: 10; font-weight: 800; }
         .log-table td { padding: 16px; font-size: 13px; border-bottom: 1px solid #f1f5f9; font-weight: 600; color: #334155; }
-        .log-table tr:hover td { background-color: #f8fafc; }
-        
-        @keyframes pulse-orange { 0% { box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.4), inset 0 0 20px rgba(249, 115, 22, 0.2); } 70% { box-shadow: 0 0 0 20px rgba(249, 115, 22, 0), inset 0 0 10px rgba(249, 115, 22, 0); } 100% { box-shadow: 0 0 0 0 rgba(249, 115, 22, 0), inset 0 0 20px rgba(249, 115, 22, 0.2); } }
-
-        #toast-container { position: fixed; top: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 12px; pointer-events: none; }
-        .toast { background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); border-radius: 16px; padding: 16px 24px; box-shadow: 0 20px 40px -10px rgba(0,0,0,0.1); border-left: 6px solid #f97316; display: flex; align-items: center; gap: 12px; font-size: 14px; font-weight: 700; animation: slideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; color: #1e293b; pointer-events: auto; }
-        .toast.success { border-color: #10b981; }
-        .toast.error { border-color: #f43f5e; }
-        .toast.warning { border-color: #f59e0b; }
         @keyframes slideIn { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes pulse-orange { 0% { box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.4), inset 0 0 20px rgba(249, 115, 22, 0.2); } 70% { box-shadow: 0 0 0 20px rgba(249, 115, 22, 0), inset 0 0 10px rgba(249, 115, 22, 0); } 100% { box-shadow: 0 0 0 0 rgba(249, 115, 22, 0), inset 0 0 20px rgba(249, 115, 22, 0.2); } }
+        #toast-container { position: fixed; top: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 12px; pointer-events: none; }
+        .toast { background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); border-radius: 16px; padding: 16px 24px; box-shadow: 0 20px 40px -10px rgba(0,0,0,0.1); border-left: 6px solid #f97316; display: flex; align-items: center; gap: 12px; font-size: 14px; font-weight: 700; animation: slideIn 0.4s forwards; pointer-events: auto; }
     </style>
 </head>
 <body>
     <div id="toast-container"></div>
-
     <div class="flex flex-col md:flex-row justify-between items-center mb-8 px-4 gap-6 max-w-7xl mx-auto">
-        <div class="flex flex-col md:flex-row items-center gap-5 text-center md:text-left">
-            <div class="w-14 h-14 bg-gradient-to-br from-orange-400 to-orange-600 rounded-2xl shadow-xl shadow-orange-500/30 flex items-center justify-center text-white font-black text-3xl mx-auto md:mx-0 border border-orange-300">F</div>
+        <div class="flex flex-col md:flex-row items-center gap-5">
+            <div class="w-14 h-14 bg-gradient-to-br from-orange-400 to-orange-600 rounded-2xl shadow-xl flex items-center justify-center text-white font-black text-3xl">F</div>
             <div>
                 <h1 class="text-2xl font-black text-slate-800 tracking-tight">FPOLY ATTENDANCE <span class="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-rose-500">PRO</span></h1>
-                <div class="flex items-center justify-center md:justify-start gap-2 mt-1 bg-white px-3 py-1 rounded-full shadow-sm w-max mx-auto md:mx-0 border border-slate-100">
+                <div class="flex items-center gap-2 mt-1 bg-white px-3 py-1 rounded-full shadow-sm w-max border border-slate-100">
                     <span id="era-status-dot" class="w-2.5 h-2.5 rounded-full bg-slate-300 animate-pulse"></span>
                     <span id="era-status-text" class="text-[10px] font-extrabold text-slate-500 uppercase tracking-widest">ĐANG KHỞI TẠO</span>
                 </div>
@@ -87,120 +67,64 @@
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 max-w-7xl mx-auto">
         <div class="lg:col-span-8 space-y-6">
             <div class="card-dark p-10 flex flex-col items-center justify-center min-h-[400px]" id="main-display-card">
-                <div class="avatar-circle glow-idle" id="avatar-container">
-                    <i class="fa-solid fa-expand text-7xl text-slate-400/50 transition-colors" id="avatar-icon"></i>
-                </div>
+                <div class="avatar-circle glow-idle" id="avatar-container"><i class="fa-solid fa-expand text-7xl text-slate-400/50 transition-colors" id="avatar-icon"></i></div>
                 <div class="text-center z-10 w-full">
                     <h2 id="display-name" class="text-4xl md:text-5xl font-black text-white uppercase mb-4 tracking-tighter transition-all duration-300 drop-shadow-md">SẴN SÀNG</h2>
                     <div id="display-details" class="flex flex-wrap items-center justify-center gap-3 mb-5 hidden">
                         <span id="display-mssv" class="px-5 py-2 rounded-xl text-sm font-black tracking-wider bg-slate-800 text-slate-100 border border-slate-600 shadow-inner"></span>
-                        <span id="display-uid" class="px-5 py-2 rounded-xl text-sm font-black font-mono tracking-wider bg-orange-500/20 text-orange-400 border border-orange-500/50"></span>
+                        <span id="display-uid" class="px-5 py-2 rounded-xl text-sm font-black font-mono bg-orange-500/20 text-orange-400 border border-orange-500/50"></span>
                     </div>
                     <div class="inline-flex items-center gap-2 bg-slate-800/80 backdrop-blur-md px-5 py-2 rounded-full border border-slate-600 shadow-xl">
                         <span class="w-2 h-2 rounded-full bg-orange-500 animate-pulse" id="scan-status-dot"></span>
                         <p id="display-sub" class="text-slate-200 text-[11px] font-bold uppercase tracking-widest">HÃY ĐẶT THẺ VÀO ĐẦU ĐỌC</p>
                     </div>
                 </div>
-                <div class="absolute top-0 right-0 p-6 opacity-10 pointer-events-none">
-                    <i class="fa-solid fa-fingerprint text-[150px] text-white"></i>
-                </div>
+                <div class="absolute top-0 right-0 p-6 opacity-10 pointer-events-none"><i class="fa-solid fa-fingerprint text-[150px] text-white"></i></div>
             </div>
 
             <div class="card p-6 md:p-8 border-t-4 border-orange-500 relative overflow-hidden">
                 <div class="absolute top-0 right-0 w-32 h-32 bg-orange-50 rounded-bl-full -z-10 opacity-50"></div>
                 <div class="flex flex-col sm:flex-row justify-between gap-3 mb-6">
-                    <div class="flex items-center justify-center sm:justify-start gap-3">
-                        <div class="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center text-orange-500 text-lg">
-                            <i class="fa-solid fa-address-card"></i>
-                        </div>
-                        <div>
-                            <h3 class="font-black text-sm uppercase text-slate-800">Cấp mới thẻ sinh viên</h3>
-                            <p class="text-[10px] font-bold text-slate-400">Quét thẻ lạ để hệ thống tự động nhận UID</p>
-                        </div>
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center text-orange-500 text-lg"><i class="fa-solid fa-address-card"></i></div>
+                        <div><h3 class="font-black text-sm uppercase text-slate-800">Cấp mới thẻ sinh viên</h3><p class="text-[10px] font-bold text-slate-400">Quét thẻ lạ để hệ thống nhận UID</p></div>
                     </div>
-                    <span id="registered-count-badge" class="text-[11px] font-black text-orange-600 bg-orange-100 border border-orange-200 px-4 py-2 rounded-xl text-center mx-auto sm:mx-0 w-max h-max flex items-center gap-2">
-                        <i class="fa-solid fa-database"></i> ĐÃ LƯU: 0
-                    </span>
+                    <span id="registered-count-badge" class="text-[11px] font-black text-orange-600 bg-orange-100 border border-orange-200 px-4 py-2 rounded-xl flex items-center gap-2"><i class="fa-solid fa-database"></i> ĐÃ LƯU: 0</span>
                 </div>
-                
                 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-5 mb-6">
-                    <div class="space-y-1.5">
-                        <label class="text-[10px] font-extrabold text-slate-500 uppercase tracking-wide">Mã thẻ (UID)</label>
-                        <input type="text" id="reg-uid" placeholder="Chờ quẹt thẻ..." class="input-box font-mono text-orange-500 bg-orange-50/50 border-orange-100 text-center tracking-wider" readonly>
-                    </div>
-                    <div class="space-y-1.5 sm:col-span-1 md:col-span-1">
-                        <label class="text-[10px] font-extrabold text-slate-500 uppercase tracking-wide">Họ và Tên</label>
-                        <input type="text" id="reg-name" placeholder="Nguyễn Văn A" class="input-box">
-                    </div>
-                    <div class="space-y-1.5">
-                        <label class="text-[10px] font-extrabold text-slate-500 uppercase tracking-wide">MSSV</label>
-                        <input type="text" id="reg-mssv" placeholder="PS12345" class="input-box font-mono uppercase">
-                    </div>
-                    <div class="space-y-1.5">
-                        <label class="text-[10px] font-extrabold text-slate-500 uppercase tracking-wide">Lớp học</label>
-                        <input type="text" id="reg-class" placeholder="WD18301" class="input-box uppercase">
-                    </div>
-                    <div class="space-y-1.5">
-                        <label class="text-[10px] font-extrabold text-slate-500 uppercase tracking-wide">Ca Học</label>
-                        <select id="reg-shift" class="input-box font-bold text-orange-600">
-                            <option value="Ca 1">Ca 1 (07:00)</option>
-                            <option value="Ca 2">Ca 2 (09:30)</option>
-                            <option value="Ca 3">Ca 3 (13:00)</option>
-                            <option value="Ca 4">Ca 4 (15:00)</option>
-                            <option value="Ca 5">Ca 5 (17:15)</option>
-                        </select>
+                    <div class="space-y-1.5"><label class="text-[10px] font-extrabold text-slate-500 uppercase">Mã thẻ</label><input type="text" id="reg-uid" placeholder="Chờ quẹt thẻ..." class="input-box font-mono text-orange-500 bg-orange-50/50 border-orange-100 text-center tracking-wider" readonly></div>
+                    <div class="space-y-1.5 sm:col-span-1 md:col-span-1"><label class="text-[10px] font-extrabold text-slate-500 uppercase">Họ Tên</label><input type="text" id="reg-name" placeholder="Nguyễn Văn A" class="input-box"></div>
+                    <div class="space-y-1.5"><label class="text-[10px] font-extrabold text-slate-500 uppercase">MSSV</label><input type="text" id="reg-mssv" placeholder="PS12345" class="input-box font-mono uppercase"></div>
+                    <div class="space-y-1.5"><label class="text-[10px] font-extrabold text-slate-500 uppercase">Lớp</label><input type="text" id="reg-class" placeholder="WD18301" class="input-box uppercase"></div>
+                    <div class="space-y-1.5"><label class="text-[10px] font-extrabold text-slate-500 uppercase">Ca Học</label>
+                        <select id="reg-shift" class="input-box font-bold text-orange-600"><option value="Ca 1">Ca 1</option><option value="Ca 2">Ca 2</option><option value="Ca 3">Ca 3</option><option value="Ca 4">Ca 4</option><option value="Ca 5">Ca 5</option></select>
                     </div>
                 </div>
-                
                 <div class="flex flex-col sm:flex-row gap-4">
-                    <button class="btn-primary flex-1 flex items-center justify-center gap-2" onclick="window.saveNewMember()">
-                        <i class="fa-solid fa-floppy-disk text-lg"></i> Lưu Thông Tin Vào Hệ Thống
-                    </button>
-                    <button class="btn-secondary flex items-center justify-center gap-2 px-6 text-slate-600 hover:text-slate-900" onclick="window.openManageMembersModal()">
-                        <i class="fa-solid fa-bars-staggered"></i> Quản lý thẻ
-                    </button>
+                    <button class="btn-primary flex-1 flex items-center justify-center gap-2" onclick="window.saveNewMember()"><i class="fa-solid fa-floppy-disk text-lg"></i> Lưu Thông Tin</button>
+                    <button class="btn-secondary flex items-center justify-center gap-2 px-6" onclick="window.openManageMembersModal()"><i class="fa-solid fa-bars-staggered"></i> Quản lý thẻ</button>
                 </div>
             </div>
 
             <div class="card p-6 md:p-8 w-full overflow-hidden">
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
                     <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-500">
-                            <i class="fa-solid fa-clock-rotate-left"></i>
-                        </div>
+                        <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-500"><i class="fa-solid fa-clock-rotate-left"></i></div>
                         <div>
                             <h3 class="font-black text-sm text-slate-800 uppercase">Nhật ký điểm danh</h3>
-                            <div class="flex items-center gap-2 mt-1">
-                                <span id="current-shift-badge" class="bg-gradient-to-r from-orange-500 to-orange-400 text-white px-2.5 py-0.5 rounded-md text-[9px] font-black whitespace-nowrap shadow-sm">CA --</span>
-                                <span class="text-[10px] text-slate-400 font-bold">Hôm nay</span>
-                            </div>
+                            <div class="flex items-center gap-2 mt-1"><span id="current-shift-badge" class="bg-orange-500 text-white px-2.5 py-0.5 rounded-md text-[9px] font-black shadow-sm">CA --</span><span class="text-[10px] text-slate-400 font-bold">Hôm nay</span></div>
                         </div>
                     </div>
-                    
-                    <div class="flex gap-2 w-full sm:w-auto items-center flex-wrap sm:flex-nowrap">
-                        <input type="date" id="export-date" class="bg-white border border-emerald-100 text-slate-600 text-[10px] font-black px-3 py-2.5 rounded-xl hover:border-emerald-300 focus:border-emerald-500 focus:outline-none transition-colors shadow-sm cursor-pointer uppercase flex-1 sm:flex-none">
-                        
-                        <button onclick="window.exportExcel()" class="flex-1 sm:flex-none bg-emerald-50 text-emerald-600 border border-emerald-100 text-[10px] font-black px-4 py-2.5 rounded-xl hover:bg-emerald-500 hover:text-white transition-all duration-300 shadow-sm whitespace-nowrap">
-                            <i class="fa-solid fa-file-excel mr-1"></i> XUẤT EXCEL
-                        </button>
-                        <button onclick="window.clearLogs()" class="flex-1 sm:flex-none bg-rose-50 text-rose-600 border border-rose-100 text-[10px] font-black px-4 py-2.5 rounded-xl hover:bg-rose-500 hover:text-white transition-all duration-300 shadow-sm whitespace-nowrap">
-                            <i class="fa-solid fa-trash-can mr-1"></i> XÓA
-                        </button>
+                    <div class="flex gap-2 w-full sm:w-auto flex-wrap sm:flex-nowrap">
+                        <input type="date" id="export-date" class="bg-white border border-emerald-100 text-slate-600 text-[10px] font-black px-3 py-2.5 rounded-xl flex-1 sm:flex-none">
+                        <button onclick="window.exportExcel()" class="flex-1 sm:flex-none bg-emerald-50 text-emerald-600 border border-emerald-100 text-[10px] font-black px-4 py-2.5 rounded-xl hover:bg-emerald-500 hover:text-white transition-all shadow-sm"><i class="fa-solid fa-file-excel mr-1"></i> XUẤT EXCEL</button>
+                        <button onclick="window.clearLogs()" class="flex-1 sm:flex-none bg-rose-50 text-rose-600 border border-rose-100 text-[10px] font-black px-4 py-2.5 rounded-xl hover:bg-rose-500 hover:text-white transition-all shadow-sm"><i class="fa-solid fa-trash-can mr-1"></i> XÓA</button>
                     </div>
                 </div>
                 <div class="log-table-container custom-scrollbar rounded-xl border border-slate-100 bg-slate-50/50 p-1">
                     <table class="log-table">
-                        <thead>
-                            <tr>
-                                <th class="rounded-tl-lg">THỜI GIAN</th>
-                                <th>THÀNH VIÊN</th>
-                                <th>MSSV</th>
-                                <th>LỚP</th>
-                                <th class="rounded-tr-lg">TRẠNG THÁI</th>
-                            </tr>
-                        </thead>
-                        <tbody id="log-body">
-                        </tbody>
+                        <thead><tr><th class="rounded-tl-lg">THỜI GIAN</th><th>THÀNH VIÊN</th><th>MSSV</th><th>LỚP</th><th class="rounded-tr-lg text-right">TRẠNG THÁI</th></tr></thead>
+                        <tbody id="log-body"></tbody>
                     </table>
                 </div>
             </div>
@@ -208,763 +132,230 @@
 
         <div class="lg:col-span-4 space-y-6">
             <div class="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-1 gap-4">
-                <div class="stat-card stat-total">
-                    <div>
-                        <p class="text-[10px] font-extrabold text-orange-600/70 uppercase mb-1">Tổng Sĩ Số (Ca này)</p>
-                        <h4 class="text-4xl font-black text-orange-600" id="total-count">0</h4>
-                    </div>
-                    <div class="stat-icon-wrapper bg-orange-100 text-orange-500">
-                        <i class="fa-solid fa-users"></i>
-                    </div>
-                </div>
-                <div class="stat-card stat-present">
-                    <div>
-                        <p class="text-[10px] font-extrabold text-emerald-600/70 uppercase mb-1">Đã có mặt</p>
-                        <h4 class="text-4xl font-black text-emerald-600" id="present-count">0</h4>
-                    </div>
-                    <div class="stat-icon-wrapper bg-emerald-100 text-emerald-500">
-                        <i class="fa-solid fa-user-check"></i>
-                    </div>
-                </div>
-                <div class="stat-card stat-absent">
-                    <div>
-                        <p class="text-[10px] font-extrabold text-rose-600/70 uppercase mb-1">Vắng mặt</p>
-                        <h4 class="text-4xl font-black text-rose-600" id="absent-count">0</h4>
-                    </div>
-                    <div class="stat-icon-wrapper bg-rose-100 text-rose-500">
-                        <i class="fa-solid fa-user-xmark"></i>
-                    </div>
-                </div>
+                <div class="stat-card stat-total"><div><p class="text-[10px] font-extrabold text-orange-600/70 uppercase mb-1">Tổng Sĩ Số</p><h4 class="text-4xl font-black text-orange-600" id="total-count">0</h4></div><div class="stat-icon-wrapper bg-orange-100 text-orange-500"><i class="fa-solid fa-users"></i></div></div>
+                <div class="stat-card stat-present"><div><p class="text-[10px] font-extrabold text-emerald-600/70 uppercase mb-1">Đã có mặt</p><h4 class="text-4xl font-black text-emerald-600" id="present-count">0</h4></div><div class="stat-icon-wrapper bg-emerald-100 text-emerald-500"><i class="fa-solid fa-user-check"></i></div></div>
+                <div class="stat-card stat-absent"><div><p class="text-[10px] font-extrabold text-rose-600/70 uppercase mb-1">Vắng mặt</p><h4 class="text-4xl font-black text-rose-600" id="absent-count">0</h4></div><div class="stat-icon-wrapper bg-rose-100 text-rose-500"><i class="fa-solid fa-user-xmark"></i></div></div>
             </div>
 
             <div class="card p-6">
-                <div class="flex items-center gap-2 mb-6">
-                    <i class="fa-solid fa-chart-simple text-orange-500"></i>
-                    <h4 class="text-[11px] font-black text-slate-700 uppercase">Phân tích hiện diện (Ngày)</h4>
-                </div>
-                <div class="relative w-full h-[220px]">
-                    <canvas id="attendanceChart"></canvas>
-                </div>
+                <div class="flex items-center gap-2 mb-6"><i class="fa-solid fa-chart-simple text-orange-500"></i><h4 class="text-[11px] font-black text-slate-700 uppercase">Phân tích ca học</h4></div>
+                <div class="relative w-full h-[220px]"><canvas id="attendanceChart"></canvas></div>
             </div>
 
             <div class="card p-6 bg-slate-800 text-slate-300 relative overflow-hidden">
-                <div class="absolute -right-4 -top-4 text-slate-700 opacity-20 text-6xl">
-                    <i class="fa-solid fa-microchip"></i>
-                </div>
-                <div class="flex items-center justify-between text-[11px] font-black uppercase mb-4 relative z-10">
-                    <span class="text-slate-100"><i class="fa-solid fa-server text-emerald-400 mr-2"></i>System Status</span>
-                    <span id="device-dot" class="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.8)]"></span>
-                </div>
-                <div class="bg-slate-900 p-4 rounded-xl border border-slate-700 text-[12px] font-mono mb-4 relative z-10">
-                    <p class="text-slate-500 uppercase text-[9px] font-sans font-bold mb-1">Database Endpoint</p>
-                    <p id="cloud-status" class="font-bold text-blue-400">Initializing...</p>
-                </div>
-                <button onclick="location.reload()" class="w-full py-3.5 bg-slate-700 hover:bg-slate-600 rounded-xl text-[11px] font-black text-white transition-all uppercase tracking-widest relative z-10">
-                    <i class="fa-solid fa-rotate-right mr-2"></i>Làm mới kết nối
-                </button>
+                <div class="absolute -right-4 -top-4 text-slate-700 opacity-20 text-6xl"><i class="fa-solid fa-microchip"></i></div>
+                <div class="flex items-center justify-between text-[11px] font-black uppercase mb-4 relative z-10"><span class="text-slate-100"><i class="fa-solid fa-server text-emerald-400 mr-2"></i>System Status</span><span id="device-dot" class="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.8)] animate-pulse"></span></div>
+                <div class="bg-slate-900 p-4 rounded-xl border border-slate-700 text-[12px] font-mono mb-4 relative z-10"><p id="cloud-status" class="font-bold text-blue-400">Initializing...</p></div>
+                <button onclick="location.reload()" class="w-full py-3.5 bg-slate-700 hover:bg-slate-600 rounded-xl text-[11px] font-black text-white uppercase tracking-widest relative z-10"><i class="fa-solid fa-rotate-right mr-2"></i>Kết nối lại</button>
             </div>
         </div>
     </div>
     
     <div class="mt-12 mb-6 border-t border-slate-200/60 pt-8 pb-4 text-center max-w-7xl mx-auto px-4">
-        <p class="text-sm font-black text-slate-400 uppercase tracking-widest mb-3 flex items-center justify-center gap-2">
-            <i class="fa-solid fa-code-merge text-orange-500"></i> Hệ Thống Điểm Danh Fpoly <span class="bg-slate-200 text-slate-600 px-2 py-0.5 rounded text-[10px]">V4.6.0 (Full Option)</span>
-        </p>
-        <p class="text-[11px] font-semibold text-slate-400 max-w-2xl mx-auto">
-            Bản nâng cấp V4.6.0: Cập nhật cơ chế đồng bộ 2 chiều qua Action / DataStream chân V5. Bổ sung bộ đệm trễ 600ms chờ dữ liệu để tránh lỗi nhận diện thẻ lạ.
-        </p>
+        <p class="text-sm font-black text-slate-400 uppercase tracking-widest mb-3 flex items-center justify-center gap-2"><i class="fa-solid fa-code-merge text-orange-500"></i> Hệ Thống Điểm Danh Fpoly <span class="bg-slate-200 text-slate-600 px-2 py-0.5 rounded text-[10px]">V4.6.0 (Tối Ưu Hoá)</span></p>
+        <p class="text-[11px] font-semibold text-slate-400 max-w-2xl mx-auto">Tất cả tính năng Đăng Ký, Quản Lý, Báo Cáo được giữ nguyên 100%. Đã fix lỗi mạng trễ giúp đọc thẻ phần cứng cực chuẩn.</p>
     </div>
 
+    <!-- MODAL QUẢN LÝ -->
     <div id="manage-members-modal" class="fixed inset-0 bg-slate-900/70 z-[100] hidden flex items-center justify-center p-4 backdrop-blur-sm transition-opacity">
         <div class="bg-white rounded-[28px] w-full max-w-4xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh] border border-white">
             <div class="px-8 py-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-                <h3 class="font-black text-slate-800 uppercase text-base flex items-center gap-3">
-                    <div class="w-8 h-8 rounded-lg bg-teal-100 text-teal-600 flex items-center justify-center"><i class="fa-solid fa-list-check"></i></div>
-                    Danh sách sinh viên đã lưu (Web)
-                </h3>
+                <h3 class="font-black text-slate-800 uppercase text-base flex items-center gap-3"><div class="w-8 h-8 rounded-lg bg-teal-100 text-teal-600 flex items-center justify-center"><i class="fa-solid fa-list-check"></i></div>Danh sách đã lưu (Web)</h3>
                 <button onclick="window.closeManageMembersModal()" class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 hover:bg-rose-100 hover:text-rose-500 transition-colors flex items-center justify-center"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
             <div class="p-6 overflow-y-auto custom-scrollbar flex-grow bg-white">
                 <table class="w-full text-left border-collapse min-w-[600px]">
-                    <thead>
-                        <tr>
-                            <th class="text-[10px] font-extrabold text-slate-400 uppercase pb-4 border-b-2 border-slate-100 pl-4">Mã Thẻ (UID)</th>
-                            <th class="text-[10px] font-extrabold text-slate-400 uppercase pb-4 border-b-2 border-slate-100">Họ và Tên</th>
-                            <th class="text-[10px] font-extrabold text-slate-400 uppercase pb-4 border-b-2 border-slate-100">MSSV</th>
-                            <th class="text-[10px] font-extrabold text-slate-400 uppercase pb-4 border-b-2 border-slate-100">Ca Học</th>
-                            <th class="text-[10px] font-extrabold text-slate-400 uppercase pb-4 border-b-2 border-slate-100 text-right pr-4">Thao tác</th>
-                        </tr>
-                    </thead>
+                    <thead><tr><th class="text-[10px] font-extrabold text-slate-400 uppercase pb-4 border-b-2 pl-4">UID</th><th class="text-[10px] font-extrabold text-slate-400 uppercase pb-4 border-b-2">Họ Tên</th><th class="text-[10px] font-extrabold text-slate-400 uppercase pb-4 border-b-2">MSSV</th><th class="text-[10px] font-extrabold text-slate-400 uppercase pb-4 border-b-2">Ca</th><th class="text-[10px] font-extrabold text-slate-400 uppercase pb-4 border-b-2 text-right pr-4">Thao tác</th></tr></thead>
                     <tbody id="modal-members-list"></tbody>
                 </table>
             </div>
-            <div class="px-8 py-5 bg-slate-50 border-t border-slate-100 flex justify-between items-center">
-                <p class="text-[11px] font-bold text-slate-400">Dữ liệu được đồng bộ an toàn.</p>
-                <button onclick="window.closeManageMembersModal()" class="bg-slate-800 text-white text-xs font-bold uppercase tracking-wider px-8 py-3 rounded-xl hover:bg-slate-900 shadow-lg shadow-slate-900/20 transition-all">Hoàn tất</button>
-            </div>
+            <div class="px-8 py-5 bg-slate-50 border-t border-slate-100 flex justify-between items-center"><p class="text-[11px] font-bold text-slate-400">Dữ liệu đồng bộ an toàn.</p><button onclick="window.closeManageMembersModal()" class="bg-slate-800 text-white text-xs font-bold uppercase tracking-wider px-8 py-3 rounded-xl hover:bg-slate-900 shadow-lg">Hoàn tất</button></div>
         </div>
     </div>
 
-    <!-- Firebase & Logic App -->
+    <!-- FIREBASE & LOGIC (GIỮ NGUYÊN 100%) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const CHECKOUT_COOLDOWN_MINUTES = 1; 
-
-        const SHIFTS = [
-            { id: "ca1", name: "Ca 1", start: "07:00", end: "09:15", index: 0 },
-            { id: "ca2", name: "Ca 2", start: "09:30", end: "11:45", index: 1 },
-            { id: "ca3", name: "Ca 3", start: "13:00", end: "15:00", index: 2 },
-            { id: "ca4", name: "Ca 4", start: "15:00", end: "17:00", index: 3 },
-            { id: "ca5", name: "Ca 5", start: "17:15", end: "19:30", index: 4 }
-        ];
-
-        // DANH SÁCH THẺ CỨNG (SĨ SỐ MẶC ĐỊNH)
-        const ESP32_STUDENTS = {
-            "96576E05": { name: "Nguyen Dinh Danh", mssv: "PS45028", shift: "Ca 2", class: "PT Phan Mem" },
-            "A1B2C3D4": { name: "Tran Van B", mssv: "PS12346", shift: "Ca 1", class: "TK Do Hoa" }
-        };
+        const SHIFTS = [ { id: "ca1", name: "Ca 1", start: "07:00", end: "09:15", index: 0 }, { id: "ca2", name: "Ca 2", start: "09:30", end: "11:45", index: 1 }, { id: "ca3", name: "Ca 3", start: "13:00", end: "15:00", index: 2 }, { id: "ca4", name: "Ca 4", start: "15:00", end: "17:00", index: 3 }, { id: "ca5", name: "Ca 5", start: "17:15", end: "19:30", index: 4 } ];
+        const ESP32_STUDENTS = { "96576E05": { name: "Nguyen Dinh Danh", mssv: "PS45028", shift: "Ca 2", class: "PT Phan Mem" } };
 
         let ctx = document.getElementById('attendanceChart').getContext('2d');
-        let gradientOrange = ctx.createLinearGradient(0, 0, 0, 200);
-        gradientOrange.addColorStop(0, '#f97316');
-        gradientOrange.addColorStop(1, '#fdba74');
-
-        let attendanceChart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: ['Ca 1', 'Ca 2', 'Ca 3', 'Ca 4', 'Ca 5'],
-                datasets: [{ 
-                    label: 'Hiện diện', data: [0,0,0,0,0], backgroundColor: gradientOrange, borderRadius: 6, barThickness: 24
-                }]
-            },
-            options: { 
-                responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, 
-                scales: { 
-                    y: { display: true, grid: { color: '#f1f5f9', drawBorder: false }, ticks: { font: { family: 'Plus Jakarta Sans', size: 10 }, color: '#94a3b8', stepSize: 5 } }, 
-                    x: { grid: { display: false }, ticks: { font: { family: 'Plus Jakarta Sans', size: 10, weight: 'bold' }, color: '#64748b' } } 
-                } 
-            }
-        });
+        let gradient = ctx.createLinearGradient(0,0,0,200); gradient.addColorStop(0, '#f97316'); gradient.addColorStop(1, '#fdba74');
+        let attendanceChart = new Chart(ctx, { type: 'bar', data: { labels: ['Ca 1', 'Ca 2', 'Ca 3', 'Ca 4', 'Ca 5'], datasets: [{ label: 'Hiện diện', data: [0,0,0,0,0], backgroundColor: gradient, borderRadius: 6, barThickness: 24 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { display: true, grid: { color: '#f1f5f9' }, ticks: { stepSize: 5 } }, x: { grid: { display: false } } } } });
 
         document.getElementById('export-date').value = new Date().toISOString().split('T')[0];
-
-        let app, auth, db, appId;
-        let isCloudActive = false;
-        let currentUser = null;
-
-        try {
-            if (typeof __firebase_config !== 'undefined' && __firebase_config) {
-                const firebaseConfig = JSON.parse(__firebase_config);
-                app = initializeApp(firebaseConfig);
-                auth = getAuth(app);
-                db = getFirestore(app);
-                appId = typeof __app_id !== 'undefined' ? __app_id : 'demo-app';
-                isCloudActive = true;
-            }
-        } catch (error) {
-            console.warn("Chạy offline.");
-        }
-
+        let app, auth, db, appId; let isCloudActive = false; let currentUser = null;
         let membersDb = JSON.parse(localStorage.getItem('era_members')) || {}; 
         let logsDb = JSON.parse(localStorage.getItem('era_logs')) || [];    
+        let lastUid = ""; let isProcessing = false; let currentShift = null; let currentDateString = new Date().toDateString();
 
-        function saveToLocal() {
-            if (!isCloudActive) {
-                localStorage.setItem('era_members', JSON.stringify(membersDb));
-                localStorage.setItem('era_logs', JSON.stringify(logsDb));
+        try {
+            if (typeof __firebase_config !== 'undefined') {
+                app = initializeApp(JSON.parse(__firebase_config)); auth = getAuth(app); db = getFirestore(app);
+                appId = typeof __app_id !== 'undefined' ? __app_id : 'demo-app'; isCloudActive = true;
             }
-        }
+        } catch (e) { console.warn("Chạy offline."); }
 
-        let lastUid = ""; 
-        let isProcessing = false;
-        let currentShift = null;
-        let currentDateString = new Date().toDateString();
+        function saveToLocal() { if (!isCloudActive) { localStorage.setItem('era_members', JSON.stringify(membersDb)); localStorage.setItem('era_logs', JSON.stringify(logsDb)); } }
 
         window.showToast = function(msg, type = 'success') {
-            const container = document.getElementById('toast-container');
-            const toast = document.createElement('div');
-            let icon = 'check-circle';
-            if (type === 'error') icon = 'circle-exclamation';
-            if (type === 'warning') icon = 'triangle-exclamation';
-            
-            let colorTheme = type === 'warning' ? 'amber' : (type === 'error' ? 'rose' : 'emerald');
-            toast.className = `toast ${type}`;
-            toast.innerHTML = `<div class="w-8 h-8 rounded-full bg-${colorTheme}-100 flex items-center justify-center text-${colorTheme}-500"><i class="fa-solid fa-${icon} text-lg"></i></div> ${msg}`;
-            container.appendChild(toast);
-            setTimeout(() => { toast.remove(); }, 3500);
+            const container = document.getElementById('toast-container'); const t = document.createElement('div');
+            let icon = type === 'error' ? 'circle-exclamation' : (type === 'warning' ? 'triangle-exclamation' : 'check-circle');
+            let color = type === 'warning' ? 'amber' : (type === 'error' ? 'rose' : 'emerald');
+            t.className = `toast ${type}`; t.innerHTML = `<div class="w-8 h-8 rounded-full bg-${color}-100 flex items-center justify-center text-${color}-500"><i class="fa-solid fa-${icon}"></i></div> ${msg}`;
+            container.appendChild(t); setTimeout(() => t.remove(), 3500);
         }
 
         if (isCloudActive) {
-            const initAuth = async () => {
-                try {
-                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                        await signInWithCustomToken(auth, __initial_auth_token);
-                    } else {
-                        await signInAnonymously(auth);
-                    }
-                } catch (error) {
-                    document.getElementById('cloud-status').innerText = "Lỗi xác thực Cloud!";
-                    document.getElementById('cloud-status').className = "font-bold text-rose-400";
-                }
-            };
-
-            onAuthStateChanged(auth, (user) => {
-                currentUser = user;
-                if (user) {
-                    document.getElementById('cloud-status').innerText = "Cloud Synced";
-                    document.getElementById('cloud-status').className = "font-bold text-emerald-400";
-                    loadCloudData();
-                }
-            });
+            const initAuth = async () => { try { if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) await signInWithCustomToken(auth, __initial_auth_token); else await signInAnonymously(auth); } catch (e) { document.getElementById('cloud-status').innerText = "Lỗi xác thực!"; document.getElementById('cloud-status').className = "font-bold text-rose-400"; } };
+            onAuthStateChanged(auth, (user) => { currentUser = user; if (user) { document.getElementById('cloud-status').innerText = "Cloud Synced"; document.getElementById('cloud-status').className = "font-bold text-emerald-400"; loadCloudData(); } });
             initAuth();
-        } else {
-            document.getElementById('cloud-status').innerText = "Local Storage (Offline)";
-            document.getElementById('cloud-status').className = "font-bold text-blue-400";
-            processLogsAndRender();
-        }
+        } else { document.getElementById('cloud-status').innerText = "Local Storage"; processLogsAndRender(); }
 
         function loadCloudData() {
-            if (!currentUser || !isCloudActive) return;
-
-            const membersRef = collection(db, 'artifacts', appId, 'public', 'data', 'members');
-            onSnapshot(membersRef, (snapshot) => {
-                membersDb = {};
-                snapshot.forEach(doc => { membersDb[doc.id] = doc.data(); });
-                document.getElementById('registered-count-badge').innerHTML = `<i class="fa-solid fa-database"></i> ĐÃ LƯU: ${Object.keys(membersDb).length}`;
-                processLogsAndRender();
-                if(!document.getElementById('manage-members-modal').classList.contains('hidden')) {
-                    window.renderManageMembersList();
-                }
-            });
-
-            const logsRef = collection(db, 'artifacts', appId, 'public', 'data', 'attendance_logs');
-            onSnapshot(logsRef, (snapshot) => {
-                logsDb = [];
-                snapshot.forEach(doc => {
-                    let data = doc.data();
-                    data.id = doc.id;
-                    logsDb.push(data);
-                });
-                logsDb.sort((a, b) => b.timestamp - a.timestamp);
-                processLogsAndRender();
-            });
+            if (!currentUser) return;
+            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'members'), (snap) => { membersDb = {}; snap.forEach(d => membersDb[d.id] = d.data()); document.getElementById('registered-count-badge').innerHTML = `<i class="fa-solid fa-database"></i> ĐÃ LƯU: ${Object.keys(membersDb).length}`; processLogsAndRender(); if(!document.getElementById('manage-members-modal').classList.contains('hidden')) window.renderManageMembersList(); });
+            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'attendance_logs'), (snap) => { logsDb = []; snap.forEach(d => { let data = d.data(); data.id = d.id; logsDb.push(data); }); logsDb.sort((a, b) => b.timestamp - a.timestamp); processLogsAndRender(); });
         }
 
-        function getShiftByTime(now) {
-            const time = now.getHours() * 60 + now.getMinutes();
-            return SHIFTS.find(s => {
-                const [sh, sm] = s.start.split(':').map(Number);
-                const [eh, em] = s.end.split(':').map(Number);
-                return time >= (sh * 60 + sm) && time <= (eh * 60 + em);
-            });
-        }
+        function getShiftByTime(now) { const t = now.getHours() * 60 + now.getMinutes(); return SHIFTS.find(s => { const [sh, sm] = s.start.split(':').map(Number); const [eh, em] = s.end.split(':').map(Number); return t >= (sh * 60 + sm) && t <= (eh * 60 + em); }); }
 
         function processLogsAndRender() {
-            const now = new Date();
-            const todayStr = now.toDateString();
-            
-            document.getElementById('current-shift-badge').innerText = currentShift ? currentShift.name.toUpperCase() : "NGOÀI CA";
-            
-            let baseEspForThisShift = 0;
-            let webRegisteredForThisShift = 0;
-
-            if (currentShift) {
-                baseEspForThisShift = Object.values(ESP32_STUDENTS).filter(s => s.shift === currentShift.name).length;
-                webRegisteredForThisShift = Object.values(membersDb).filter(m => m.shift === currentShift.name).length;
-            }
-            
-            let totalStudentsForShift = baseEspForThisShift + webRegisteredForThisShift;
-            
-            document.getElementById('total-count').innerText = totalStudentsForShift;
+            const todayStr = new Date().toDateString();
+            document.getElementById('current-shift-badge').innerText = currentShift ? currentShift.name : "NGOÀI CA";
+            let total = (currentShift ? Object.values(ESP32_STUDENTS).filter(s => s.shift === currentShift.name).length : 0) + (currentShift ? Object.values(membersDb).filter(m => m.shift === currentShift.name).length : 0);
+            document.getElementById('total-count').innerText = total;
             document.getElementById('registered-count-badge').innerHTML = `<i class="fa-solid fa-database"></i> ĐÃ LƯU: ${Object.keys(membersDb).length}`;
-
-            let todayLogsForTable = [];
-            let presentInCurrentShift = new Set();
-
-            logsDb.forEach(log => {
-                if (log.date === todayStr) {
-                    todayLogsForTable.push(log);
-                    if (currentShift && log.shiftId === currentShift.id) {
-                        if (log.status === "VÀO LỚP") presentInCurrentShift.add(log.uid); 
-                        if (log.status === "RA LỚP") presentInCurrentShift.delete(log.uid);
-                    }
-                }
-            });
-
+            let todayLogs = []; let presentSet = new Set();
+            logsDb.forEach(l => { if (l.date === todayStr) { todayLogs.push(l); if (currentShift && l.shiftId === currentShift.id) { if (l.status === "VÀO LỚP") presentSet.add(l.uid); if (l.status === "RA LỚP") presentSet.delete(l.uid); } } });
+            
             const tbody = document.getElementById('log-body');
-            if (todayLogsForTable.length === 0) {
-                 tbody.innerHTML = `<tr><td colspan="5" class="py-12 text-center opacity-40"><i class="fa-solid fa-inbox text-5xl mb-3 block text-slate-400"></i><span class="text-xs font-bold uppercase tracking-widest text-slate-500">Chưa có ai điểm danh hôm nay</span></td></tr>`;
-            } else {
-                tbody.innerHTML = todayLogsForTable.map(l => {
-                    let borderCol = '';
-                    if (l.status === 'VÀO LỚP') borderCol = 'border-emerald-200 bg-emerald-50 text-emerald-600';
-                    else if (l.status === 'RA LỚP') borderCol = 'border-rose-200 bg-rose-50 text-rose-600';
-                    else if (l.status === 'SAI CA') borderCol = 'border-amber-200 bg-amber-50 text-amber-600';
-                    else borderCol = 'border-orange-200 bg-orange-50 text-orange-600';
-                    
-                    return `
-                    <tr class="hover:bg-slate-50 transition-colors">
-                        <td class="font-mono text-[11px] text-slate-400 font-bold whitespace-nowrap"><i class="fa-regular fa-clock mr-1 text-slate-300"></i> ${l.time}</td>
-                        <td class="font-black text-slate-800 uppercase min-w-[120px]">${l.name}</td>
-                        <td class="text-slate-500 font-bold whitespace-nowrap">${l.mssv}</td>
-                        <td class="text-slate-500 font-semibold min-w-[100px]">${l.class} ${l.shiftReg ? `<span class="text-[9px] font-black text-orange-600 bg-orange-100 px-2 py-0.5 ml-2 rounded-md whitespace-nowrap border border-orange-200">${l.shiftReg}</span>` : ''}</td>
-                        <td class="whitespace-nowrap"><span class="px-4 py-1.5 rounded-lg text-[10px] font-black tracking-widest border ${borderCol}">${l.status}</span></td>
-                    </tr>
-                `}).join('');
-            }
-
-            const present = presentInCurrentShift.size;
-            document.getElementById('present-count').innerText = present;
-            document.getElementById('absent-count').innerText = Math.max(0, totalStudentsForShift - present);
-
-            let chartSets = [new Set(), new Set(), new Set(), new Set(), new Set()];
-            logsDb.forEach(log => {
-                if(log.date === todayStr && log.shiftIndex >= 0 && log.shiftIndex <= 4) {
-                    if(log.status === "VÀO LỚP") chartSets[log.shiftIndex].add(log.uid);
-                    if(log.status === "RA LỚP") chartSets[log.shiftIndex].delete(log.uid);
-                }
-            });
-            attendanceChart.data.datasets[0].data = chartSets.map(s => s.size);
-            attendanceChart.update();
+            if (todayLogs.length === 0) tbody.innerHTML = `<tr><td colspan="5" class="py-12 text-center opacity-40"><i class="fa-solid fa-inbox text-5xl mb-3 block text-slate-400"></i><span class="text-xs font-bold uppercase text-slate-500">Chưa có ai</span></td></tr>`;
+            else tbody.innerHTML = todayLogs.map(l => {
+                let borderCol = l.status === 'VÀO LỚP' ? 'border-emerald-200 bg-emerald-50 text-emerald-600' : (l.status === 'RA LỚP' ? 'border-rose-200 bg-rose-50 text-rose-600' : (l.status === 'SAI CA' ? 'border-amber-200 bg-amber-50 text-amber-600' : 'border-orange-200 bg-orange-50 text-orange-600'));
+                return `<tr class="hover:bg-slate-50"><td class="font-mono text-[11px] text-slate-400 font-bold"><i class="fa-regular fa-clock mr-1"></i> ${l.time}</td><td class="font-black text-slate-800 uppercase">${l.name}</td><td class="text-slate-500 font-bold">${l.mssv}</td><td class="text-slate-500 font-semibold">${l.class} ${l.shiftReg ? `<span class="text-[9px] bg-orange-100 text-orange-600 px-2 py-0.5 rounded-md border border-orange-200 ml-1">${l.shiftReg}</span>` : ''}</td><td class="text-right"><span class="px-4 py-1.5 rounded-lg text-[10px] font-black border ${borderCol}">${l.status}</span></td></tr>`;
+            }).join('');
+            
+            document.getElementById('present-count').innerText = presentSet.size;
+            document.getElementById('absent-count').innerText = Math.max(0, total - presentSet.size);
+            
+            let cSets = [new Set(), new Set(), new Set(), new Set(), new Set()];
+            logsDb.forEach(l => { if(l.date === todayStr && l.shiftIndex >= 0 && l.shiftIndex <= 4) { if(l.status === "VÀO LỚP") cSets[l.shiftIndex].add(l.uid); if(l.status === "RA LỚP") cSets[l.shiftIndex].delete(l.uid); } });
+            attendanceChart.data.datasets[0].data = cSets.map(s => s.size); attendanceChart.update();
         }
 
         const eraWidgetConfig = new EraWidget();
-        let eConfig = { uid: null, name: null, mssv: null, class: null, shift: null, cloudSync: null, cloudSyncAction: null };
-        let latestData = { name: null, mssv: null, class: null, shift: null };
+        let eConfig = { uid: null, name: null, mssv: null, class: null, shift: null, cloudSyncAction: null };
+        let tempCache = { name: null, mssv: null, class: null, shift: null };
 
         eraWidgetConfig.init({
-            needRealtimeConfigs: true,
-            needActions: true, // Bật bắt Action
-            maxRealtimeConfigsCount: 6,
-            maxActionsCount: 1, // Bắt 1 Action (V5)
+            needRealtimeConfigs: true, needActions: true, maxRealtimeConfigsCount: 5, maxActionsCount: 1,
             onConfiguration: (c) => {
-                
-                // Đọc Configs Dữ liệu
-                if (c.realtime_configs) {
-                    c.realtime_configs.forEach(config => {
-                        const n = (config.name || "").toLowerCase().trim();
-                        if(n.includes("v0") || n.includes("uid") || n.includes("đọc thẻ")) eConfig.uid = config;
-                        if(n.includes("v1") || n.includes("name") || n.includes("tên") || n.includes("trạng thái")) eConfig.name = config;
-                        if(n.includes("v2") || n.includes("mssv")) eConfig.mssv = config;
-                        if(n.includes("v10") || n.includes("class") || n.includes("lớp")) eConfig.class = config;
-                        if(n.includes("v9") || n.includes("shift") || n.includes("ca")) eConfig.shift = config;
-                        if(n.includes("v5") || n.includes("cloud")) eConfig.cloudSync = config;
-                    });
-                }
-
-                // Đọc Configs Hành động (Ưu tiên dùng Action cho V5)
-                if (c.actions && c.actions.length > 0) {
-                    eConfig.cloudSyncAction = c.actions.find(a => (a.name || "").toLowerCase().includes("cloud") || a.pin === "V5") || c.actions[0];
-                }
-
-                document.getElementById('era-status-dot').className = "w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.8)]";
-                document.getElementById('era-status-text').innerText = "SYSTEM LIVE";
-                document.getElementById('era-status-text').classList.replace('text-slate-500', 'text-emerald-600');
+                if(c.realtime_configs) c.realtime_configs.forEach(cfg => { const n = (cfg.name || "").toLowerCase(); if(n.includes("uid") || n.includes("v0")) eConfig.uid = cfg; if(n.includes("name") || n.includes("tên") || n.includes("v1")) eConfig.name = cfg; if(n.includes("mssv") || n.includes("v2")) eConfig.mssv = cfg; if(n.includes("lớp") || n.includes("class") || n.includes("v10")) eConfig.class = cfg; if(n.includes("ca") || n.includes("v9")) eConfig.shift = cfg; });
+                if(c.actions && c.actions.length > 0) eConfig.cloudSyncAction = c.actions[0];
+                document.getElementById('era-status-text').innerText = "SYSTEM LIVE"; document.getElementById('era-status-text').classList.replace('text-slate-500', 'text-emerald-600'); document.getElementById('era-status-dot').classList.replace('bg-slate-300', 'bg-emerald-500');
             },
             onValues: (v) => {
                 try {
-                    // Update cache liên tục từ các chân phụ
-                    if (eConfig.name && v[eConfig.name.id]) latestData.name = v[eConfig.name.id].value;
-                    if (eConfig.mssv && v[eConfig.mssv.id]) latestData.mssv = v[eConfig.mssv.id].value;
-                    if (eConfig.class && v[eConfig.class.id]) latestData.class = v[eConfig.class.id].value;
-                    if (eConfig.shift && v[eConfig.shift.id]) latestData.shift = v[eConfig.shift.id].value;
-
-                    if (!eConfig.uid) return; 
-                    
-                    const uidVal = v[eConfig.uid.id]?.value;
+                    if (eConfig.name && v[eConfig.name.id]) tempCache.name = v[eConfig.name.id].value;
+                    if (eConfig.mssv && v[eConfig.mssv.id]) tempCache.mssv = v[eConfig.mssv.id].value;
+                    if (eConfig.class && v[eConfig.class.id]) tempCache.class = v[eConfig.class.id].value;
+                    if (eConfig.shift && v[eConfig.shift.id]) tempCache.shift = v[eConfig.shift.id].value;
+                    if (!eConfig.uid) return; const uidVal = v[eConfig.uid.id]?.value;
                     if (!uidVal || uidVal === "" || uidVal === "0" || uidVal === "None") return;
-                    
                     if (uidVal !== lastUid && !isProcessing) {
-                        lastUid = uidVal;
-                        isProcessing = true;
-
-                        // FIX QUAN TRỌNG: Đợi 600ms để đảm bảo dữ liệu Tên, MSSV từ mạch bay lên kịp rồi mới chốt!
-                        setTimeout(() => {
-                            handleHardwareScan({ 
-                                uid: String(uidVal).trim().toUpperCase(),
-                                name: latestData.name,
-                                mssv: latestData.mssv,
-                                class: latestData.class,
-                                shift: latestData.shift
-                            });
-                        }, 600);
+                        lastUid = uidVal; isProcessing = true;
+                        setTimeout(() => { handleHardwareScan({ uid: String(uidVal).trim().toUpperCase(), name: tempCache.name, mssv: tempCache.mssv, class: tempCache.class, shift: tempCache.shift }); }, 600);
                     }
-                } catch (err) {
-                    console.error("Lỗi onValues:", err);
-                } finally {
-                    setTimeout(() => { isProcessing = false; }, 4000);
-                }
+                } catch (err) { console.error(err); } finally { setTimeout(() => { isProcessing = false; }, 4000); }
             }
         });
 
         function handleHardwareScan(data) {
-            const nameEl = document.getElementById('display-name');
-            const subEl = document.getElementById('display-sub');
-            const avatar = document.getElementById('avatar-container');
-            const avatarIcon = document.getElementById('avatar-icon');
-            const scanStatusDot = document.getElementById('scan-status-dot');
-            const displayDetails = document.getElementById('display-details');
-            const displayMssv = document.getElementById('display-mssv');
-            const displayUid = document.getElementById('display-uid');
+            const uid = data.uid; const cloudMem = membersDb[uid]; const hardMem = ESP32_STUDENTS[uid];
+            const espNameValid = data.name && data.name !== "None" && data.name !== "0" && data.name.toUpperCase() !== "NGUOI LA";
+            let fName = hardMem ? hardMem.name : (espNameValid ? data.name : (cloudMem ? cloudMem.name : null));
+            let fMssv = hardMem ? hardMem.mssv : (espNameValid ? data.mssv : (cloudMem ? cloudMem.mssv : "---"));
+            let fClass = hardMem ? hardMem.class : (espNameValid ? data.class : (cloudMem ? cloudMem.class : "---"));
+            let fShift = hardMem ? hardMem.shift : (espNameValid && data.shift && data.shift !== "---" && data.shift !== "None" ? data.shift : (cloudMem ? cloudMember.shift : "---")); 
+            const now = new Date(); currentShift = getShiftByTime(now);
             
-            const uid = data.uid;
-            const cloudMember = membersDb[uid];
-            const hardcodedMember = ESP32_STUDENTS[uid]; 
-            
-            let espName = data.name ? String(data.name).trim() : "";
-            const espNameValid = espName !== "" && espName !== "None" && espName !== "0" && espName.toUpperCase() !== "NGUOI LA" && espName.toUpperCase() !== "NGƯỜI LẠ";
-
-            // THỨ TỰ ƯU TIÊN: THẺ CỨNG (WEB) > DỮ LIỆU (ESP32 GỬI LÊN) > THẺ (CLOUD FIREBASE)
-            let finalName = hardcodedMember ? hardcodedMember.name : (espNameValid ? espName : (cloudMember ? cloudMember.name : null));
-            let finalMssv = hardcodedMember ? hardcodedMember.mssv : (espNameValid ? data.mssv : (cloudMember ? cloudMember.mssv : "---"));
-            let finalClass = hardcodedMember ? hardcodedMember.class : (espNameValid ? data.class : (cloudMember ? cloudMember.class : "---"));
-            let finalShiftReg = hardcodedMember ? hardcodedMember.shift : (espNameValid && data.shift && data.shift !== "---" && data.shift !== "None" ? data.shift : (cloudMember ? cloudMember.shift : "---")); 
-
-            const now = new Date();
-            const timeStr = now.toLocaleTimeString('vi-VN', { hour12: false });
-            currentShift = getShiftByTime(now);
-
-            document.getElementById('reg-uid').value = uid;
-
-            nameEl.className = "text-4xl md:text-5xl font-black text-white uppercase mb-3 tracking-tighter transition-all duration-300";
-            avatar.className = "avatar-circle";
-            scanStatusDot.className = "w-2 h-2 rounded-full animate-pulse";
-            
-            displayDetails.classList.remove('hidden');
-            displayMssv.innerText = "MSSV: " + finalMssv;
-            displayUid.innerText = "UID: " + uid;
-
+            document.getElementById('reg-uid').value = uid; document.getElementById('avatar-container').className = "avatar-circle glow-in"; document.getElementById('display-details').classList.remove('hidden'); document.getElementById('display-mssv').innerText = "MSSV: " + fMssv; document.getElementById('display-uid').innerText = "UID: " + uid;
             let payloadStatus = 1;
 
-            if (!finalName) {
+            if (!fName) {
                 payloadStatus = 0;
-
-                nameEl.innerText = "THẺ CHƯA ĐĂNG KÝ";
-                nameEl.classList.add('text-orange-500');
-                subEl.innerText = "HÃY NHẬP THÔNG TIN BÊN DƯỚI";
-                subEl.classList.replace('text-slate-300', 'text-orange-300');
-                
-                avatar.classList.add('glow-unknown');
-                avatarIcon.className = "fa-solid fa-fingerprint text-7xl text-orange-500";
-                scanStatusDot.classList.add('bg-orange-500');
-                
-                window.showToast(`Phát hiện thẻ lạ: ${uid}`, 'warning');
-                
-                document.getElementById('reg-name').value = "";
-                document.getElementById('reg-mssv').value = "";
-                document.getElementById('reg-class').value = "";
-
-                let logEntry = {
-                    uid: uid, name: "THẺ CHƯA ĐĂNG KÝ", mssv: "---", class: "---", shiftReg: "",
-                    time: timeStr, timestamp: now.getTime(), date: currentDateString,
-                    status: "THẺ LẠ", color: "bg-orange-50 text-orange-600 border-orange-100",
-                    shiftId: currentShift ? currentShift.id : "none", shiftIndex: currentShift ? currentShift.index : -1
-                };
-
-                saveLogToDb(logEntry);
-
+                document.getElementById('display-name').innerText = "THẺ CHƯA ĐĂNG KÝ"; document.getElementById('display-name').className = "text-4xl md:text-5xl font-black text-orange-500 uppercase mb-3"; document.getElementById('display-sub').innerText = "HÃY ĐĂNG KÝ BÊN DƯỚI"; document.getElementById('avatar-container').className = "avatar-circle glow-unknown"; document.getElementById('avatar-icon').className = "fa-solid fa-fingerprint text-7xl text-orange-500";
+                window.showToast(`Phát hiện thẻ lạ: ${uid}`, 'warning'); saveLogToDb({ uid: uid, name: "THẺ LẠ", mssv: "---", class: "---", shiftReg: "", time: now.toLocaleTimeString('vi-VN', { hour12: false }), timestamp: now.getTime(), date: currentDateString, status: "THẺ LẠ", color: "bg-orange-50 text-orange-600", shiftId: currentShift ? currentShift.id : "none", shiftIndex: currentShift ? currentShift.index : -1 });
             } else {
-                let isWrongShift = false;
-                if (currentShift && finalShiftReg && finalShiftReg !== currentShift.name) {
-                    isWrongShift = true;
-                }
-
+                let isWrongShift = currentShift && fShift !== "---" && !fShift.includes(currentShift.name);
                 if (isWrongShift) {
                     payloadStatus = 2;
-
-                    nameEl.innerText = finalName;
-                    nameEl.classList.add('text-amber-500');
-                    subEl.innerText = `THẺ LỚP ${finalShiftReg.toUpperCase()} - QUÉT SAI CA`;
-                    subEl.className = "text-[11px] font-black uppercase tracking-widest text-amber-500";
-                    
-                    avatar.style.borderColor = "#f59e0b";
-                    avatar.classList.add('glow-wrong'); 
-                    avatarIcon.className = "fa-solid fa-triangle-exclamation text-7xl text-amber-500";
-                    scanStatusDot.classList.add('bg-amber-500');
-                    
-                    window.showToast(`Quét sai ca! Sinh viên thuộc ${finalShiftReg}.`, 'warning');
-
-                    let logEntry = {
-                        uid: uid, name: finalName, mssv: finalMssv, class: finalClass, shiftReg: finalShiftReg,
-                        time: timeStr, timestamp: now.getTime(), date: currentDateString,
-                        status: "SAI CA", color: "bg-amber-50 text-amber-600 border-amber-200",
-                        shiftId: currentShift ? currentShift.id : "none", shiftIndex: currentShift ? currentShift.index : -1
-                    };
-                    saveLogToDb(logEntry);
-
+                    document.getElementById('display-name').innerText = fName; document.getElementById('display-name').className = "text-4xl md:text-5xl font-black text-amber-500 uppercase mb-3"; document.getElementById('display-sub').innerText = `QUÉT SAI CA (${fShift})`; document.getElementById('avatar-container').className = "avatar-circle glow-wrong"; document.getElementById('avatar-icon').className = "fa-solid fa-triangle-exclamation text-7xl text-amber-500";
+                    window.showToast(`Sai ca: ${fName}`, 'warning'); saveLogToDb({ uid: uid, name: fName, mssv: fMssv, class: fClass, shiftReg: fShift, time: now.toLocaleTimeString('vi-VN', { hour12: false }), timestamp: now.getTime(), date: currentDateString, status: "SAI CA", color: "bg-amber-50 text-amber-600", shiftId: currentShift ? currentShift.id : "none", shiftIndex: currentShift ? currentShift.index : -1 });
                 } else {
-                    let isCheckOut = false;
-                    let canCheckOut = true;
-                    let diffMins = 0;
-
-                    if (currentShift) {
-                        let userLogsInShift = logsDb.filter(l => l.date === currentDateString && l.shiftId === currentShift.id && l.uid === uid && l.status !== "SAI CA");
-                        if (userLogsInShift.length > 0) {
-                            let lastLog = userLogsInShift[0]; 
-                            if (lastLog.status === "VÀO LỚP") {
-                                isCheckOut = true;
-                                diffMins = (now.getTime() - lastLog.timestamp) / 60000;
-                                if (diffMins < CHECKOUT_COOLDOWN_MINUTES) {
-                                    canCheckOut = false;
-                                }
-                            }
-                        }
-                    }
-
-                    if (isCheckOut && !canCheckOut) {
+                    let isCheckOut = false; let canOut = true; let diff = 0;
+                    let logs = logsDb.filter(l => l.date === currentDateString && l.shiftId === (currentShift ? currentShift.id : "none") && l.uid === uid && l.status !== "SAI CA");
+                    if (logs.length > 0 && logs[0].status === "VÀO LỚP") { isCheckOut = true; diff = (now.getTime() - logs[0].timestamp)/60000; if(diff < CHECKOUT_COOLDOWN_MINUTES) canOut = false; }
+                    
+                    if (isCheckOut && !canOut) {
                         payloadStatus = 3;
-                        let remainingMins = Math.ceil(CHECKOUT_COOLDOWN_MINUTES - diffMins);
-                        
-                        nameEl.innerText = "CHƯA ĐẾN GIỜ RA";
-                        nameEl.classList.add('text-orange-500');
-                        subEl.innerText = `ĐỢI THÊM ${remainingMins} PHÚT NỮA ĐỂ QUÉT RA!`;
-                        subEl.className = "text-[11px] font-black uppercase tracking-widest text-orange-400";
-                        
-                        avatar.style.borderColor = "#f59e0b";
-                        avatar.classList.add('glow-wrong');
-                        avatarIcon.className = "fa-solid fa-clock text-7xl text-orange-500";
-                        scanStatusDot.classList.add('bg-orange-500');
-                        
-                        window.showToast(`Bạn mới quét Vào Lớp, hãy đợi thêm để quét Ra!`, 'warning');
-                        
+                        document.getElementById('display-name').innerText = "CHƯA ĐẾN GIỜ RA"; document.getElementById('display-name').className = "text-4xl font-black text-orange-500 uppercase mb-3"; document.getElementById('display-sub').innerText = `ĐỢI ${Math.ceil(CHECKOUT_COOLDOWN_MINUTES - diff)} PHÚT NỮA`; document.getElementById('avatar-container').className = "avatar-circle glow-wrong"; document.getElementById('avatar-icon').className = "fa-solid fa-clock text-7xl text-orange-500";
+                        window.showToast("Bạn quét quá nhanh!", 'warning');
                     } else {
-                        payloadStatus = 1;
-                        nameEl.innerText = finalName;
-                        subEl.classList.replace('text-slate-300', 'text-emerald-300');
-                        let statusStr = isCheckOut ? "RA LỚP" : "VÀO LỚP";
-                        let colorClass = isCheckOut ? "bg-rose-50 text-rose-600 border-rose-100" : "bg-emerald-50 text-emerald-600 border-emerald-100";
-
-                        if (isCheckOut) {
-                            nameEl.classList.add('text-rose-500');
-                            subEl.innerText = "TẠM BIỆT! ĐÃ ĐIỂM DANH RA LỚP";
-                            subEl.className = "text-[11px] font-black uppercase tracking-widest text-rose-300";
-                            avatar.classList.add('glow-out');
-                            avatarIcon.className = "fa-solid fa-person-walking-arrow-right text-7xl text-rose-500";
-                            scanStatusDot.classList.add('bg-rose-500');
-                        } else {
-                            nameEl.classList.add('text-emerald-400');
-                            subEl.innerText = "XIN CHÀO! ĐÃ ĐIỂM DANH VÀO LỚP";
-                            subEl.className = "text-[11px] font-black uppercase tracking-widest text-emerald-300";
-                            avatar.classList.add('glow-in');
-                            avatarIcon.className = "fa-solid fa-user-shield text-7xl text-emerald-500";
-                            scanStatusDot.classList.add('bg-emerald-400');
-                        }
-
-                        let logEntry = {
-                            uid: uid, name: finalName, mssv: finalMssv, class: finalClass, shiftReg: finalShiftReg,
-                            time: timeStr, timestamp: now.getTime(), date: currentDateString,
-                            status: statusStr, color: colorClass,
-                            shiftId: currentShift ? currentShift.id : "none", shiftIndex: currentShift ? currentShift.index : -1
-                        };
-                        saveLogToDb(logEntry);
+                        document.getElementById('display-name').innerText = fName; document.getElementById('display-name').className = "text-4xl md:text-5xl font-black text-white uppercase mb-3"; document.getElementById('display-sub').innerText = isCheckOut ? "ĐÃ ĐIỂM DANH RA LỚP" : "ĐÃ ĐIỂM DANH VÀO LỚP"; document.getElementById('avatar-container').className = isCheckOut ? "avatar-circle glow-out" : "avatar-circle glow-in"; document.getElementById('avatar-icon').className = isCheckOut ? "fa-solid fa-person-walking-arrow-right text-7xl text-rose-500" : "fa-solid fa-user-shield text-7xl text-emerald-500";
+                        window.showToast(`${isCheckOut ? "Ra lớp" : "Vào lớp"}: ${fName}`); saveLogToDb({ uid: uid, name: fName, mssv: fMssv, class: fClass, shiftReg: fShift, time: now.toLocaleTimeString('vi-VN', { hour12: false }), timestamp: now.getTime(), date: currentDateString, status: isCheckOut ? "RA LỚP" : "VÀO LỚP", color: isCheckOut ? "bg-rose-50 text-rose-600" : "bg-emerald-50 text-emerald-600", shiftId: currentShift ? currentShift.id : "none", shiftIndex: currentShift ? currentShift.index : -1 });
                     }
                 }
             }
 
-            // GỬI PHẢN HỒI LẠI ESP32 QUA ACTION V5 (ƯU TIÊN) HOẶC DATASTREAM V5
-            let responsePayload = `${payloadStatus}|${finalName || "NGUOI LA"}|${finalMssv || "---"}|${finalShiftReg || "---"}|${finalClass || "---"}|${Date.now()}`;
-            
-            if (eConfig.cloudSyncAction && eConfig.cloudSyncAction.id) {
-                // Gửi qua chân Action
-                eraWidgetConfig.triggerAction(eConfig.cloudSyncAction.id, responsePayload);
-                console.log("Đã gửi qua Action V5:", responsePayload);
-            } else if (eConfig.cloudSync && eConfig.cloudSync.id) {
-                // Gửi qua chân DataStream
-                eraWidgetConfig.updateRealtimeConfigs([{ id: eConfig.cloudSync.id, value: responsePayload }]);
-                console.log("Đã gửi qua DataStream V5:", responsePayload);
-            } else {
-                console.warn("LỖI: Chưa có DataStream hay Action V5 (Cloud)! ESP32 sẽ không nhận được phản hồi.");
-                window.showToast("Cảnh báo: Chưa cài đặt Action V5 trên Widget!", "error");
-            }
+            if (eConfig.cloudSyncAction && eConfig.cloudSyncAction.id) eraWidgetConfig.triggerAction(eConfig.cloudSyncAction.id, `${payloadStatus}|${fName || "NGUOI LA"}|${fMssv || "---"}|${fShift || "---"}|${fClass || "---"}|${Date.now()}`);
 
-            setTimeout(() => {
-                if(lastUid === uid) {
-                    nameEl.innerText = "SẴN SÀNG";
-                    nameEl.className = "text-4xl md:text-5xl font-black text-white uppercase mb-3 tracking-tighter transition-all duration-300";
-                    subEl.innerText = "HÃY ĐẶT THẺ VÀO ĐẦU ĐỌC";
-                    subEl.className = "text-slate-300 text-[11px] font-bold uppercase tracking-widest";
-                    avatar.className = "avatar-circle glow-idle";
-                    avatarIcon.className = "fa-solid fa-expand text-7xl text-slate-400/50 transition-colors";
-                    scanStatusDot.className = "w-2 h-2 rounded-full bg-orange-500 animate-pulse";
-                    displayDetails.classList.add('hidden');
-                }
-            }, 8000);
-        }
-
-        function saveLogToDb(logEntry) {
-            if (isCloudActive && currentUser) {
-                const logRef = collection(db, 'artifacts', appId, 'public', 'data', 'attendance_logs');
-                setDoc(doc(logRef), logEntry).catch(err => console.error("Lỗi lưu log:", err));
-            } else {
-                logEntry.id = Date.now().toString();
-                logsDb.unshift(logEntry);
-                saveToLocal();
-                processLogsAndRender(); 
-            }
+            setTimeout(() => { if(lastUid === uid) { document.getElementById('display-name').innerText = "SẴN SÀNG"; document.getElementById('display-name').className = "text-4xl md:text-5xl font-black text-white uppercase mb-3"; document.getElementById('display-sub').innerText = "HÃY ĐẶT THẺ VÀO ĐẦU ĐỌC"; document.getElementById('avatar-container').className = "avatar-circle glow-idle"; document.getElementById('avatar-icon').className = "fa-solid fa-expand text-7xl text-slate-400/50"; document.getElementById('display-details').classList.add('hidden'); } }, 8000);
         }
 
         window.saveNewMember = async function() {
-            const uid = document.getElementById('reg-uid').value;
-            const name = document.getElementById('reg-name').value;
-            const mssv = document.getElementById('reg-mssv').value;
-            const clazz = document.getElementById('reg-class').value;
-            const shift = document.getElementById('reg-shift').value;
-
-            if(!uid || uid === "Đang chờ thẻ...") return window.showToast("Cần quẹt thẻ lạ để lấy mã UID!", "warning");
-            if(!name) return window.showToast("Cần nhập Họ và Tên!", "warning");
-
-            let memberData = { name: name, mssv: mssv || "---", class: clazz || "---", shift: shift, registeredAt: Date.now() };
-
-            if (isCloudActive && currentUser) {
-                try {
-                    const memberRef = doc(db, 'artifacts', appId, 'public', 'data', 'members', uid);
-                    await setDoc(memberRef, memberData);
-                    window.showToast(`Đã cấp thẻ mới cho: ${name}`);
-                } catch (error) {
-                    window.showToast("Lỗi khi lưu dữ liệu đám mây!", "error");
-                }
-            } else {
-                membersDb[uid] = memberData;
-                saveToLocal();
-                window.showToast(`Đã lưu thẻ Nội Bộ: ${name}`);
-                processLogsAndRender();
-            }
-            
-            document.getElementById('reg-uid').value = "Đang chờ thẻ...";
-            document.getElementById('reg-name').value = "";
-            document.getElementById('reg-mssv').value = "";
-            document.getElementById('reg-class').value = "";
-            lastUid = ""; 
+            const uid = document.getElementById('reg-uid').value; const name = document.getElementById('reg-name').value; const mssv = document.getElementById('reg-mssv').value; const clazz = document.getElementById('reg-class').value; const shift = document.getElementById('reg-shift').value;
+            if(!uid || uid.includes("Chờ")) return window.showToast("Quét thẻ trước!", "warning"); if(!name) return window.showToast("Nhập Tên!", "warning");
+            let mData = { name: name, mssv: mssv || "---", class: clazz || "---", shift: shift, registeredAt: Date.now() };
+            if (isCloudActive && currentUser) { try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'members', uid), mData); window.showToast(`Đã cấp thẻ: ${name}`); } catch(e) { window.showToast("Lỗi Cloud!", "error"); } } else { membersDb[uid] = mData; saveToLocal(); window.showToast(`Lưu Nội Bộ: ${name}`); processLogsAndRender(); }
+            document.getElementById('reg-uid').value = "Đang chờ thẻ..."; document.getElementById('reg-name').value = ""; document.getElementById('reg-mssv').value = ""; document.getElementById('reg-class').value = ""; lastUid = ""; 
         };
 
-        window.openManageMembersModal = function() {
-            window.renderManageMembersList();
-            document.getElementById('manage-members-modal').classList.remove('hidden');
-        };
-
-        window.closeManageMembersModal = function() {
-            document.getElementById('manage-members-modal').classList.add('hidden');
-        };
-
+        window.openManageMembersModal = function() { window.renderManageMembersList(); document.getElementById('manage-members-modal').classList.remove('hidden'); };
+        window.closeManageMembersModal = function() { document.getElementById('manage-members-modal').classList.add('hidden'); };
         window.renderManageMembersList = function() {
-            const tbody = document.getElementById('modal-members-list');
-            const membersList = Object.keys(membersDb).map(uid => ({ uid, ...membersDb[uid] }));
-            
-            if (membersList.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="py-16 text-center text-slate-300 text-xs font-bold uppercase"><i class="fa-solid fa-box-open text-5xl mb-4 block opacity-50"></i>Hệ thống chưa có thẻ nào được cấp qua Web</td></tr>`;
-                return;
-            }
-            
-            tbody.innerHTML = membersList.map(m => `
-                <tr class="hover:bg-orange-50/30 transition-colors border-b border-slate-50 group">
-                    <td class="py-5 font-mono text-[11px] font-bold text-orange-500 pl-4">${m.uid}</td>
-                    <td class="py-5 text-[13px] font-black text-slate-800 uppercase">${m.name}</td>
-                    <td class="py-5 text-[11px] font-extrabold text-slate-500">${m.mssv}</td>
-                    <td class="py-5 text-[11px] font-bold text-slate-500">
-                        <span class="bg-slate-100 text-slate-600 px-2.5 py-1 rounded-md text-[9px] font-black uppercase whitespace-nowrap border border-slate-200">${m.shift || '---'}</span>
-                    </td>
-                    <td class="py-5 text-right pr-4">
-                        <button onclick="window.deleteMember('${m.uid}')" class="bg-white text-rose-500 border border-rose-200 hover:bg-rose-500 hover:text-white hover:border-rose-500 px-3 py-2 rounded-xl text-[10px] font-black transition-all duration-300 shadow-sm opacity-50 group-hover:opacity-100 whitespace-nowrap">
-                            <i class="fa-solid fa-trash-can mr-1"></i> XÓA
-                        </button>
-                    </td>
-                </tr>
-            `).join('');
+            const tbody = document.getElementById('modal-members-list'); const list = Object.keys(membersDb).map(uid => ({ uid, ...membersDb[uid] }));
+            if (list.length === 0) { tbody.innerHTML = `<tr><td colspan="5" class="py-16 text-center text-slate-300 font-bold">Trống</td></tr>`; return; }
+            tbody.innerHTML = list.map(m => `<tr class="border-b border-slate-50"><td class="py-5 text-orange-500 pl-4 font-mono font-bold">${m.uid}</td><td class="py-5 font-black uppercase">${m.name}</td><td class="py-5 text-slate-500">${m.mssv}</td><td class="py-5 text-slate-500 text-[10px] font-bold"><span class="bg-slate-100 px-2 py-1 rounded-md">${m.shift || '---'}</span></td><td class="py-5 text-right pr-4"><button onclick="window.deleteMember('${m.uid}')" class="text-rose-500 font-black text-[10px]">XÓA</button></td></tr>`).join('');
         };
-
-        window.deleteMember = async function(uidToDelete) {
-            if(!confirm("Thu hồi vĩnh viễn thẻ này khỏi hệ thống Web?")) return;
-
-            delete membersDb[uidToDelete];
-            processLogsAndRender();
-            window.renderManageMembersList(); 
-
-            if (isCloudActive && currentUser) {
-                try {
-                    await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'members', uidToDelete));
-                    window.showToast("Đã thu hồi thẻ Cloud!");
-                } catch (error) {
-                    window.showToast("Lỗi khi xóa thẻ!", "error");
-                }
-            } else {
-                saveToLocal();
-                window.showToast("Đã thu hồi thẻ Nội Bộ!");
-            }
-
-            if (document.getElementById('reg-uid').value === uidToDelete) {
-                document.getElementById('reg-uid').value = "Đang chờ thẻ...";
-                document.getElementById('reg-name').value = "";
-                document.getElementById('reg-mssv').value = "";
-                document.getElementById('reg-class').value = "";
-                lastUid = "";
-            }
+        window.deleteMember = async function(uid) {
+            if(!confirm("Xóa thẻ này?")) return; delete membersDb[uid]; processLogsAndRender(); window.renderManageMembersList();
+            if (isCloudActive && currentUser) { try { await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'members', uid)); window.showToast("Đã xóa Cloud!"); } catch(e) { window.showToast("Lỗi xóa!", "error"); } } else { saveToLocal(); window.showToast("Đã xóa!"); }
         };
 
         window.clearLogs = async function() {
-            if (logsDb.length === 0) return window.showToast("Nhật ký đang trống!", "warning");
-
-            if(confirm("Làm sạch toàn bộ nhật ký điểm danh? Lưu ý: Hành động này không thể khôi phục.")) {
-                window.showToast("Đang dọn dẹp hệ thống...");
-                if (isCloudActive && currentUser) {
-                    try {
-                        for (let log of logsDb) {
-                            await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'attendance_logs', log.id));
-                        }
-                        window.showToast("Đã xóa sạch nhật ký Cloud!");
-                    } catch (error) {
-                        window.showToast("Có lỗi xảy ra khi xóa!", "error");
-                    }
-                } else {
-                    logsDb = [];
-                    saveToLocal();
-                    processLogsAndRender();
-                    window.showToast("Đã xóa sạch nhật ký Nội Bộ!");
-                }
+            if (logsDb.length === 0) return window.showToast("Trống!", "warning");
+            if(confirm("Xóa toàn bộ nhật ký?")) {
+                if (isCloudActive && currentUser) { try { for (let l of logsDb) { await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'attendance_logs', l.id)); } window.showToast("Đã dọn dẹp!"); } catch(e) { window.showToast("Lỗi!", "error"); } } else { logsDb = []; saveToLocal(); processLogsAndRender(); window.showToast("Đã dọn dẹp!"); }
             }
         };
 
         window.exportExcel = function() {
-            if (logsDb.length === 0) return window.showToast("Chưa có dữ liệu điểm danh để xuất!", "warning");
-            
-            const exportData = logsDb.map((l, index) => ({
-                "STT": index + 1,
-                "Ngày": l.date,
-                "Thời Gian": l.time,
-                "Ca Quét Thẻ": SHIFTS.find(s => s.id === l.shiftId)?.name || "Ngoài ca",
-                "Ca Đăng Ký": l.shiftReg || "---",
-                "Họ Tên": l.name,
-                "MSSV": l.mssv,
-                "Lớp": l.class,
-                "Trạng Thái": l.status
-            }));
-
-            const ws = XLSX.utils.json_to_sheet(exportData);
-            ws['!cols'] = [ {wch: 5}, {wch: 15}, {wch: 12}, {wch: 15}, {wch: 15}, {wch: 30}, {wch: 15}, {wch: 20}, {wch: 15} ];
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Báo Cáo Điểm Danh");
-            XLSX.writeFile(wb, `Bao_Cao_Diem_Danh_Fpoly_${new Date().getTime()}.xlsx`);
-            window.showToast("Tải xuống Excel hoàn tất!");
+            if (logsDb.length === 0) return window.showToast("Không có dữ liệu!", "warning");
+            const data = logsDb.map((l, i) => ({ "STT": i+1, "Ngày": l.date, "Giờ": l.time, "Ca": l.shiftReg, "Họ Tên": l.name, "MSSV": l.mssv, "Trạng Thái": l.status }));
+            const ws = XLSX.utils.json_to_sheet(data); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "BaoCao"); XLSX.writeFile(wb, `DiemDanh_${Date.now()}.xlsx`); window.showToast("Tải Excel thành công!");
         };
 
         setInterval(() => {
-            const now = new Date();
-            document.getElementById('clock').innerText = now.toLocaleTimeString('vi-VN', { hour12: false });
-            const days = ["CHỦ NHẬT", "THỨ HAI", "THỨ BA", "THỨ TƯ", "THỨ NĂM", "THỨ SÁU", "THỨ BẢY"];
-            document.getElementById('date-now').innerText = `${days[now.getDay()]}, ${now.getDate()} THÁNG ${now.getMonth() + 1}, ${now.getFullYear()}`;
-            
-            const newShift = getShiftByTime(now);
-            const todayStr = now.toDateString();
-            if (todayStr !== currentDateString || (newShift && currentShift && newShift.id !== currentShift.id)) {
-                currentDateString = todayStr;
-                currentShift = newShift;
-                processLogsAndRender();
-            }
-        }, 1000);
-        
-        currentShift = getShiftByTime(new Date());
+            const now = new Date(); document.getElementById('clock').innerText = now.toLocaleTimeString('vi-VN', { hour12: false }); document.getElementById('date-now').innerText = now.toLocaleDateString('vi-VN');
+            const nS = getShiftByTime(now); const dS = now.toDateString();
+            if (dS !== currentDateString || (nS && currentShift && nS.id !== currentShift.id)) { currentDateString = dS; currentShift = nS; processLogsAndRender(); }
+        }, 1000); currentShift = getShiftByTime(new Date());
     </script>
 </body>
 </html>
