@@ -85,21 +85,17 @@
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 max-w-7xl mx-auto">
-        
         <div class="lg:col-span-8 space-y-6">
-            
             <div class="card-dark p-10 flex flex-col items-center justify-center min-h-[400px]" id="main-display-card">
                 <div class="avatar-circle glow-idle" id="avatar-container">
                     <i class="fa-solid fa-expand text-7xl text-slate-400/50 transition-colors" id="avatar-icon"></i>
                 </div>
                 <div class="text-center z-10 w-full">
                     <h2 id="display-name" class="text-4xl md:text-5xl font-black text-white uppercase mb-4 tracking-tighter transition-all duration-300 drop-shadow-md">SẴN SÀNG</h2>
-                    
                     <div id="display-details" class="flex flex-wrap items-center justify-center gap-3 mb-5 hidden">
                         <span id="display-mssv" class="px-5 py-2 rounded-xl text-sm font-black tracking-wider bg-slate-800 text-slate-100 border border-slate-600 shadow-inner"></span>
                         <span id="display-uid" class="px-5 py-2 rounded-xl text-sm font-black font-mono tracking-wider bg-orange-500/20 text-orange-400 border border-orange-500/50"></span>
                     </div>
-
                     <div class="inline-flex items-center gap-2 bg-slate-800/80 backdrop-blur-md px-5 py-2 rounded-full border border-slate-600 shadow-xl">
                         <span class="w-2 h-2 rounded-full bg-orange-500 animate-pulse" id="scan-status-dot"></span>
                         <p id="display-sub" class="text-slate-200 text-[11px] font-bold uppercase tracking-widest">HÃY ĐẶT THẺ VÀO ĐẦU ĐỌC</p>
@@ -272,10 +268,10 @@
     
     <div class="mt-12 mb-6 border-t border-slate-200/60 pt-8 pb-4 text-center max-w-7xl mx-auto px-4">
         <p class="text-sm font-black text-slate-400 uppercase tracking-widest mb-3 flex items-center justify-center gap-2">
-            <i class="fa-solid fa-code-merge text-orange-500"></i> Hệ Thống Điểm Danh Fpoly <span class="bg-slate-200 text-slate-600 px-2 py-0.5 rounded text-[10px]">V4.2.0</span>
+            <i class="fa-solid fa-code-merge text-orange-500"></i> Hệ Thống Điểm Danh Fpoly <span class="bg-slate-200 text-slate-600 px-2 py-0.5 rounded text-[10px]">V4.3.0</span>
         </p>
         <p class="text-[11px] font-semibold text-slate-400 max-w-2xl mx-auto">
-            Bản nâng cấp V4.2.0: <b>Sửa lỗi thẻ cứng</b>. Đã cấu hình Web nhận đầy đủ Tên, Lớp, MSSV, Ca từ phần cứng ESP32 gửi lên và ƯU TIÊN tuyệt đối trước khi đối chiếu với Web Database.
+            Bản nâng cấp V4.3.0: <b>Sửa lỗi rớt thẻ cứng và Timeout LCD</b>. Bổ sung bộ nhớ đệm (Cache) trên Web để gom đủ tín hiệu từ ESP32 trước khi phân tích. Ép ERa phản hồi lập thời cho màn hình cứng.
         </p>
     </div>
 
@@ -326,8 +322,7 @@
         ];
 
         const ESP32_STUDENTS = [
-            { uid: "96576E05", shift: "Ca 2" },
-            { uid: "A1B2C3D4", shift: "Ca 1" }
+            { uid: "96576E05", shift: "Ca 2" } // Danh
         ];
 
         let ctx = document.getElementById('attendanceChart').getContext('2d');
@@ -536,20 +531,23 @@
 
         const eraWidgetConfig = new EraWidget();
         let eConfig = { uid: null, name: null, mssv: null, class: null, shift: null, cloudSync: null };
+        
+        // BỘ NHỚ ĐỆM (CACHE) KHẮC PHỤC LỖI ESP32 GỬI TÍN HIỆU RỜI RẠC
+        let latestData = { name: null, mssv: null, class: null, shift: null };
 
-        // --- CẤU HÌNH LẠI ONVALUES ĐỂ BẮT 100% DATA TỪ ESP32 ---
         eraWidgetConfig.init({
             needRealtimeConfigs: true,
             maxRealtimeConfigsCount: 6,
             onConfiguration: (c) => {
                 
                 c.realtime_configs.forEach(config => {
-                    if(config.name === "đọc thẻ" || config.name === "UID") eConfig.uid = config;
-                    if(config.name === "trạng thái truy cập" || config.name === "Name") eConfig.name = config;
-                    if(config.name === "MSSV") eConfig.mssv = config;
-                    if(config.name === "Class") eConfig.class = config;
-                    if(config.name === "Ca") eConfig.shift = config;
-                    if(config.name === "Cloud" || config.name === "Cloud Sync") eConfig.cloudSync = config;
+                    const n = config.name.toLowerCase().trim();
+                    if(n === "đọc thẻ" || n === "uid" || n === "v0") eConfig.uid = config;
+                    if(n === "trạng thái truy cập" || n === "name" || n === "v1") eConfig.name = config;
+                    if(n === "mssv" || n === "v2") eConfig.mssv = config;
+                    if(n === "class" || n === "lớp" || n === "v10") eConfig.class = config;
+                    if(n === "ca" || n === "shift" || n === "v9") eConfig.shift = config;
+                    if(n === "cloud" || n === "cloud sync" || n === "v5") eConfig.cloudSync = config;
                 });
 
                 document.getElementById('era-status-dot').className = "w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.8)]";
@@ -558,6 +556,12 @@
             },
             onValues: (v) => {
                 try {
+                    // 1. Cập nhật bộ nhớ đệm (Cache) liên tục khi ESP32 gửi dữ liệu phụ lên trước
+                    if (eConfig.name && v[eConfig.name.id]) latestData.name = v[eConfig.name.id].value;
+                    if (eConfig.mssv && v[eConfig.mssv.id]) latestData.mssv = v[eConfig.mssv.id].value;
+                    if (eConfig.class && v[eConfig.class.id]) latestData.class = v[eConfig.class.id].value;
+                    if (eConfig.shift && v[eConfig.shift.id]) latestData.shift = v[eConfig.shift.id].value;
+
                     if (!eConfig.uid) return; 
                     
                     const uidVal = v[eConfig.uid.id]?.value;
@@ -567,18 +571,13 @@
                     lastUid = uidVal;
                     isProcessing = true;
 
-                    // ĐỌC THÔNG TIN TỪ ESP32 GỬI LÊN (NẾU CÓ)
-                    const nameVal = eConfig.name ? v[eConfig.name.id]?.value : null;
-                    const mssvVal = eConfig.mssv ? v[eConfig.mssv.id]?.value : null;
-                    const classVal = eConfig.class ? v[eConfig.class.id]?.value : null;
-                    const shiftVal = eConfig.shift ? v[eConfig.shift.id]?.value : null;
-
+                    // 2. Chỉ chạy xử lý khi nhận được mã thẻ UID (V0). Kết hợp mã thẻ với thông tin đã lưu trong Cache.
                     handleHardwareScan({ 
                         uid: uidVal,
-                        name: nameVal,
-                        mssv: mssvVal,
-                        class: classVal,
-                        shift: shiftVal
+                        name: latestData.name,
+                        mssv: latestData.mssv,
+                        class: latestData.class,
+                        shift: latestData.shift
                     });
                 } catch (err) {
                     console.error("Lỗi onValues:", err);
@@ -756,8 +755,8 @@
 
             // --- BƯỚC 2: GỬI KẾT QUẢ ĐÃ LỌC VỀ CHO LCD ESP32 ---
             if (eConfig.cloudSync && eConfig.cloudSync.id) {
-                let responsePayload = `${payloadStatus}|${finalName || "NGUOI LA"}|${finalMssv || "---"}|${finalShiftReg || "---"}|${finalClass || "---"}`;
-                console.log("-> Bắn DataStream ID: ", eConfig.cloudSync.id, " Payload: ", responsePayload);
+                // Ép ERa luôn cập nhật bằng cách thêm Timestamp Date.now() vào cuối chuỗi
+                let responsePayload = `${payloadStatus}|${finalName || "NGUOI LA"}|${finalMssv || "---"}|${finalShiftReg || "---"}|${finalClass || "---"}|${Date.now()}`;
                 eraWidgetConfig.updateRealtimeConfigs([{ id: eConfig.cloudSync.id, value: responsePayload }]);
             } else {
                 console.warn("LỖI: Chưa có DataStream V5 (Cloud)! ESP32 sẽ không nhận được phản hồi.");
