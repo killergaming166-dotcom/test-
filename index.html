@@ -153,8 +153,8 @@
     </div>
     
     <div class="mt-12 mb-6 border-t border-slate-200/60 pt-8 pb-4 text-center max-w-7xl mx-auto px-4">
-        <p class="text-sm font-black text-slate-400 uppercase tracking-widest mb-3 flex items-center justify-center gap-2"><i class="fa-solid fa-code-merge text-orange-500"></i> Hệ Thống Điểm Danh Fpoly <span class="bg-slate-200 text-slate-600 px-2 py-0.5 rounded text-[10px]">V4.6.2 (Chuẩn 5 DataStream)</span></p>
-        <p class="text-[11px] font-semibold text-slate-400 max-w-2xl mx-auto">Đã xóa bỏ Actions, chuyển V5 sang Realtime Data. Gộp chung Lớp vào MSSV để giới hạn đúng 5 chân (V0, V1, V2, V5, V9).</p>
+        <p class="text-sm font-black text-slate-400 uppercase tracking-widest mb-3 flex items-center justify-center gap-2"><i class="fa-solid fa-code-merge text-orange-500"></i> Hệ Thống Điểm Danh Fpoly <span class="bg-slate-200 text-slate-600 px-2 py-0.5 rounded text-[10px]">V4.6.2 (Tối Ưu Tốc Độ)</span></p>
+        <p class="text-[11px] font-semibold text-slate-400 max-w-2xl mx-auto">Tăng tốc độ phản hồi từ Web về Mạch qua việc ép giảm thời gian trễ xuống mức nhỏ nhất.</p>
     </div>
 
     <!-- MODAL QUẢN LÝ -->
@@ -174,7 +174,7 @@
         </div>
     </div>
 
-    <!-- FIREBASE & LOGIC -->
+    <!-- FIREBASE & LOGIC (GIỮ NGUYÊN 100%) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
@@ -280,9 +280,11 @@
                     if (!uidVal || uidVal === "" || uidVal === "0" || uidVal === "None") return;
                     if (uidVal !== lastUid && !isProcessing) {
                         lastUid = uidVal; isProcessing = true;
-                        setTimeout(() => { handleHardwareScan({ uid: String(uidVal).trim().toUpperCase(), name: tempCache.name, mssv: tempCache.mssv, shift: tempCache.shift }); }, 600);
+                        
+                        // TỐI ƯU TỐC ĐỘ: Giảm thời gian Web chờ Data xuống chỉ còn 150ms 
+                        setTimeout(() => { handleHardwareScan({ uid: String(uidVal).trim().toUpperCase(), name: tempCache.name, mssv: tempCache.mssv, shift: tempCache.shift }); }, 150);
                     }
-                } catch (err) { console.error(err); } finally { setTimeout(() => { isProcessing = false; }, 4000); }
+                } catch (err) { console.error(err); } finally { setTimeout(() => { isProcessing = false; }, 3000); }
             }
         });
 
@@ -292,7 +294,7 @@
             
             let fName = hardMem ? hardMem.name : (espNameValid ? data.name : (cloudMem ? cloudMem.name : null));
             let fMssv = hardMem ? hardMem.mssv : (espNameValid ? data.mssv : (cloudMem ? cloudMem.mssv : "---"));
-            let fShift = hardMem ? hardMem.shift : (espNameValid && data.shift && data.shift !== "---" && data.shift !== "None" ? data.shift : (cloudMem ? cloudMember.shift : "---")); 
+            let fShift = hardMem ? hardMem.shift : (espNameValid && data.shift && data.shift !== "---" && data.shift !== "None" ? data.shift : (cloudMem ? cloudMem.shift : "---")); 
             const now = new Date(); currentShift = getShiftByTime(now);
             
             document.getElementById('reg-uid').value = uid; document.getElementById('avatar-container').className = "avatar-circle glow-in"; document.getElementById('display-details').classList.remove('hidden'); document.getElementById('display-mssv').innerText = "MSSV & LỚP: " + fMssv; document.getElementById('display-uid').innerText = "UID: " + uid;
@@ -324,9 +326,8 @@
                 }
             }
 
-            // BẮN PHẢN HỒI QUA REALTIME DATATSTREAM V5 THAY VÌ ACTION
+            // BẮN PHẢN HỒI QUA REALTIME DATATSTREAM V5
             if (eConfig.cloudSync && eConfig.cloudSync.id) {
-                // Định dạng không còn Class, Class đã gộp vào MSSV
                 let res = `${payloadStatus}|${fName || "NGUOI LA"}|${fMssv || "---"}|${fShift || "---"}|${Date.now()}`;
                 eraWidgetConfig.updateRealtimeConfigs([{ id: eConfig.cloudSync.id, value: res }]);
             } else {
@@ -334,13 +335,13 @@
                 window.showToast("Vui lòng thêm Cloud V5 vào Realtime Configs!", "error");
             }
 
-            setTimeout(() => { if(lastUid === uid) { document.getElementById('display-name').innerText = "SẴN SÀNG"; document.getElementById('display-name').className = "text-4xl md:text-5xl font-black text-white uppercase mb-3"; document.getElementById('display-sub').innerText = "HÃY ĐẶT THẺ VÀO ĐẦU ĐỌC"; document.getElementById('avatar-container').className = "avatar-circle glow-idle"; document.getElementById('avatar-icon').className = "fa-solid fa-expand text-7xl text-slate-400/50"; document.getElementById('display-details').classList.add('hidden'); } }, 8000);
+            setTimeout(() => { if(lastUid === uid) { document.getElementById('display-name').innerText = "SẴN SÀNG"; document.getElementById('display-name').className = "text-4xl md:text-5xl font-black text-white uppercase mb-3"; document.getElementById('display-sub').innerText = "HÃY ĐẶT THẺ VÀO ĐẦU ĐỌC"; document.getElementById('avatar-container').className = "avatar-circle glow-idle"; document.getElementById('avatar-icon').className = "fa-solid fa-expand text-7xl text-slate-400/50"; document.getElementById('display-details').classList.add('hidden'); } }, 6000);
         }
 
         window.saveNewMember = async function() {
             const uid = document.getElementById('reg-uid').value; const name = document.getElementById('reg-name').value; const mssv = document.getElementById('reg-mssv').value; const shift = document.getElementById('reg-shift').value;
             if(!uid || uid.includes("Chờ")) return window.showToast("Quét thẻ trước!", "warning"); if(!name) return window.showToast("Nhập Tên!", "warning");
-            let mData = { name: name, mssv: mssv || "---", shift: shift, registeredAt: Date.now() }; // Không còn class độc lập
+            let mData = { name: name, mssv: mssv || "---", shift: shift, registeredAt: Date.now() }; 
             if (isCloudActive && currentUser) { try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'members', uid), mData); window.showToast(`Đã cấp thẻ: ${name}`); } catch(e) { window.showToast("Lỗi Cloud!", "error"); } } else { membersDb[uid] = mData; saveToLocal(); window.showToast(`Lưu Nội Bộ: ${name}`); processLogsAndRender(); }
             document.getElementById('reg-uid').value = "Đang chờ thẻ..."; document.getElementById('reg-name').value = ""; document.getElementById('reg-mssv').value = ""; lastUid = ""; 
         };
