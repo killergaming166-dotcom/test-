@@ -107,6 +107,11 @@
             border-color: #10b981; 
             background: rgba(16, 185, 129, 0.1); 
         }
+        .glow-out { 
+            box-shadow: 0 0 60px rgba(244, 63, 94, 0.5), inset 0 0 20px rgba(244, 63, 94, 0.3); 
+            border-color: #f43f5e; 
+            background: rgba(244, 63, 94, 0.1); 
+        }
         .glow-wrong { 
             box-shadow: 0 0 60px rgba(245, 158, 11, 0.5), inset 0 0 20px rgba(245, 158, 11, 0.3); 
             border-color: #f59e0b; 
@@ -185,6 +190,7 @@
             border-radius: 16px; 
         }
         .custom-scrollbar::-webkit-scrollbar { width: 8px; height: 8px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 10px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; border: 2px solid #f1f5f9; }
 
         .log-table { 
@@ -338,7 +344,7 @@
     </div>
     
     <div class="mt-12 mb-6 border-t border-slate-200/60 pt-8 pb-4 text-center max-w-7xl mx-auto px-4">
-        <p class="text-sm font-black text-slate-400 uppercase tracking-widest mb-3 flex items-center justify-center gap-2"><i class="fa-solid fa-code-merge text-orange-500"></i> Hệ Thống Điểm Danh Fpoly <span class="bg-slate-200 text-slate-600 px-2 py-0.5 rounded text-[10px]">V4.9.3 FINAL</span></p>
+        <p class="text-sm font-black text-slate-400 uppercase tracking-widest mb-3 flex items-center justify-center gap-2"><i class="fa-solid fa-code-merge text-orange-500"></i> Hệ Thống Điểm Danh Fpoly <span class="bg-slate-200 text-slate-600 px-2 py-0.5 rounded text-[10px]">V4.9.3 (Đã Fix Lỗi Treo Mạch)</span></p>
     </div>
 
     <!-- MODAL QUẢN LÝ -->
@@ -368,6 +374,8 @@
         const ESP32_HARD_STUDENTS = { "96576E05": { name: "Nguyen Dinh Danh", mssv: "PS45028", shift: "Ca 2" } }; 
 
         let db, appId, currentUser, membersDb = {}, logsDb = [], lastUid = "", isProcessing = false, currentShift = null;
+        const eraToken = "53f7b5a4-c19e-4760-9940-ff280ac07374";
+
         let ctx = document.getElementById('attendanceChart').getContext('2d');
         let gradient = ctx.createLinearGradient(0,0,0,200); gradient.addColorStop(0, '#f97316'); gradient.addColorStop(1, '#fdba74');
         let attendanceChart = new Chart(ctx, { type: 'bar', data: { labels: ['Ca 1', 'Ca 2', 'Ca 3', 'Ca 4', 'Ca 5'], datasets: [{ label: 'Hiện diện', data: [0,0,0,0,0], backgroundColor: gradient, borderRadius: 6, barThickness: 24 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { display: true, grid: { color: '#f1f5f9' }, ticks: { stepSize: 5 } }, x: { grid: { display: false } } } } });
@@ -376,15 +384,20 @@
             if (typeof __firebase_config !== 'undefined') {
                 const config = JSON.parse(__firebase_config);
                 const app = initializeApp(config);
-                const auth = getAuth(app); db = getFirestore(app); appId = __app_id;
+                const auth = getAuth(app); db = getFirestore(app); 
+                appId = typeof __app_id !== 'undefined' ? __app_id : 'demo-app';
                 onAuthStateChanged(auth, (user) => { if (user) { currentUser = user; document.getElementById('cloud-status').innerText = "ONLINE"; loadData(); } });
                 signInAnonymously(auth);
             }
-        } catch (e) { console.error(e); }
+        } catch (e) { console.error("Firebase Init Error:", e); }
 
         function loadData() {
             onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'members'), (snap) => { membersDb = {}; snap.forEach(d => membersDb[d.id] = d.data()); renderAll(); });
             onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'attendance_logs'), (snap) => { logsDb = []; snap.forEach(d => { let data = d.data(); data.id = d.id; logsDb.push(data); }); logsDb.sort((a, b) => b.timestamp - a.timestamp); renderAll(); });
+        }
+
+        async function hotlineToESP32(payload) {
+            try { await fetch(`https://broker-v2.era.io/api/v1/device/update/vpin?token=${eraToken}&pin=V5&value=${encodeURIComponent(payload)}`); } catch (err) { console.error("Hotline API error:", err); }
         }
 
         const eraWidget = new EraWidget();
@@ -409,9 +422,19 @@
                 if (eCfg.mssv && v[eCfg.mssv.id]) tempCache.mssv = v[eCfg.mssv.id].value;
                 if (eCfg.shift && v[eCfg.shift.id]) tempCache.shift = v[eCfg.shift.id].value;
                 if (!eCfg.uid) return; const u = v[eCfg.uid.id]?.value;
+                
+                // Lõi V4.9.3 Fix: Bắt try-catch để không bao giờ bị kẹt isProcessing
                 if (u && u !== "0" && u !== "" && u !== "None" && u !== lastUid && !isProcessing) {
                     lastUid = u; isProcessing = true;
-                    setTimeout(() => { handleScan(u, tempCache); isProcessing = false; }, 150);
+                    setTimeout(() => { 
+                        try {
+                            handleScan(u, tempCache); 
+                        } catch (error) {
+                            console.error("Lỗi kẹt hệ thống:", error);
+                        } finally {
+                            isProcessing = false; 
+                        }
+                    }, 150);
                 }
             }
         });
@@ -425,6 +448,7 @@
             let fShift = hard ? hard.shift : (espValid && data.shift !== "None" ? data.shift : (cloud ? cloud.shift : "---"));
             
             const now = new Date(); currentShift = getShiftByTime(now);
+            
             document.getElementById('reg-uid').value = uid;
             document.getElementById('display-name').innerText = fName || "THẺ CHƯA ĐĂNG KÝ";
             document.getElementById('display-details').classList.remove('hidden');
@@ -437,14 +461,23 @@
 
             if (fName) {
                 const entry = { uid, name: fName, mssv: fMssv, shiftReg: fShift, time: now.toLocaleTimeString('vi-VN', {hour12: false}), timestamp: now.getTime(), date: now.toDateString(), status: status === 2 ? "SAI CA" : "VÀO LỚP", shiftId: currentShift?.id || "none", shiftIndex: SHIFTS.findIndex(s => s.name === fShift) };
-                setDoc(doc(collection(db, 'artifacts', appId, 'public', 'data', 'attendance_logs')), entry);
+                if (db && appId) {
+                    setDoc(doc(collection(db, 'artifacts', appId, 'public', 'data', 'attendance_logs')), entry).catch(e => console.error("Lỗi Firestore:", e));
+                } else {
+                    entry.id = Date.now().toString();
+                    logsDb.unshift(entry);
+                    renderAll();
+                }
                 window.showToast(`Xin chào ${fName}!`);
             }
 
-            if (eCfg.cloud) {
-                const res = `${status}|${fName || "NGUOI LA"}|${fMssv}|${fShift}|${Date.now()}`;
-                eraWidget.updateRealtimeConfigs([{ id: eCfg.cloud.id, value: res }]);
+            const payloadRes = `${status}|${fName || "NGUOI LA"}|${fMssv}|${fShift}|${Date.now()}`;
+            if (eCfg.cloud && eCfg.cloud.id) {
+                eraWidget.updateRealtimeConfigs([{ id: eCfg.cloud.id, value: payloadRes }]);
+            } else {
+                hotlineToESP32(payloadRes); // Dự phòng gọi qua API nếu Realtime lỗi
             }
+
             setTimeout(() => { if(lastUid === uid) { document.getElementById('display-name').innerText = "SẴN SÀNG"; document.getElementById('display-details').classList.add('hidden'); document.getElementById('avatar-container').className = "avatar-circle glow-idle"; } }, 6000);
         }
 
@@ -467,20 +500,47 @@
             document.getElementById('total-count').innerText = totalInShift;
             document.getElementById('present-count').innerText = present.size;
             document.getElementById('absent-count').innerText = Math.max(0, totalInShift - present.size);
+            
             let sets = [new Set(), new Set(), new Set(), new Set(), new Set()];
-            logsDb.forEach(l => { if(l.date === today && l.shiftIndex >= 0 && l.status === "VÀO LỚP") sets[l.shiftIndex].add(l.uid); });
+            logsDb.forEach(l => { 
+                if(l.date === today && l.shiftIndex >= 0 && l.shiftIndex < 5 && l.status === "VÀO LỚP") {
+                    sets[l.shiftIndex].add(l.uid); 
+                }
+            });
             attendanceChart.data.datasets[0].data = sets.map(s => s.size); attendanceChart.update();
         }
 
         window.saveNewMember = () => {
             const u = document.getElementById('reg-uid').value, n = document.getElementById('reg-name').value, m = document.getElementById('reg-mssv').value, s = document.getElementById('reg-shift').value;
-            if (u && n) { setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'members', u), { name: n, mssv: m, shift: s, timestamp: Date.now() }); window.showToast("Lưu thành công!"); } else window.showToast("Nhập tên trước!", "warning");
+            if (u && n) { 
+                if (db && appId) {
+                    setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'members', u), { name: n, mssv: m, shift: s, timestamp: Date.now() }).catch(e => console.error(e)); 
+                } else {
+                    membersDb[u] = { name: n, mssv: m, shift: s, timestamp: Date.now() };
+                    renderAll();
+                }
+                window.showToast("Lưu thành công!"); 
+            } else window.showToast("Nhập tên trước!", "warning");
         };
 
         window.openManageMembersModal = () => { document.getElementById('modal-members-list').innerHTML = Object.keys(membersDb).map(u => `<tr><td class="pl-4 py-4 font-mono text-orange-500">${u}</td><td class="font-bold">${membersDb[u].name}</td><td>${membersDb[u].mssv}</td><td>${membersDb[u].shift}</td><td class="text-right pr-4"><button onclick="window.del('${u}')" class="text-rose-500 font-black">XÓA</button></td></tr>`).join(''); document.getElementById('manage-members-modal').classList.remove('hidden'); };
         window.closeManageMembersModal = () => document.getElementById('manage-members-modal').classList.add('hidden');
-        window.del = async (u) => { if(confirm("Xóa thẻ?")) { await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'members', u)); window.openManageMembersModal(); } };
-        window.clearLogs = async () => { if(confirm("Xóa sạch nhật ký?")) { for (let l of logsDb) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'attendance_logs', l.id)); } };
+        window.del = async (u) => { 
+            if(confirm("Xóa thẻ?")) { 
+                if (db && appId) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'members', u)); 
+                else { delete membersDb[u]; renderAll(); }
+                window.openManageMembersModal(); 
+            } 
+        };
+        window.clearLogs = async () => { 
+            if(confirm("Xóa sạch nhật ký?")) { 
+                if (db && appId) {
+                    for (let l of logsDb) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'attendance_logs', l.id)); 
+                } else {
+                    logsDb = []; renderAll();
+                }
+            } 
+        };
         window.exportExcel = () => { const ws = XLSX.utils.json_to_sheet(logsDb.map(l => ({ "Giờ": l.time, "Tên": l.name, "MSSV": l.mssv, "Trạng thái": l.status }))); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Attendance"); XLSX.writeFile(wb, `FPOLY_${Date.now()}.xlsx`); };
         window.showToast = (m, t='success') => { const c = document.getElementById('toast-container'), i = document.createElement('div'); i.className = "toast"; i.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-500"></i> ${m}`; c.appendChild(i); setTimeout(() => i.remove(), 3500); };
 
