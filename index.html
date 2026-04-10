@@ -105,6 +105,8 @@
         .glow-idle { box-shadow: 0 0 30px rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.2); transform: scale(1); }
         .glow-unknown { box-shadow: 0 0 60px rgba(249, 115, 22, 0.5), inset 0 0 20px rgba(249, 115, 22, 0.3); border-color: #f97316; animation: pulse-orange 2s infinite; background: rgba(249, 115, 22, 0.1); transform: scale(1.05); }
         .glow-in { box-shadow: 0 0 60px rgba(16, 185, 129, 0.5), inset 0 0 20px rgba(16, 185, 129, 0.3); border-color: #10b981; background: rgba(16, 185, 129, 0.1); transform: scale(1.05); }
+        .glow-out { border-color: #f43f5e; box-shadow: 0 0 60px rgba(244, 63, 94, 0.5), inset 0 0 20px rgba(244, 63, 94, 0.3); background: rgba(244, 63, 94, 0.1); transform: scale(1.05); }
+        .glow-out i { color: #f43f5e; transform: scale(1.1); }
         .glow-wrong { box-shadow: 0 0 60px rgba(245, 158, 11, 0.5), inset 0 0 20px rgba(245, 158, 11, 0.3); border-color: #f59e0b; background: rgba(245, 158, 11, 0.1); transform: scale(1.05); }
 
         .input-box { 
@@ -212,6 +214,9 @@
         .log-table tr:hover td {
             background-color: #f8fafc;
         }
+
+        /* Thêm badge cho Trạng thái Ra lớp */
+        .badge-out { border-color: #f43f5e; color: #f43f5e; background: #fff1f2; }
 
         /* Hiệu ứng hiển thị mượt mà cho bảng */
         @keyframes fadeInRow {
@@ -346,10 +351,10 @@
     </div>
     
     <div class="mt-12 mb-6 border-t border-slate-200/60 pt-8 pb-4 text-center max-w-7xl mx-auto px-4">
-        <p class="text-sm font-black text-slate-400 uppercase tracking-widest mb-3 flex items-center justify-center gap-2"><i class="fa-solid fa-code-merge text-orange-500"></i> Hệ Thống Điểm Danh Fpoly <span class="bg-slate-200 text-slate-600 px-2 py-0.5 rounded text-[10px]">V5.0 FINAL FIX (SMOOTH UI)</span></p>
+        <p class="text-sm font-black text-slate-400 uppercase tracking-widest mb-3 flex items-center justify-center gap-2"><i class="fa-solid fa-code-merge text-orange-500"></i> Hệ Thống Điểm Danh Fpoly <span class="bg-slate-200 text-slate-600 px-2 py-0.5 rounded text-[10px]">V5.0 SMART CHECKOUT</span></p>
     </div>
 
-    <!-- MODAL QUẢN LÝ TỐI ƯU CSS ANIMATION -->
+    <!-- MODAL QUẢN LÝ -->
     <div id="manage-members-modal" class="fixed inset-0 bg-slate-900/70 z-[100] hidden flex items-center justify-center p-4 backdrop-blur-sm transition-opacity duration-300 opacity-0">
         <div class="bg-white rounded-[28px] w-full max-w-4xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh] border border-white transform scale-95 transition-transform duration-300">
             <div class="px-8 py-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
@@ -372,9 +377,28 @@
         import { getAuth, onAuthStateChanged, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        const SHIFTS = [ { id: "ca1", name: "Ca 1", start: "07:00", end: "09:15" }, { id: "ca2", name: "Ca 2", start: "09:30", end: "11:45" }, { id: "ca3", name: "Ca 3", start: "13:00", end: "15:00" }, { id: "ca4", name: "Ca 4", start: "15:00", end: "17:00" }, { id: "ca5", name: "Ca 5", start: "17:15", end: "19:30" } ];
+        // CẤU HÌNH THỜI GIAN CÁC CA HỌC
+        const SHIFTS = [ 
+            { id: "ca1", name: "Ca 1", start: "07:00", end: "09:15" }, 
+            { id: "ca2", name: "Ca 2", start: "09:30", end: "11:45" }, 
+            { id: "ca3", name: "Ca 3", start: "13:00", end: "15:00" }, 
+            { id: "ca4", name: "Ca 4", start: "15:00", end: "17:00" }, 
+            { id: "ca5", name: "Ca 5", start: "17:15", end: "19:30" } 
+        ];
         
-        // Cấu hình mã thẻ cứng
+        // BỘ NHỚ ĐỆM DOM (GIÚP JS CHẠY SIÊU NHANH)
+        const UI = {
+            name: document.getElementById('display-name'),
+            target: document.getElementById('avatar-container'),
+            icon: document.getElementById('avatar-icon'),
+            sub: document.getElementById('display-sub'),
+            dot: document.getElementById('scan-status-dot'),
+            details: document.getElementById('display-details'),
+            mssv: document.getElementById('display-mssv'),
+            uid: document.getElementById('display-uid'),
+            logBody: document.getElementById('log-body')
+        };
+        
         const ESP32_HARD_STUDENTS = { "96576E05": { name: "Nguyen Dinh Danh", mssv: "PS45028", shift: "Ca 2" } }; 
 
         let db, appId, currentUser, membersDb = {}, logsDb = [], lastUid = "", isProcessing = false, currentShift = null;
@@ -413,8 +437,8 @@
 
         function loadData() {
             if (!currentUser) return;
-            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'members'), (snap) => { membersDb = {}; snap.forEach(d => membersDb[d.id] = d.data()); renderAll(); });
-            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'attendance_logs'), (snap) => { logsDb = []; snap.forEach(d => { let data = d.data(); data.id = d.id; logsDb.push(data); }); logsDb.sort((a, b) => b.timestamp - a.timestamp); renderAll(); });
+            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'members'), (snap) => { membersDb = {}; snap.forEach(d => membersDb[d.id] = d.data()); requestAnimationFrame(renderAll); });
+            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'attendance_logs'), (snap) => { logsDb = []; snap.forEach(d => { let data = d.data(); data.id = d.id; logsDb.push(data); }); logsDb.sort((a, b) => b.timestamp - a.timestamp); requestAnimationFrame(renderAll); });
         }
 
         // HOTLINE ĐẾN ESP32
@@ -473,80 +497,131 @@
             let fShift = hard ? hard.shift : (espValid && data.shift !== "None" ? data.shift : (cloud ? cloud.shift : "---"));
             
             const now = new Date(); currentShift = getShiftByTime(now);
-            
             document.getElementById('reg-uid').value = uid;
-            
-            // Xử lý Giao Diện mượt mà
-            const detailsEl = document.getElementById('display-details');
-            detailsEl.classList.remove('hidden');
-            
-            document.getElementById('display-mssv').innerText = fMssv;
-            document.getElementById('display-uid').innerText = uid;
-
-            const uiName = document.getElementById('display-name');
-            const uiTarget = document.getElementById('avatar-container');
-            const uiIcon = document.getElementById('avatar-icon');
-            const uiSub = document.getElementById('display-sub');
-            const uiDot = document.getElementById('scan-status-dot');
 
             let status = fName ? 1 : 0;
-            if (fName && currentShift && fShift !== "---" && fShift !== currentShift.name) status = 2;
+            let actionStr = "VÀO LỚP";
+            let isCheckOut = false;
+            let remainingMins = 0;
 
-            // XỬ LÝ ĐỔI MÀU GIAO DIỆN (LẠ, SAI CA, ĐÚNG)
-            if (!fName) {
-                uiName.innerText = "THẺ CHƯA ĐĂNG KÝ";
-                uiName.className = "text-4xl md:text-5xl font-black text-orange-500 uppercase mb-4 tracking-tighter transition-all duration-300 drop-shadow-md";
-                uiTarget.className = "avatar-circle glow-unknown";
-                if(uiIcon) uiIcon.className = "fa-solid fa-fingerprint text-7xl text-orange-500 transition-colors";
-                if(uiSub) uiSub.innerText = "VUI LÒNG ĐĂNG KÝ THẺ TẠI WEB";
-                if(uiDot) uiDot.className = "w-2.5 h-2.5 rounded-full bg-orange-500 animate-pulse transition-colors";
-                window.showToast(`Phát hiện thẻ lạ: ${uid}`, "warning");
-            } else if (status === 2) {
-                uiName.innerText = fName;
-                uiName.className = "text-4xl md:text-5xl font-black text-amber-500 uppercase mb-4 tracking-tighter transition-all duration-300 drop-shadow-md";
-                uiTarget.className = "avatar-circle glow-wrong";
-                if(uiIcon) uiIcon.className = "fa-solid fa-triangle-exclamation text-7xl text-amber-500 transition-colors";
-                if(uiSub) uiSub.innerText = `QUÉT SAI CA (${fShift})`;
-                if(uiDot) uiDot.className = "w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse transition-colors";
-                window.showToast(`Cảnh báo: Sinh viên ${fName} đi sai ca.`, "warning");
-            } else {
-                uiName.innerText = fName;
-                uiName.className = "text-4xl md:text-5xl font-black text-emerald-400 uppercase mb-4 tracking-tighter transition-all duration-300 drop-shadow-md";
-                uiTarget.className = "avatar-circle glow-in";
-                if(uiIcon) uiIcon.className = "fa-solid fa-check text-7xl text-emerald-400 transition-colors";
-                if(uiSub) uiSub.innerText = "ĐIỂM DANH THÀNH CÔNG";
-                if(uiDot) uiDot.className = "w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse transition-colors";
-                window.showToast(`Xin chào ${fName}!`);
+            // KIỂM TRA LOGIC VÀO/RA/SAI CA
+            if (fName && currentShift && fShift !== "---" && fShift !== currentShift.name) {
+                status = 2; // Cảnh báo Sai Ca
+            } else if (fName && currentShift && fShift === currentShift.name) {
+                const todayStr = now.toDateString();
+                // Kiểm tra xem hôm nay thẻ này đã vào ca hiện tại chưa
+                const hasCheckedIn = logsDb.some(l => l.date === todayStr && l.uid === uid && l.shiftId === currentShift.id && l.status === "VÀO LỚP");
+                
+                if (hasCheckedIn) {
+                    isCheckOut = true;
+                    const [endH, endM] = currentShift.end.split(':').map(Number);
+                    const endMins = endH * 60 + endM;
+                    const currMins = now.getHours() * 60 + now.getMinutes();
+                    remainingMins = endMins - currMins;
+                    
+                    // Cho phép Checkout nếu thời gian còn lại <= 15 phút so với lúc hết ca
+                    if (remainingMins <= 15) { 
+                        status = 1;
+                        actionStr = "RA LỚP";
+                    } else {
+                        status = 3; // 3: Từ chối ra lớp do quá sớm
+                        actionStr = "CHƯA ĐẾN GIỜ RA";
+                    }
+                }
             }
 
-            if (fName) {
-                // Tự động tìm Index của ca để truyền vào Chart.js
+            // GIAO DIỆN XỬ LÝ THEO KẾT QUẢ LOGIC
+            requestAnimationFrame(() => {
+                UI.details.classList.remove('hidden');
+                UI.details.classList.remove('opacity-0', 'translate-y-4');
+                UI.mssv.innerText = fMssv;
+                UI.uid.innerText = uid;
+
+                if (!fName) {
+                    // THẺ LẠ
+                    UI.name.innerText = "THẺ CHƯA ĐĂNG KÝ";
+                    UI.name.className = "text-4xl md:text-5xl font-black text-orange-500 uppercase mb-4 tracking-tighter transition-all duration-300 drop-shadow-md scale-105";
+                    UI.target.className = "avatar-circle glow-unknown";
+                    if(UI.icon) UI.icon.className = "fa-solid fa-fingerprint text-7xl text-orange-500 transition-colors";
+                    if(UI.sub) UI.sub.innerText = "VUI LÒNG ĐĂNG KÝ THẺ TẠI WEB";
+                    if(UI.dot) UI.dot.className = "w-2.5 h-2.5 rounded-full bg-orange-500 animate-pulse transition-colors";
+                    window.showToast(`Phát hiện thẻ lạ: ${uid}`, "warning");
+                } else if (status === 2) {
+                    // QUÉT SAI CA
+                    UI.name.innerText = fName;
+                    UI.name.className = "text-4xl md:text-5xl font-black text-amber-500 uppercase mb-4 tracking-tighter transition-all duration-300 drop-shadow-md scale-105";
+                    UI.target.className = "avatar-circle glow-wrong";
+                    if(UI.icon) UI.icon.className = "fa-solid fa-triangle-exclamation text-7xl text-amber-500 transition-colors";
+                    if(UI.sub) UI.sub.innerText = `QUÉT SAI CA (${fShift})`;
+                    if(UI.dot) UI.dot.className = "w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse transition-colors";
+                    window.showToast(`Cảnh báo: Sinh viên ${fName} đi sai ca.`, "warning");
+                } else if (status === 3) {
+                    // RA SỚM - TỪ CHỐI
+                    UI.name.innerText = "CHƯA ĐẾN GIỜ RA";
+                    UI.name.className = "text-4xl md:text-5xl font-black text-orange-500 uppercase mb-4 tracking-tighter transition-all duration-300 drop-shadow-md scale-105";
+                    UI.target.className = "avatar-circle glow-wrong";
+                    if(UI.icon) UI.icon.className = "fa-solid fa-clock text-7xl text-orange-500 transition-colors";
+                    if(UI.sub) UI.sub.innerText = `ĐỢI THÊM ${remainingMins} PHÚT ĐỂ RA LỚP`;
+                    if(UI.dot) UI.dot.className = "w-2.5 h-2.5 rounded-full bg-orange-500 animate-pulse transition-colors";
+                    window.showToast(`Phải đợi đến cuối ca học mới được ra!`, "warning");
+                } else {
+                    UI.name.innerText = fName;
+                    if (isCheckOut) {
+                        // RA LỚP HỢP LỆ
+                        UI.name.className = "text-4xl md:text-5xl font-black text-rose-400 uppercase mb-4 tracking-tighter transition-all duration-300 drop-shadow-md scale-105";
+                        UI.target.className = "avatar-circle glow-out";
+                        if(UI.icon) UI.icon.className = "fa-solid fa-person-walking-arrow-right text-7xl text-rose-500 transition-colors";
+                        if(UI.sub) UI.sub.innerText = "ĐÃ ĐIỂM DANH RA LỚP";
+                        if(UI.dot) UI.dot.className = "w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse transition-colors";
+                        window.showToast(`Tạm biệt ${fName}!`);
+                    } else {
+                        // VÀO LỚP HỢP LỆ
+                        UI.name.className = "text-4xl md:text-5xl font-black text-emerald-400 uppercase mb-4 tracking-tighter transition-all duration-300 drop-shadow-md scale-105";
+                        UI.target.className = "avatar-circle glow-in";
+                        if(UI.icon) UI.icon.className = "fa-solid fa-check text-7xl text-emerald-400 transition-colors";
+                        if(UI.sub) UI.sub.innerText = "ĐIỂM DANH VÀO LỚP THÀNH CÔNG";
+                        if(UI.dot) UI.dot.className = "w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse transition-colors";
+                        window.showToast(`Xin chào ${fName}!`);
+                    }
+                }
+            });
+
+            // GHI NHẬT KÝ DATABASE
+            if (fName && status !== 3) {
                 let sIdx = SHIFTS.findIndex(s => s.name === fShift);
-                const entry = { uid, name: fName, mssv: fMssv, shiftReg: fShift, time: now.toLocaleTimeString('vi-VN', {hour12: false}), timestamp: now.getTime(), date: now.toDateString(), status: status === 2 ? "SAI CA" : "VÀO LỚP", shiftId: currentShift?.id || "none", shiftIndex: sIdx };
+                const entry = { uid, name: fName, mssv: fMssv, shiftReg: fShift, time: now.toLocaleTimeString('vi-VN', {hour12: false}), timestamp: now.getTime(), date: now.toDateString(), status: actionStr, shiftId: currentShift?.id || "none", shiftIndex: sIdx };
                 
                 if (db && appId) {
                     setDoc(doc(collection(db, 'artifacts', appId, 'public', 'data', 'attendance_logs')), entry).catch(e => console.error("Lỗi Firestore:", e));
                 } else {
                     entry.id = Date.now().toString();
                     logsDb.unshift(entry);
-                    renderAll();
+                    requestAnimationFrame(renderAll);
                 }
             }
 
-            // Gọi Hotline API về ESP32
+            // GỬI LỆNH TRẠNG THÁI XUỐNG ESP32 
+            // 1: VÀO LỚP / RA LỚP OK | 2: SAI CA | 3: CHƯA TỚI GIỜ RA
             const payloadRes = `${status}|${fName || "NGUOI LA"}|${fMssv}|${fShift}|${Date.now()}`;
-            hotlineToESP32(payloadRes);
+            if (eCfg.cloud && eCfg.cloud.id) {
+                eraWidget.updateRealtimeConfigs([{ id: eCfg.cloud.id, value: payloadRes }]);
+            } else {
+                hotlineToESP32(payloadRes); 
+            }
 
-            // Trả giao diện về Sẵn Sàng mượt mà
+            // PHỤC HỒI MÀN HÌNH VỀ SẴN SÀNG
             setTimeout(() => { 
                 if(lastUid === uid) { 
-                    uiName.innerText = "SẴN SÀNG";
-                    uiName.className = "text-4xl md:text-5xl font-black text-white uppercase mb-4 tracking-tighter transition-all duration-300 drop-shadow-md";
-                    detailsEl.classList.add('hidden');
-                    uiTarget.className = "avatar-circle glow-idle";
-                    if(uiIcon) uiIcon.className = "fa-solid fa-expand text-7xl text-slate-400/50 transition-colors";
-                    if(uiSub) uiSub.innerText = "HÃY ĐẶT THẺ VÀO ĐẦU ĐỌC";
-                    if(uiDot) uiDot.className = "w-2.5 h-2.5 rounded-full bg-orange-500 animate-pulse transition-colors";
+                    requestAnimationFrame(() => {
+                        UI.name.innerText = "SẴN SÀNG";
+                        UI.name.className = "text-4xl md:text-5xl font-black text-white uppercase mb-4 tracking-tighter transition-all duration-300 drop-shadow-md";
+                        UI.details.classList.add('hidden');
+                        UI.target.className = "avatar-circle glow-idle";
+                        if(UI.icon) UI.icon.className = "fa-solid fa-expand text-7xl text-slate-400/50 transition-colors";
+                        if(UI.sub) UI.sub.innerText = "HÃY ĐẶT THẺ VÀO ĐẦU ĐỌC";
+                        if(UI.dot) UI.dot.className = "w-2.5 h-2.5 rounded-full bg-orange-500 animate-pulse transition-colors";
+                        lastUid = ""; // Mở khóa nhận thẻ lại
+                    });
                 } 
             }, 6000);
         }
@@ -556,35 +631,42 @@
         function renderAll() {
             const today = new Date().toDateString();
             const logs = logsDb.filter(l => l.date === today);
-            const tbody = document.getElementById('log-body');
             let present = new Set();
             let totalInShift = (currentShift ? Object.values(ESP32_HARD_STUDENTS).filter(s => s.shift === currentShift.name).length : 0) + (currentShift ? Object.values(membersDb).filter(m => m.shift === currentShift.name).length : 0);
             
-            // Render đúng 4 cột, thêm CSS animation cho dòng mới
-            tbody.innerHTML = logs.map(l => {
-                if (currentShift && l.shiftId === currentShift.id && l.status === "VÀO LỚP") present.add(l.uid);
-                let badge = l.status === "VÀO LỚP" ? "bg-emerald-50 text-emerald-600 border-emerald-200" : (l.status === "SAI CA" ? "bg-amber-50 text-amber-600 border-amber-200" : "bg-orange-50 text-orange-600 border-orange-200");
-                return `<tr class="hover:bg-slate-50 transition-colors animate-fade-in">
-                    <td>${l.time}</td>
-                    <td class="font-bold uppercase">${l.name}</td>
-                    <td>${l.mssv} <span class="bg-slate-100 text-[9px] px-1 rounded border border-slate-200 ml-1">${l.shiftReg}</span></td>
-                    <td class="text-right"><span class="px-4 py-1.5 rounded-lg text-[10px] font-black border ${badge} transition-colors">${l.status}</span></td>
-                </tr>`;
-            }).join('');
+            let htmlStr = "";
+            if(!logs.length) {
+                htmlStr = `<tr><td colspan="4" class="py-12 text-center text-slate-400 font-bold uppercase text-xs tracking-widest bg-transparent">Chưa có nhật ký hôm nay</td></tr>`;
+            } else {
+                htmlStr = logs.map(l => {
+                    // Kiểm tra ai đã vào lớp
+                    if (currentShift && l.shiftId === currentShift.id && l.status === "VÀO LỚP") present.add(l.uid);
+                    
+                    let badge = l.status === "VÀO LỚP" ? "badge-ok" : (l.status === "RA LỚP" ? "badge-out" : (l.status === "SAI CA" ? "badge-warn" : "badge-error"));
+                    let icon = l.status === "VÀO LỚP" ? "fa-check" : (l.status === "RA LỚP" ? "fa-person-walking-arrow-right" : (l.status === "SAI CA" ? "fa-triangle-exclamation" : "fa-xmark"));
+                    
+                    return `<tr class="hover:bg-slate-50 transition-colors animate-fade-in">
+                        <td class="font-mono text-[11px] text-slate-400"><i class="fa-regular fa-clock mr-2 text-slate-300"></i>${l.time}</td>
+                        <td class="font-black uppercase text-slate-700">${l.name}</td>
+                        <td class="font-bold text-slate-500">${l.mssv} <span class="bg-slate-100 text-slate-500 text-[9px] px-2 py-0.5 rounded-[6px] border border-slate-200 ml-2 shadow-sm">${l.shiftReg}</span></td>
+                        <td class="text-right"><span class="badge-outline ${badge}"><i class="fa-solid ${icon} text-[8px]"></i> ${l.status}</span></td>
+                    </tr>`;
+                }).join('');
+            }
+            UI.logBody.innerHTML = htmlStr;
             
-            if(!logs.length) tbody.innerHTML = `<tr><td colspan="4" class="py-12 text-center text-slate-300 font-bold uppercase text-xs">Chưa có nhật ký hôm nay</td></tr>`;
             document.getElementById('total-count').innerText = totalInShift;
             document.getElementById('present-count').innerText = present.size;
             document.getElementById('absent-count').innerText = Math.max(0, totalInShift - present.size);
             
-            // Fix lỗi Chart js Crash
-            let sets = [new Set(), new Set(), new Set(), new Set(), new Set()];
-            logsDb.forEach(l => { 
+            let sets = [0,0,0,0,0];
+            logs.forEach(l => { 
                 if(l.date === today && l.shiftIndex !== undefined && l.shiftIndex >= 0 && l.shiftIndex < 5 && l.status === "VÀO LỚP") {
-                    sets[l.shiftIndex].add(l.uid); 
+                    sets[l.shiftIndex]++; 
                 }
             });
-            attendanceChart.data.datasets[0].data = sets.map(s => s.size); attendanceChart.update();
+            attendanceChart.data.datasets[0].data = sets; 
+            attendanceChart.update();
         }
 
         window.saveNewMember = () => {
@@ -594,13 +676,13 @@
                     setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'members', u), { name: n, mssv: m, shift: s, timestamp: Date.now() }).catch(e => console.error(e)); 
                 } else {
                     membersDb[u] = { name: n, mssv: m, shift: s, timestamp: Date.now() };
-                    renderAll();
+                    requestAnimationFrame(renderAll);
                 }
-                window.showToast("Lưu thành công!"); 
-            } else window.showToast("Nhập tên trước!", "warning");
+                window.showToast("Lưu thông tin thẻ thành công!"); 
+                document.getElementById('reg-name').value = ""; document.getElementById('reg-mssv').value = "";
+            } else window.showToast("Vui lòng quét thẻ và nhập tên!", "warning");
         };
 
-        // UI Modal Smooth Transitions
         const modalEl = document.getElementById('manage-members-modal');
         const modalBox = modalEl.querySelector('.bg-white');
         
@@ -624,7 +706,7 @@
         window.del = async (u) => { 
             if(confirm("Xóa thẻ?")) { 
                 if (db && appId) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'members', u)); 
-                else { delete membersDb[u]; renderAll(); }
+                else { delete membersDb[u]; requestAnimationFrame(renderAll); }
                 window.openManageMembersModal(); 
             } 
         };
@@ -633,14 +715,31 @@
                 if (db && appId) {
                     for (let l of logsDb) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'attendance_logs', l.id)); 
                 } else {
-                    logsDb = []; renderAll();
+                    logsDb = []; requestAnimationFrame(renderAll);
                 }
             } 
         };
         window.exportExcel = () => { const ws = XLSX.utils.json_to_sheet(logsDb.map(l => ({ "Giờ": l.time, "Tên": l.name, "MSSV": l.mssv, "Trạng thái": l.status }))); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Attendance"); XLSX.writeFile(wb, `FPOLY_${Date.now()}.xlsx`); };
-        window.showToast = (m, t='success') => { const c = document.getElementById('toast-container'), i = document.createElement('div'); i.className = "toast"; i.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-500"></i> ${m}`; c.appendChild(i); setTimeout(() => i.remove(), 3500); };
+        window.showToast = (m, t='success') => { const c = document.getElementById('toast-container'), i = document.createElement('div'); let icon = t === 'success' ? 'fa-check-circle text-emerald-500' : 'fa-triangle-exclamation text-amber-500'; i.className = "toast"; i.innerHTML = `<i class="fa-solid ${icon} text-lg"></i> <span class="tracking-wide">${m}</span>`; c.appendChild(i); setTimeout(() => i.remove(), 3500); };
 
-        setInterval(() => { const now = new Date(); document.getElementById('clock').innerText = now.toLocaleTimeString('vi-VN', {hour12: false}); document.getElementById('date-now').innerText = now.toLocaleDateString('vi-VN', {weekday: 'long', day: 'numeric', month: 'numeric'}); }, 1000);
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('clock').innerText = now.toLocaleTimeString('vi-VN', {hour12: false});
+            document.getElementById('date-now').innerText = now.toLocaleDateString('vi-VN', {weekday: 'long', day: 'numeric', month: 'numeric'});
+            
+            const newShift = getShiftByTime(now);
+            if (newShift && (!currentShift || currentShift.id !== newShift.id)) {
+                currentShift = newShift;
+                document.getElementById('current-shift-badge').innerText = currentShift.name.toUpperCase();
+                requestAnimationFrame(renderAll);
+            } else if (!newShift) {
+                document.getElementById('current-shift-badge').innerText = "NGOÀI CA";
+            }
+            
+            requestAnimationFrame(updateClock);
+        }
+        requestAnimationFrame(updateClock);
+
     </script>
 </body>
 </html>
