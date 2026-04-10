@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FPOLY LIVE ATTENDANCE SYSTEM V1.2.5</title>
+    <title>FPOLY LIVE ATTENDANCE SYSTEM V1.2.6</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://www.unpkg.com/@eohjsc/era-widget@1.1.3/src/index.js"></script>
@@ -349,7 +349,7 @@
     </div>
     
     <div class="mt-12 mb-6 border-t border-slate-200/60 pt-8 pb-4 text-center max-w-7xl mx-auto px-4">
-        <p class="text-sm font-black text-slate-400 uppercase tracking-widest mb-3 flex items-center justify-center gap-2"><i class="fa-solid fa-code-merge text-orange-500"></i> Hệ Thống Điểm Danh Fpoly <span class="bg-slate-200 text-slate-600 px-2 py-0.5 rounded text-[10px]">V1.2.5 (Ổn định, Lưu Nội Bộ)</span></p>
+        <p class="text-sm font-black text-slate-400 uppercase tracking-widest mb-3 flex items-center justify-center gap-2"><i class="fa-solid fa-code-merge text-orange-500"></i> Hệ Thống Điểm Danh Fpoly <span class="bg-slate-200 text-slate-600 px-2 py-0.5 rounded text-[10px]">V1.2.6 (V3 SYNC)</span></p>
     </div>
 
     <!-- MODAL QUẢN LÝ -->
@@ -369,7 +369,7 @@
         </div>
     </div>
 
-    <!-- FIREBASE & LOGIC CHÍNH V1.2.5 -->
+    <!-- FIREBASE & LOGIC CHÍNH V1.2.6 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
@@ -387,7 +387,6 @@
         const CHECKOUT_COOLDOWN_MINUTES = 15; // Còn <= 15 phút sát giờ về mới được ra
         const ESP32_HARD_STUDENTS = { "96576E05": { name: "Nguyen Dinh Danh", mssv: "PS45028", shift: "Ca 2" } }; 
 
-        // BỘ NHỚ DOM & TRẠNG THÁI
         const UI = {
             name: document.getElementById('display-name'),
             target: document.getElementById('avatar-container'),
@@ -404,12 +403,10 @@
         let isProcessing = false;
         let lastUid = "";
         let currentShift = null;
-        let selectedDateStr = new Date().toDateString(); // Ngày đang được lọc
+        let selectedDateStr = new Date().toDateString(); 
 
-        // KHỞI TẠO BỘ LỌC NGÀY
         const filterDateInput = document.getElementById('filter-date');
         filterDateInput.value = new Date().toISOString().split('T')[0];
-        
         filterDateInput.addEventListener('change', () => {
             if(filterDateInput.value) {
                 const [y, m, d] = filterDateInput.value.split('-');
@@ -420,7 +417,6 @@
             requestAnimationFrame(renderAll);
         });
 
-        // 1. TẢI DỮ LIỆU TỪ LOCAL STORAGE (CHỐNG MẤT KHI RESET)
         let membersDb = JSON.parse(localStorage.getItem('era_members')) || {};
         let logsDb = JSON.parse(localStorage.getItem('era_logs')) || [];
 
@@ -429,12 +425,10 @@
             localStorage.setItem('era_logs', JSON.stringify(logsDb));
         }
 
-        // BIỂU ĐỒ
         let ctx = document.getElementById('attendanceChart').getContext('2d');
         let gradient = ctx.createLinearGradient(0,0,0,200); gradient.addColorStop(0, '#f97316'); gradient.addColorStop(1, '#fdba74');
         let attendanceChart = new Chart(ctx, { type: 'bar', data: { labels: ['Ca 1', 'Ca 2', 'Ca 3', 'Ca 4', 'Ca 5'], datasets: [{ label: 'Hiện diện', data: [0,0,0,0,0], backgroundColor: gradient, borderRadius: 6, barThickness: 24 }] }, options: { responsive: true, maintainAspectRatio: false, animation: { duration: 500 }, plugins: { legend: { display: false } }, scales: { y: { display: true, grid: { color: '#f1f5f9' }, ticks: { stepSize: 5 } }, x: { grid: { display: false } } } } });
 
-        // KHỞI TẠO FIREBASE (Nếu có)
         try {
             if (typeof __firebase_config !== 'undefined' && __firebase_config) {
                 const config = JSON.parse(__firebase_config);
@@ -476,8 +470,18 @@
         }
 
         // =========================================================
-        // GIAO TIẾP ERA WIDGET CHUẨN (KHÔNG DÙNG FETCH API)
+        // GIAO TIẾP ERa API (BẮN LỆNH XUỐNG ESP32 QUA CHÂN V3)
         // =========================================================
+        const eraToken = "53f7b5a4-c19e-4760-9940-ff280ac07374";
+        async function hotlineToESP32(payload) {
+            try { 
+                // GỌI API BROKER LÊN CHÂN V3
+                const url = `https://broker-v2.era.io/api/v1/device/update/vpin?token=${eraToken}&pin=V3&value=${encodeURIComponent(payload)}`;
+                await fetch(url, { method: 'GET', mode: 'no-cors' }); 
+                console.log("-> Da day tin hieu V3 xuong ESP32: ", payload);
+            } catch (err) { console.error("Hotline API error:", err); }
+        }
+
         const eraWidget = new EraWidget();
         let eCfg = { uid: null, name: null, mssv: null, shift: null, cloud: null };
         let tempCache = { name: null, mssv: null, shift: null };
@@ -491,7 +495,7 @@
                     if(n.includes("name") || n.includes("v1") || n === "trạng thái truy cập") eCfg.name = cfg;
                     if(n.includes("mssv") || n.includes("v2")) eCfg.mssv = cfg;
                     if(n.includes("ca") || n.includes("v9")) eCfg.shift = cfg;
-                    if(n.includes("cloud") || n.includes("v5")) eCfg.cloud = cfg;
+                    if(n.includes("cloud") || n.includes("v3")) eCfg.cloud = cfg; // Cập nhật cấu hình đón V3
                 });
                 document.getElementById('era-status-text').innerText = "SYSTEM LIVE"; document.getElementById('era-status-dot').className = "w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse";
             },
@@ -533,7 +537,6 @@
             let isCheckOut = false;
             let remainingMins = 0;
 
-            // --- LOGIC VÀO/RA/SAI CA ---
             if (fName && currentShift && fShift !== "---" && fShift !== currentShift.name) {
                 status = 2; // Sai Ca
             } else if (fName && currentShift && fShift === currentShift.name) {
@@ -557,7 +560,6 @@
                 }
             }
 
-            // CẬP NHẬT GIAO DIỆN
             requestAnimationFrame(() => {
                 UI.details.classList.remove('hidden');
                 UI.details.classList.remove('opacity-0', 'translate-y-4');
@@ -608,7 +610,6 @@
                 }
             });
 
-            // GHI NHẬT KÝ LƯU TRỮ VĨNH VIỄN
             if (fName && status !== 3) {
                 let sIdx = SHIFTS.findIndex(s => s.name === fShift);
                 const entry = { uid, name: fName, mssv: fMssv, shiftReg: fShift, time: now.toLocaleTimeString('vi-VN', {hour12: false}), timestamp: now.getTime(), date: now.toDateString(), status: actionStr, shiftId: currentShift?.id || "none", shiftIndex: sIdx };
@@ -618,18 +619,14 @@
                 } else {
                     entry.id = Date.now().toString();
                     logsDb.unshift(entry);
-                    syncLocal(); // CHỐNG MẤT LOG KHI RESET
+                    syncLocal(); 
                     requestAnimationFrame(renderAll);
                 }
             }
 
-            // GỬI LỆNH TRẠNG THÁI XUỐNG ESP32 BẰNG CHUẨN ERA WIDGET (Không dùng fetch)
+            // GỌI HÀM API ĐẨY XUỐNG V3 CỦA ESP32
             const payloadRes = `${status}|${fName || "NGUOI LA"}|${fMssv}|${fShift}|${Date.now()}`;
-            if (eCfg.cloud && eCfg.cloud.id) {
-                eraWidget.updateRealtimeConfigs([{ id: eCfg.cloud.id, value: payloadRes }]);
-            } else {
-                console.error("Thiếu DataStream V5 trên cấu hình ERa.");
-            }
+            hotlineToESP32(payloadRes);
 
             setTimeout(() => { 
                 if(lastUid === uid) { 
@@ -650,13 +647,10 @@
         function getShiftByTime(n) { const t = n.getHours()*60 + n.getMinutes(); return SHIFTS.find(s => { const [h, m] = s.start.split(':').map(Number); const [eh, em] = s.end.split(':').map(Number); return t >= (h*60+m) && t <= (eh*60+em); }); }
 
         function renderAll() {
-            // Lọc dữ liệu theo bộ lọc ngày được chọn (Chứ không phải luôn lấy ngày hôm nay)
             const logsToRender = logsDb.filter(l => l.date === selectedDateStr);
-            
             const tbody = document.getElementById('log-body');
             let present = new Set();
             
-            // Sĩ số chỉ tính nếu đang xem ngày hôm nay và trong ca hiện tại
             let isViewingToday = selectedDateStr === new Date().toDateString();
             let totalInShift = 0;
             if(isViewingToday && currentShift) {
@@ -699,13 +693,8 @@
         window.saveNewMember = () => {
             const u = document.getElementById('reg-uid').value, n = document.getElementById('reg-name').value, m = document.getElementById('reg-mssv').value, s = document.getElementById('reg-shift').value;
             if (u && n) { 
-                if (db && appId) {
-                    setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'members', u), { name: n, mssv: m, shift: s, timestamp: Date.now() }).catch(e => {}); 
-                } else {
-                    membersDb[u] = { name: n, mssv: m, shift: s, timestamp: Date.now() };
-                    syncLocal(); // CHỐNG MẤT MEMBERS KHI RESET
-                    requestAnimationFrame(renderAll);
-                }
+                if (db && appId) setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'members', u), { name: n, mssv: m, shift: s, timestamp: Date.now() }).catch(e => {}); 
+                else { membersDb[u] = { name: n, mssv: m, shift: s, timestamp: Date.now() }; syncLocal(); requestAnimationFrame(renderAll); }
                 window.showToast("Lưu thành công!"); document.getElementById('reg-name').value = ""; document.getElementById('reg-mssv').value = "";
             } else window.showToast("Nhập tên trước!", "warning");
         };
@@ -740,7 +729,7 @@
                     for (let l of logsToDelete) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'attendance_logs', l.id)); 
                 } else {
                     logsDb = logsDb.filter(l => l.date !== selectedDateStr); 
-                    syncLocal(); // XÓA VÀ LƯU LẠI
+                    syncLocal(); 
                     renderAll();
                 }
                 window.showToast("Đã xóa nhật ký ngày đang chọn!");
