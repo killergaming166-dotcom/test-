@@ -268,10 +268,10 @@
     
     <div class="mt-12 mb-6 border-t border-slate-200/60 pt-8 pb-4 text-center max-w-7xl mx-auto px-4">
         <p class="text-sm font-black text-slate-400 uppercase tracking-widest mb-3 flex items-center justify-center gap-2">
-            <i class="fa-solid fa-code-merge text-orange-500"></i> Hệ Thống Điểm Danh Fpoly <span class="bg-slate-200 text-slate-600 px-2 py-0.5 rounded text-[10px]">V4.3.0</span>
+            <i class="fa-solid fa-code-merge text-orange-500"></i> Hệ Thống Điểm Danh Fpoly <span class="bg-slate-200 text-slate-600 px-2 py-0.5 rounded text-[10px]">V4.4.0</span>
         </p>
         <p class="text-[11px] font-semibold text-slate-400 max-w-2xl mx-auto">
-            Bản nâng cấp V4.3.0: <b>Sửa lỗi rớt thẻ cứng và Timeout LCD</b>. Bổ sung bộ nhớ đệm (Cache) trên Web để gom đủ tín hiệu từ ESP32 trước khi phân tích. Ép ERa phản hồi lập thời cho màn hình cứng.
+            Bản nâng cấp V4.4.0: <b>Bảo vệ thẻ nạp cứng ESP32</b>. Web đã được thiết lập bộ nhớ gốc nhận diện lập tức các thẻ được nạp cứng từ mạch mà không cần chờ dữ liệu từ các chân V1, V2, tránh 100% tình trạng rớt mạng dẫn tới đọc nhầm thành Thẻ Lạ.
         </p>
     </div>
 
@@ -305,7 +305,6 @@
         </div>
     </div>
 
-    <!-- Firebase & Logic App -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
@@ -321,9 +320,11 @@
             { id: "ca5", name: "Ca 5", start: "17:15", end: "19:30", index: 4 }
         ];
 
-        const ESP32_STUDENTS = [
-            { uid: "96576E05", shift: "Ca 2" } // Danh
-        ];
+        // ĐÂY LÀ CHÌA KHÓA: Danh sách thẻ cứng nạp sẵn vào Web
+        const ESP32_STUDENTS = {
+            "96576E05": { name: "Nguyen Dinh Danh", mssv: "PS45028", shift: "Ca 2", class: "PT Phan Mem" },
+            "A1B2C3D4": { name: "Tran Van B", mssv: "PS12346", shift: "Ca 1", class: "TK Do Hoa" }
+        };
 
         let ctx = document.getElementById('attendanceChart').getContext('2d');
         let gradientOrange = ctx.createLinearGradient(0, 0, 0, 200);
@@ -470,7 +471,7 @@
             let webRegisteredForThisShift = 0;
 
             if (currentShift) {
-                baseEspForThisShift = ESP32_STUDENTS.filter(s => s.shift === currentShift.name).length;
+                baseEspForThisShift = Object.values(ESP32_STUDENTS).filter(s => s.shift === currentShift.name).length;
                 webRegisteredForThisShift = Object.values(membersDb).filter(m => m.shift === currentShift.name).length;
             }
             
@@ -532,14 +533,12 @@
         const eraWidgetConfig = new EraWidget();
         let eConfig = { uid: null, name: null, mssv: null, class: null, shift: null, cloudSync: null };
         
-        // BỘ NHỚ ĐỆM (CACHE) KHẮC PHỤC LỖI ESP32 GỬI TÍN HIỆU RỜI RẠC
         let latestData = { name: null, mssv: null, class: null, shift: null };
 
         eraWidgetConfig.init({
             needRealtimeConfigs: true,
             maxRealtimeConfigsCount: 6,
             onConfiguration: (c) => {
-                
                 c.realtime_configs.forEach(config => {
                     const n = config.name.toLowerCase().trim();
                     if(n === "đọc thẻ" || n === "uid" || n === "v0") eConfig.uid = config;
@@ -556,7 +555,6 @@
             },
             onValues: (v) => {
                 try {
-                    // 1. Cập nhật bộ nhớ đệm (Cache) liên tục khi ESP32 gửi dữ liệu phụ lên trước
                     if (eConfig.name && v[eConfig.name.id]) latestData.name = v[eConfig.name.id].value;
                     if (eConfig.mssv && v[eConfig.mssv.id]) latestData.mssv = v[eConfig.mssv.id].value;
                     if (eConfig.class && v[eConfig.class.id]) latestData.class = v[eConfig.class.id].value;
@@ -571,7 +569,6 @@
                     lastUid = uidVal;
                     isProcessing = true;
 
-                    // 2. Chỉ chạy xử lý khi nhận được mã thẻ UID (V0). Kết hợp mã thẻ với thông tin đã lưu trong Cache.
                     handleHardwareScan({ 
                         uid: uidVal,
                         name: latestData.name,
@@ -587,7 +584,6 @@
             }
         });
 
-        // --- XỬ LÝ LÔ GIC & ƯU TIÊN THẺ CỨNG ---
         function handleHardwareScan(data) {
             const nameEl = document.getElementById('display-name');
             const subEl = document.getElementById('display-sub');
@@ -600,15 +596,15 @@
             
             const uid = data.uid;
             const cloudMember = membersDb[uid];
+            const hardcodedMember = ESP32_STUDENTS[uid]; // KIỂM TRA TRỰC TIẾP TRÊN WEB
             
-            // XÁC MINH ESP32 CÓ GỬI THẺ CỨNG HAY KHÔNG (Khác NGUOI LA, Khác None)
             const espNameValid = data.name && data.name !== "None" && data.name !== "0" && data.name !== "NGUOI LA" && data.name !== "nguoi la" && data.name !== "Người lạ";
 
-            // NGUYÊN TẮC: LẤY CỦA ESP32 TRƯỚC, NẾU KHÔNG CÓ THÌ MỚI LẤY CỦA CLOUD
-            let finalName = espNameValid ? data.name : (cloudMember ? cloudMember.name : null);
-            let finalMssv = espNameValid ? data.mssv : (cloudMember ? cloudMember.mssv : "---");
-            let finalClass = espNameValid ? data.class : (cloudMember ? cloudMember.class : "---");
-            let finalShiftReg = espNameValid && data.shift && data.shift !== "---" && data.shift !== "None" ? data.shift : (cloudMember ? cloudMember.shift : "---"); 
+            // NGUYÊN TẮC: THẺ CỨNG > THẺ ĐÁM MÂY > DỮ LIỆU RỜI TỪ ESP32
+            let finalName = hardcodedMember ? hardcodedMember.name : (cloudMember ? cloudMember.name : (espNameValid ? data.name : null));
+            let finalMssv = hardcodedMember ? hardcodedMember.mssv : (cloudMember ? cloudMember.mssv : (espNameValid ? data.mssv : "---"));
+            let finalClass = hardcodedMember ? hardcodedMember.class : (cloudMember ? cloudMember.class : (espNameValid ? data.class : "---"));
+            let finalShiftReg = hardcodedMember ? hardcodedMember.shift : (cloudMember ? cloudMember.shift : (espNameValid && data.shift && data.shift !== "---" && data.shift !== "None" ? data.shift : "---")); 
 
             const now = new Date();
             const timeStr = now.toLocaleTimeString('vi-VN', { hour12: false });
@@ -624,10 +620,9 @@
             displayMssv.innerText = "MSSV: " + finalMssv;
             displayUid.innerText = "UID: " + uid;
 
-            let payloadStatus = 1; // 1: Hợp lệ
+            let payloadStatus = 1;
 
             if (!finalName) {
-                // THẺ LẠ
                 payloadStatus = 0;
 
                 nameEl.innerText = "THẺ CHƯA ĐĂNG KÝ";
@@ -655,14 +650,13 @@
                 saveLogToDb(logEntry);
 
             } else {
-                // THẺ ĐÃ ĐĂNG KÝ
                 let isWrongShift = false;
                 if (currentShift && finalShiftReg && finalShiftReg !== currentShift.name) {
                     isWrongShift = true;
                 }
 
                 if (isWrongShift) {
-                    payloadStatus = 2; // Sai Ca
+                    payloadStatus = 2;
 
                     nameEl.innerText = finalName;
                     nameEl.classList.add('text-amber-500');
@@ -704,7 +698,7 @@
                     }
 
                     if (isCheckOut && !canCheckOut) {
-                        payloadStatus = 3; // Chưa đến giờ ra
+                        payloadStatus = 3;
                         let remainingMins = Math.ceil(CHECKOUT_COOLDOWN_MINUTES - diffMins);
                         
                         nameEl.innerText = "CHƯA ĐẾN GIỜ RA";
@@ -720,7 +714,7 @@
                         window.showToast(`Bạn mới quét Vào Lớp, hãy đợi thêm để quét Ra!`, 'warning');
                         
                     } else {
-                        payloadStatus = 1; // Hợp lệ
+                        payloadStatus = 1;
                         nameEl.innerText = finalName;
                         subEl.classList.replace('text-slate-300', 'text-emerald-300');
                         let statusStr = isCheckOut ? "RA LỚP" : "VÀO LỚP";
@@ -753,9 +747,8 @@
                 }
             }
 
-            // --- BƯỚC 2: GỬI KẾT QUẢ ĐÃ LỌC VỀ CHO LCD ESP32 ---
             if (eConfig.cloudSync && eConfig.cloudSync.id) {
-                // Ép ERa luôn cập nhật bằng cách thêm Timestamp Date.now() vào cuối chuỗi
+                // Thêm timestamp vào để ERa luôn thấy đây là tin mới
                 let responsePayload = `${payloadStatus}|${finalName || "NGUOI LA"}|${finalMssv || "---"}|${finalShiftReg || "---"}|${finalClass || "---"}|${Date.now()}`;
                 eraWidgetConfig.updateRealtimeConfigs([{ id: eConfig.cloudSync.id, value: responsePayload }]);
             } else {
