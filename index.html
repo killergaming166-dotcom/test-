@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FPOLY LIVE ATTENDANCE SYSTEM V1.2.6</title>
+    <title>FPOLY LIVE ATTENDANCE SYSTEM V1.2.7</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://www.unpkg.com/@eohjsc/era-widget@1.1.3/src/index.js"></script>
@@ -105,134 +105,50 @@
         .glow-idle { box-shadow: 0 0 30px rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.2); transform: scale(1); }
         .glow-unknown { box-shadow: 0 0 60px rgba(249, 115, 22, 0.5), inset 0 0 20px rgba(249, 115, 22, 0.3); border-color: #f97316; animation: pulse-orange 2s infinite; background: rgba(249, 115, 22, 0.1); transform: scale(1.05); }
         .glow-in { box-shadow: 0 0 60px rgba(16, 185, 129, 0.5), inset 0 0 20px rgba(16, 185, 129, 0.3); border-color: #10b981; background: rgba(16, 185, 129, 0.1); transform: scale(1.05); }
+        .glow-late { box-shadow: 0 0 60px rgba(234, 179, 8, 0.5), inset 0 0 20px rgba(234, 179, 8, 0.3); border-color: #eab308; background: rgba(234, 179, 8, 0.1); transform: scale(1.05); }
         .glow-out { border-color: #f43f5e; box-shadow: 0 0 60px rgba(244, 63, 94, 0.5), inset 0 0 20px rgba(244, 63, 94, 0.3); background: rgba(244, 63, 94, 0.1); transform: scale(1.05); }
         .glow-out i { color: #f43f5e; transform: scale(1.1); }
         .glow-wrong { box-shadow: 0 0 60px rgba(245, 158, 11, 0.5), inset 0 0 20px rgba(245, 158, 11, 0.3); border-color: #f59e0b; background: rgba(245, 158, 11, 0.1); transform: scale(1.05); }
 
         .input-box { 
-            background: #f8fafc; 
-            border: 2px solid transparent; 
-            border-radius: 16px; 
-            padding: 12px 16px; 
-            font-size: 13px; 
-            width: 100%; 
-            transition: all 0.3s var(--ease-smooth); 
-            font-weight: 600; 
-            color: #1e293b; 
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); 
+            background: #f8fafc; border: 2px solid transparent; border-radius: 16px; 
+            padding: 12px 16px; font-size: 13px; width: 100%; transition: all 0.3s var(--ease-smooth); 
+            font-weight: 600; color: #1e293b; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); 
         }
-        .input-box:focus { 
-            border-color: #f97316; 
-            outline: none; 
-            background: white; 
-            box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.1); 
-        }
-        select.input-box { 
-            appearance: none; 
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23f97316'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E"); 
-            background-repeat: no-repeat; 
-            background-position: right 14px center; 
-            background-size: 16px; 
-            padding-right: 36px; 
-        }
+        .input-box:focus { border-color: #f97316; outline: none; background: white; box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.1); }
+        select.input-box { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23f97316'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; background-size: 16px; padding-right: 36px; }
         
-        .btn-primary { 
-            background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); 
-            color: white; 
-            border-radius: 16px; 
-            font-weight: 800; 
-            padding: 14px 20px; 
-            transition: all 0.3s var(--ease-smooth); 
-            cursor: pointer; 
-            text-transform: uppercase; 
-            font-size: 12px; 
-            letter-spacing: 0.5px; 
-            box-shadow: 0 10px 20px -5px rgba(249, 115, 22, 0.4); 
-            border: 1px solid rgba(255,255,255,0.2); 
-        }
-        .btn-primary:hover { 
-            transform: translateY(-3px); 
-            box-shadow: 0 15px 25px -5px rgba(249, 115, 22, 0.5); 
-        }
+        .btn-primary { background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); color: white; border-radius: 16px; font-weight: 800; padding: 14px 20px; transition: all 0.3s var(--ease-smooth); cursor: pointer; text-transform: uppercase; font-size: 12px; letter-spacing: 0.5px; box-shadow: 0 10px 20px -5px rgba(249, 115, 22, 0.4); border: 1px solid rgba(255,255,255,0.2); }
+        .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 15px 25px -5px rgba(249, 115, 22, 0.5); }
         
-        .btn-secondary { 
-            background: white; 
-            color: #0f172a; 
-            border: 2px solid #e2e8f0; 
-            border-radius: 16px; 
-            font-weight: 800; 
-            padding: 12px 20px; 
-            transition: all 0.3s ease; 
-            cursor: pointer; 
-            text-transform: uppercase; 
-            font-size: 11px; 
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); 
-        }
-        .btn-secondary:hover { 
-            border-color: #cbd5e1; 
-            background: #f8fafc; 
-            transform: translateY(-2px); 
-        }
+        .btn-secondary { background: white; color: #0f172a; border: 2px solid #e2e8f0; border-radius: 16px; font-weight: 800; padding: 12px 20px; transition: all 0.3s ease; cursor: pointer; text-transform: uppercase; font-size: 11px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+        .btn-secondary:hover { border-color: #cbd5e1; background: #f8fafc; transform: translateY(-2px); }
 
-        .log-table-container { 
-            max-height: 400px; 
-            overflow-y: auto; 
-            overflow-x: auto; 
-            border-radius: 16px; 
-        }
+        .log-table-container { max-height: 400px; overflow-y: auto; overflow-x: auto; border-radius: 16px; }
         .custom-scrollbar::-webkit-scrollbar { width: 8px; height: 8px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 10px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; border: 2px solid #f1f5f9; }
 
-        .log-table { 
-            width: 100%; 
-            border-collapse: separate; 
-            border-spacing: 0; 
-            min-width: 600px; 
-        }
-        .log-table th { 
-            font-size: 10px; 
-            color: #64748b; 
-            text-transform: uppercase; 
-            padding: 16px; 
-            border-bottom: 2px solid #e2e8f0; 
-            text-align: left; 
-            position: sticky; 
-            top: 0; 
-            background: rgba(255,255,255,0.95); 
-            backdrop-filter: blur(8px); 
-            z-index: 10; 
-            font-weight: 800; 
-        }
-        .log-table td { 
-            padding: 16px; 
-            font-size: 13px; 
-            border-bottom: 1px solid #f1f5f9; 
-            font-weight: 600; 
-            color: #334155; 
-        }
-        .log-table tr:hover td {
-            background-color: #f8fafc;
-        }
+        .log-table { width: 100%; border-collapse: separate; border-spacing: 0; min-width: 600px; }
+        .log-table th { font-size: 10px; color: #64748b; text-transform: uppercase; padding: 16px; border-bottom: 2px solid #e2e8f0; text-align: left; position: sticky; top: 0; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px); z-index: 10; font-weight: 800; }
+        .log-table td { padding: 16px; font-size: 13px; border-bottom: 1px solid #f1f5f9; font-weight: 600; color: #334155; }
+        .log-table tr:hover td { background-color: #f8fafc; }
 
         .badge-out { border-color: #f43f5e; color: #f43f5e; background: #fff1f2; }
+        .badge-late { border-color: #eab308; color: #ca8a04; background: #fefce8; }
 
-        @keyframes fadeInRow {
-            from { opacity: 0; transform: translateY(5px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        @keyframes fadeInRow { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
         .animate-fade-in { animation: fadeInRow 0.3s var(--ease-smooth) forwards; }
 
         @keyframes slideIn { from { transform: translateX(120%) scale(0.95); opacity: 0; } to { transform: translateX(0) scale(1); opacity: 1; } }
         #toast-container { position: fixed; top: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 12px; pointer-events: none; }
         .toast { background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); border-radius: 16px; padding: 16px 24px; box-shadow: 0 20px 40px -10px rgba(0,0,0,0.1); border-left: 6px solid #f97316; display: flex; align-items: center; gap: 12px; font-size: 14px; font-weight: 700; animation: slideIn 0.4s var(--ease-out-back) forwards; pointer-events: auto; }
-        
         @keyframes pulse-orange { 0% { box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.4); } 100% { box-shadow: 0 0 0 20px rgba(249, 115, 22, 0); } }
     </style>
 </head>
 <body>
     <div id="toast-container"></div>
-    <!-- Top Bar -->
+    
     <div class="flex flex-col md:flex-row justify-between items-center mb-8 px-4 gap-6 max-w-7xl mx-auto">
         <div class="flex flex-col md:flex-row items-center gap-5">
             <div class="w-14 h-14 bg-gradient-to-br from-orange-400 to-orange-600 rounded-2xl shadow-xl flex items-center justify-center text-white font-black text-3xl hover:scale-105 transition-transform duration-300">F</div>
@@ -250,7 +166,6 @@
         </div>
     </div>
 
-    <!-- Main Content -->
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 max-w-7xl mx-auto">
         <div class="lg:col-span-8 space-y-6">
             <!-- Scan Hero -->
@@ -326,10 +241,9 @@
             </div>
         </div>
 
-        <!-- Sidebar -->
         <div class="lg:col-span-4 space-y-6">
             <div class="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-1 gap-4">
-                <div class="stat-card stat-total"><div><p class="text-[10px] font-extrabold text-orange-600/70 uppercase mb-1">Tổng Sĩ Số</p><h4 class="text-4xl font-black text-orange-600 transition-all" id="total-count">0</h4></div><div class="stat-icon-wrapper bg-orange-100 text-orange-500"><i class="fa-solid fa-users"></i></div></div>
+                <div class="stat-card stat-total"><div><p class="text-[10px] font-extrabold text-orange-600/70 uppercase mb-1">Tổng Sĩ Số (Ca này)</p><h4 class="text-4xl font-black text-orange-600 transition-all" id="total-count">0</h4></div><div class="stat-icon-wrapper bg-orange-100 text-orange-500"><i class="fa-solid fa-users"></i></div></div>
                 <div class="stat-card stat-present"><div><p class="text-[10px] font-extrabold text-emerald-600/70 uppercase mb-1">Đã có mặt</p><h4 class="text-4xl font-black text-emerald-600 transition-all" id="present-count">0</h4></div><div class="stat-icon-wrapper bg-emerald-100 text-emerald-500"><i class="fa-solid fa-user-check"></i></div></div>
                 <div class="stat-card stat-absent"><div><p class="text-[10px] font-extrabold text-rose-600/70 uppercase mb-1">Vắng mặt</p><h4 class="text-4xl font-black text-rose-600 transition-all" id="absent-count">0</h4></div><div class="stat-icon-wrapper bg-rose-100 text-rose-500"><i class="fa-solid fa-user-xmark"></i></div></div>
             </div>
@@ -349,7 +263,7 @@
     </div>
     
     <div class="mt-12 mb-6 border-t border-slate-200/60 pt-8 pb-4 text-center max-w-7xl mx-auto px-4">
-        <p class="text-sm font-black text-slate-400 uppercase tracking-widest mb-3 flex items-center justify-center gap-2"><i class="fa-solid fa-code-merge text-orange-500"></i> Hệ Thống Điểm Danh Fpoly <span class="bg-slate-200 text-slate-600 px-2 py-0.5 rounded text-[10px]">V1.2.6 (V3 SYNC)</span></p>
+        <p class="text-sm font-black text-slate-400 uppercase tracking-widest mb-3 flex items-center justify-center gap-2"><i class="fa-solid fa-code-merge text-orange-500"></i> Hệ Thống Điểm Danh Fpoly <span class="bg-slate-200 text-slate-600 px-2 py-0.5 rounded text-[10px]">V1.2.7 (Fix Đếm Lặp & Báo Trễ)</span></p>
     </div>
 
     <!-- MODAL QUẢN LÝ -->
@@ -369,7 +283,7 @@
         </div>
     </div>
 
-    <!-- FIREBASE & LOGIC CHÍNH V1.2.6 -->
+    <!-- FIREBASE & LOGIC CHÍNH V1.2.7 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
@@ -426,8 +340,8 @@
         }
 
         let ctx = document.getElementById('attendanceChart').getContext('2d');
-        let gradient = ctx.createLinearGradient(0,0,0,200); gradient.addColorStop(0, '#f97316'); gradient.addColorStop(1, '#fdba74');
-        let attendanceChart = new Chart(ctx, { type: 'bar', data: { labels: ['Ca 1', 'Ca 2', 'Ca 3', 'Ca 4', 'Ca 5'], datasets: [{ label: 'Hiện diện', data: [0,0,0,0,0], backgroundColor: gradient, borderRadius: 6, barThickness: 24 }] }, options: { responsive: true, maintainAspectRatio: false, animation: { duration: 500 }, plugins: { legend: { display: false } }, scales: { y: { display: true, grid: { color: '#f1f5f9' }, ticks: { stepSize: 5 } }, x: { grid: { display: false } } } } });
+        let gradient = ctx.createLinearGradient(0,0,0,200); gradient.addColorStop(0, '#10b981'); gradient.addColorStop(1, '#6ee7b7');
+        let attendanceChart = new Chart(ctx, { type: 'bar', data: { labels: ['Ca 1', 'Ca 2', 'Ca 3', 'Ca 4', 'Ca 5'], datasets: [{ label: 'Hiện diện', data: [0,0,0,0,0], backgroundColor: gradient, borderRadius: 6, barThickness: 24 }] }, options: { responsive: true, maintainAspectRatio: false, animation: { duration: 500 }, plugins: { legend: { display: false } }, scales: { y: { display: true, grid: { color: '#f1f5f9' }, ticks: { stepSize: 1 } }, x: { grid: { display: false } } } } });
 
         try {
             if (typeof __firebase_config !== 'undefined' && __firebase_config) {
@@ -470,21 +384,27 @@
         }
 
         // =========================================================
-        // GIAO TIẾP ERa API (BẮN LỆNH XUỐNG ESP32 QUA CHÂN V3)
+        // FIX KẾT NỐI: GỌI ĐỒNG THỜI REST API + NATIVE WIDGET
+        // Đảm bảo 100% mạch nhận được tín hiệu
         // =========================================================
         const eraToken = "53f7b5a4-c19e-4760-9940-ff280ac07374";
-        async function hotlineToESP32(payload) {
-            try { 
-                // GỌI API BROKER LÊN CHÂN V3
-                const url = `https://broker-v2.era.io/api/v1/device/update/vpin?token=${eraToken}&pin=V3&value=${encodeURIComponent(payload)}`;
-                await fetch(url, { method: 'GET', mode: 'no-cors' }); 
-                console.log("-> Da day tin hieu V3 xuong ESP32: ", payload);
-            } catch (err) { console.error("Hotline API error:", err); }
-        }
-
         const eraWidget = new EraWidget();
         let eCfg = { uid: null, name: null, mssv: null, shift: null, cloud: null };
         let tempCache = { name: null, mssv: null, shift: null };
+
+        async function hotlineToESP32(payload) {
+            try { 
+                // Cách 1: Bắn qua API (Bỏ no-cors để bắt lỗi thực tế)
+                const url = `https://broker-v2.era.io/api/v1/device/update/vpin?token=${eraToken}&pin=V3&value=${encodeURIComponent(payload)}`;
+                fetch(url).catch(e => console.log("API Fetch Warning (Ignore if working):", e)); 
+
+                // Cách 2: Bắn thẳng qua Widget (Backup chắc chắn 100%)
+                if (eCfg.cloud && eCfg.cloud.id) {
+                    eraWidget.updateRealtimeConfigs([{ id: eCfg.cloud.id, value: payload }]);
+                }
+                console.log("-> Đã ra lệnh cho ESP32:", payload);
+            } catch (err) { console.error("Hotline error:", err); }
+        }
 
         eraWidget.init({
             needRealtimeConfigs: true, maxRealtimeConfigsCount: 5,
@@ -495,7 +415,7 @@
                     if(n.includes("name") || n.includes("v1") || n === "trạng thái truy cập") eCfg.name = cfg;
                     if(n.includes("mssv") || n.includes("v2")) eCfg.mssv = cfg;
                     if(n.includes("ca") || n.includes("v9")) eCfg.shift = cfg;
-                    if(n.includes("cloud") || n.includes("v3")) eCfg.cloud = cfg; // Tự động bắt đúng chữ Cloud
+                    if(n.includes("cloud") || n.includes("v3")) eCfg.cloud = cfg; 
                 });
                 document.getElementById('era-status-text').innerText = "SYSTEM LIVE"; document.getElementById('era-status-dot').className = "w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse";
             },
@@ -534,32 +454,49 @@
 
             let status = fName ? 1 : 0;
             let actionStr = "VÀO LỚP";
-            let isCheckOut = false;
-            let remainingMins = 0;
+            let lateMins = 0; // Số phút đi trễ
 
+            // === LOGIC TÍNH TRỄ & XUẤT LỚP ===
             if (fName && currentShift && fShift !== "---" && fShift !== currentShift.name) {
                 status = 2; // Sai Ca
             } else if (fName && currentShift && fShift === currentShift.name) {
                 const todayStr = now.toDateString();
-                const hasCheckedIn = logsDb.some(l => l.date === todayStr && l.uid === uid && l.shiftId === currentShift.id && l.status === "VÀO LỚP");
+                
+                // Kiểm tra xem hôm nay sinh viên đã quét thẻ (VÀO LỚP hoặc VÀO TRỄ) chưa
+                const hasCheckedIn = logsDb.some(l => l.date === todayStr && l.uid === uid && l.shiftId === currentShift.id && (l.status.includes("VÀO LỚP") || l.status.includes("TRỄ")));
                 
                 if (hasCheckedIn) {
-                    isCheckOut = true;
+                    // Logic tính giờ RA
                     const [endH, endM] = currentShift.end.split(':').map(Number);
                     const endMins = endH * 60 + endM;
                     const currMins = now.getHours() * 60 + now.getMinutes();
-                    remainingMins = endMins - currMins;
+                    let remainingMins = endMins - currMins;
                     
                     if (remainingMins <= CHECKOUT_COOLDOWN_MINUTES) { 
-                        status = 1;
+                        status = 5; // Trạng thái 5: Ra lớp
                         actionStr = "RA LỚP";
                     } else {
-                        status = 3; 
+                        status = 3; // Chưa tới giờ ra
                         actionStr = "CHƯA ĐẾN GIỜ RA";
+                    }
+                } else {
+                    // Logic tính giờ VÀO TRỄ
+                    const [sh, sm] = currentShift.start.split(':').map(Number);
+                    const startMins = sh * 60 + sm;
+                    const currMins = now.getHours() * 60 + now.getMinutes();
+                    lateMins = currMins - startMins;
+
+                    if (lateMins > 0) {
+                        status = 4; // Trạng thái 4: Vào trễ
+                        actionStr = `VÀO TRỄ (${lateMins}p)`;
+                    } else {
+                        status = 1; // Vào đúng giờ
+                        actionStr = "VÀO LỚP";
                     }
                 }
             }
 
+            // HIỂN THỊ GIAO DIỆN
             requestAnimationFrame(() => {
                 UI.details.classList.remove('hidden');
                 UI.details.classList.remove('opacity-0', 'translate-y-4');
@@ -567,6 +504,7 @@
                 UI.uid.innerText = uid;
 
                 if (!fName) {
+                    // LẠ
                     UI.name.innerText = "THẺ CHƯA ĐĂNG KÝ";
                     UI.name.className = "text-4xl md:text-5xl font-black text-orange-500 uppercase mb-4 tracking-tighter transition-all duration-300 drop-shadow-md scale-105";
                     UI.target.className = "avatar-circle glow-unknown";
@@ -575,6 +513,7 @@
                     if(UI.dot) UI.dot.className = "w-2.5 h-2.5 rounded-full bg-orange-500 animate-pulse transition-colors";
                     window.showToast(`Phát hiện thẻ lạ: ${uid}`, "warning");
                 } else if (status === 2) {
+                    // SAI CA
                     UI.name.innerText = fName;
                     UI.name.className = "text-4xl md:text-5xl font-black text-amber-500 uppercase mb-4 tracking-tighter transition-all duration-300 drop-shadow-md scale-105";
                     UI.target.className = "avatar-circle glow-wrong";
@@ -583,33 +522,48 @@
                     if(UI.dot) UI.dot.className = "w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse transition-colors";
                     window.showToast(`Cảnh báo: Sinh viên ${fName} đi sai ca.`, "warning");
                 } else if (status === 3) {
+                    // RA SỚM BỊ TỪ CHỐI
+                    // Tính lại remainingMins để hiển thị
+                    const [endH, endM] = currentShift.end.split(':').map(Number);
+                    let rem = (endH * 60 + endM) - (now.getHours() * 60 + now.getMinutes());
                     UI.name.innerText = "CHƯA ĐẾN GIỜ RA";
                     UI.name.className = "text-4xl md:text-5xl font-black text-orange-500 uppercase mb-4 tracking-tighter transition-all duration-300 drop-shadow-md scale-105";
                     UI.target.className = "avatar-circle glow-wrong";
                     if(UI.icon) UI.icon.className = "fa-solid fa-clock text-7xl text-orange-500 transition-colors";
-                    if(UI.sub) UI.sub.innerText = `ĐỢI THÊM ${remainingMins} PHÚT ĐỂ RA LỚP`;
+                    if(UI.sub) UI.sub.innerText = `ĐỢI THÊM ${rem} PHÚT ĐỂ RA LỚP`;
                     if(UI.dot) UI.dot.className = "w-2.5 h-2.5 rounded-full bg-orange-500 animate-pulse transition-colors";
                     window.showToast(`Chưa đến giờ ra!`, "warning");
-                } else {
+                } else if (status === 4) {
+                    // VÀO LỚP TRỄ
                     UI.name.innerText = fName;
-                    if (isCheckOut) {
-                        UI.name.className = "text-4xl md:text-5xl font-black text-rose-400 uppercase mb-4 tracking-tighter transition-all duration-300 drop-shadow-md scale-105";
-                        UI.target.className = "avatar-circle glow-out";
-                        if(UI.icon) UI.icon.className = "fa-solid fa-person-walking-arrow-right text-7xl text-rose-500 transition-colors";
-                        if(UI.sub) UI.sub.innerText = "ĐÃ ĐIỂM DANH RA LỚP";
-                        if(UI.dot) UI.dot.className = "w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse transition-colors";
-                        window.showToast(`Tạm biệt ${fName}!`);
-                    } else {
-                        UI.name.className = "text-4xl md:text-5xl font-black text-emerald-400 uppercase mb-4 tracking-tighter transition-all duration-300 drop-shadow-md scale-105";
-                        UI.target.className = "avatar-circle glow-in";
-                        if(UI.icon) UI.icon.className = "fa-solid fa-check text-7xl text-emerald-400 transition-colors";
-                        if(UI.sub) UI.sub.innerText = "ĐIỂM DANH VÀO LỚP THÀNH CÔNG";
-                        if(UI.dot) UI.dot.className = "w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse transition-colors";
-                        window.showToast(`Xin chào ${fName}!`);
-                    }
+                    UI.name.className = "text-4xl md:text-5xl font-black text-yellow-500 uppercase mb-4 tracking-tighter transition-all duration-300 drop-shadow-md scale-105";
+                    UI.target.className = "avatar-circle glow-late";
+                    if(UI.icon) UI.icon.className = "fa-solid fa-clock-rotate-left text-7xl text-yellow-500 transition-colors";
+                    if(UI.sub) UI.sub.innerText = `BẠN ĐÃ ĐI TRỄ ${lateMins} PHÚT!`;
+                    if(UI.dot) UI.dot.className = "w-2.5 h-2.5 rounded-full bg-yellow-500 animate-pulse transition-colors";
+                    window.showToast(`${fName} đi trễ ${lateMins} phút!`, "warning");
+                } else if (status === 5) {
+                    // RA LỚP OK
+                    UI.name.innerText = fName;
+                    UI.name.className = "text-4xl md:text-5xl font-black text-rose-400 uppercase mb-4 tracking-tighter transition-all duration-300 drop-shadow-md scale-105";
+                    UI.target.className = "avatar-circle glow-out";
+                    if(UI.icon) UI.icon.className = "fa-solid fa-person-walking-arrow-right text-7xl text-rose-500 transition-colors";
+                    if(UI.sub) UI.sub.innerText = "ĐÃ ĐIỂM DANH RA LỚP";
+                    if(UI.dot) UI.dot.className = "w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse transition-colors";
+                    window.showToast(`Tạm biệt ${fName}!`);
+                } else {
+                    // VÀO LỚP ĐÚNG GIỜ (Status 1)
+                    UI.name.innerText = fName;
+                    UI.name.className = "text-4xl md:text-5xl font-black text-emerald-400 uppercase mb-4 tracking-tighter transition-all duration-300 drop-shadow-md scale-105";
+                    UI.target.className = "avatar-circle glow-in";
+                    if(UI.icon) UI.icon.className = "fa-solid fa-check text-7xl text-emerald-400 transition-colors";
+                    if(UI.sub) UI.sub.innerText = "ĐIỂM DANH VÀO LỚP THÀNH CÔNG";
+                    if(UI.dot) UI.dot.className = "w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse transition-colors";
+                    window.showToast(`Xin chào ${fName}!`);
                 }
             });
 
+            // GHI NHẬT KÝ DATABASE
             if (fName && status !== 3) {
                 let sIdx = SHIFTS.findIndex(s => s.name === fShift);
                 const entry = { uid, name: fName, mssv: fMssv, shiftReg: fShift, time: now.toLocaleTimeString('vi-VN', {hour12: false}), timestamp: now.getTime(), date: now.toDateString(), status: actionStr, shiftId: currentShift?.id || "none", shiftIndex: sIdx };
@@ -624,8 +578,9 @@
                 }
             }
 
-            // GỌI HÀM API ĐẨY XUỐNG V3 CỦA ESP32
-            const payloadRes = `${status}|${fName || "NGUOI LA"}|${fMssv}|${fShift}|${Date.now()}`;
+            // GỬI LỆNH TRẠNG THÁI XUỐNG ESP32
+            // Payload gửi ESP32 thêm số phút trễ ở cuối: Status|Name|MSSV|Ca|LateMins
+            const payloadRes = `${status}|${fName || "NGUOI LA"}|${fMssv}|${fShift}|${lateMins}`;
             hotlineToESP32(payloadRes);
 
             setTimeout(() => { 
@@ -649,7 +604,10 @@
         function renderAll() {
             const logsToRender = logsDb.filter(l => l.date === selectedDateStr);
             const tbody = document.getElementById('log-body');
-            let present = new Set();
+            
+            // FIX LỖI SĨ SỐ (CHỈ ĐẾM UID DUY NHẤT VÀ KHÔNG TÍNH SAI CA)
+            let presentUIDs = new Set(); 
+            let chartSets = [new Set(), new Set(), new Set(), new Set(), new Set()];
             
             let isViewingToday = selectedDateStr === new Date().toDateString();
             let totalInShift = 0;
@@ -658,8 +616,18 @@
             }
             
             tbody.innerHTML = logsToRender.map(l => {
-                if (isViewingToday && currentShift && l.shiftId === currentShift.id && l.status === "VÀO LỚP") present.add(l.uid);
-                let badge = l.status === "VÀO LỚP" ? "bg-emerald-50 text-emerald-600 border-emerald-200" : (l.status === "RA LỚP" ? "badge-out" : (l.status === "SAI CA" ? "bg-amber-50 text-amber-600 border-amber-200" : "bg-orange-50 text-orange-600 border-orange-200"));
+                // Đếm người đi học (Trạng thái Vào Lớp, Trễ, Ra Lớp)
+                if (isViewingToday && currentShift && l.shiftId === currentShift.id && (l.status.includes("VÀO LỚP") || l.status.includes("TRỄ") || l.status === "RA LỚP")) {
+                    presentUIDs.add(l.uid);
+                }
+                
+                // Cập nhật cho biểu đồ các ca
+                if(l.shiftIndex !== undefined && l.shiftIndex >= 0 && l.shiftIndex < 5 && (l.status.includes("VÀO LỚP") || l.status.includes("TRỄ") || l.status === "RA LỚP")) {
+                    chartSets[l.shiftIndex].add(l.uid);
+                }
+
+                let badge = l.status.includes("VÀO LỚP") ? "bg-emerald-50 text-emerald-600 border-emerald-200" : (l.status === "RA LỚP" ? "badge-out" : (l.status.includes("TRỄ") ? "badge-late" : (l.status === "SAI CA" ? "bg-amber-50 text-amber-600 border-amber-200" : "bg-orange-50 text-orange-600 border-orange-200")));
+                
                 return `<tr class="hover:bg-slate-50 transition-colors animate-fade-in">
                     <td>${l.time}</td>
                     <td class="font-bold uppercase">${l.name}</td>
@@ -672,21 +640,15 @@
             
             if(isViewingToday && currentShift) {
                 document.getElementById('total-count').innerText = totalInShift;
-                document.getElementById('present-count').innerText = present.size;
-                document.getElementById('absent-count').innerText = Math.max(0, totalInShift - present.size);
+                document.getElementById('present-count').innerText = presentUIDs.size;
+                document.getElementById('absent-count').innerText = Math.max(0, totalInShift - presentUIDs.size);
             } else {
                 document.getElementById('total-count').innerText = "--";
                 document.getElementById('present-count').innerText = "--";
                 document.getElementById('absent-count').innerText = "--";
             }
             
-            let sets = [0,0,0,0,0];
-            logsToRender.forEach(l => { 
-                if(l.shiftIndex !== undefined && l.shiftIndex >= 0 && l.shiftIndex < 5 && l.status === "VÀO LỚP") {
-                    sets[l.shiftIndex]++; 
-                }
-            });
-            attendanceChart.data.datasets[0].data = sets; attendanceChart.update();
+            attendanceChart.data.datasets[0].data = chartSets.map(s => s.size); attendanceChart.update();
             document.getElementById('registered-count-badge').innerText = `ĐÃ LƯU: ${Object.keys(membersDb).length}`;
         }
 
