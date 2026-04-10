@@ -268,10 +268,10 @@
     
     <div class="mt-12 mb-6 border-t border-slate-200/60 pt-8 pb-4 text-center max-w-7xl mx-auto px-4">
         <p class="text-sm font-black text-slate-400 uppercase tracking-widest mb-3 flex items-center justify-center gap-2">
-            <i class="fa-solid fa-code-merge text-orange-500"></i> Hệ Thống Điểm Danh Fpoly <span class="bg-slate-200 text-slate-600 px-2 py-0.5 rounded text-[10px]">V4.6.0 (Đã Fix Thẻ Cứng)</span>
+            <i class="fa-solid fa-code-merge text-orange-500"></i> Hệ Thống Điểm Danh Fpoly <span class="bg-slate-200 text-slate-600 px-2 py-0.5 rounded text-[10px]">V4.6.0 (Full Option)</span>
         </p>
         <p class="text-[11px] font-semibold text-slate-400 max-w-2xl mx-auto">
-            Bản nâng cấp V4.6.0: Đã thêm bộ đệm (Cache) xử lý độ trễ mạng để đảm bảo 100% không đọc sai/sót thẻ cứng nạp sẵn từ phần cứng (Nguyễn Đình Danh).
+            Bản nâng cấp V4.6.0: Cập nhật cơ chế đồng bộ 2 chiều qua Action / DataStream chân V5. Bổ sung bộ đệm trễ 600ms chờ dữ liệu để tránh lỗi nhận diện thẻ lạ.
         </p>
     </div>
 
@@ -532,23 +532,33 @@
         }
 
         const eraWidgetConfig = new EraWidget();
-        let eConfig = { uid: null, name: null, mssv: null, class: null, shift: null, cloudSync: null };
-        
+        let eConfig = { uid: null, name: null, mssv: null, class: null, shift: null, cloudSync: null, cloudSyncAction: null };
         let latestData = { name: null, mssv: null, class: null, shift: null };
 
         eraWidgetConfig.init({
             needRealtimeConfigs: true,
+            needActions: true, // Bật bắt Action
             maxRealtimeConfigsCount: 6,
+            maxActionsCount: 1, // Bắt 1 Action (V5)
             onConfiguration: (c) => {
-                c.realtime_configs.forEach(config => {
-                    const n = (config.name || "").toLowerCase().trim();
-                    if(n.includes("v0") || n.includes("uid") || n.includes("đọc thẻ")) eConfig.uid = config;
-                    if(n.includes("v1") || n.includes("name") || n.includes("tên") || n.includes("trạng thái")) eConfig.name = config;
-                    if(n.includes("v2") || n.includes("mssv")) eConfig.mssv = config;
-                    if(n.includes("v10") || n.includes("class") || n.includes("lớp")) eConfig.class = config;
-                    if(n.includes("v9") || n.includes("shift") || n.includes("ca")) eConfig.shift = config;
-                    if(n.includes("v5") || n.includes("cloud")) eConfig.cloudSync = config;
-                });
+                
+                // Đọc Configs Dữ liệu
+                if (c.realtime_configs) {
+                    c.realtime_configs.forEach(config => {
+                        const n = (config.name || "").toLowerCase().trim();
+                        if(n.includes("v0") || n.includes("uid") || n.includes("đọc thẻ")) eConfig.uid = config;
+                        if(n.includes("v1") || n.includes("name") || n.includes("tên") || n.includes("trạng thái")) eConfig.name = config;
+                        if(n.includes("v2") || n.includes("mssv")) eConfig.mssv = config;
+                        if(n.includes("v10") || n.includes("class") || n.includes("lớp")) eConfig.class = config;
+                        if(n.includes("v9") || n.includes("shift") || n.includes("ca")) eConfig.shift = config;
+                        if(n.includes("v5") || n.includes("cloud")) eConfig.cloudSync = config;
+                    });
+                }
+
+                // Đọc Configs Hành động (Ưu tiên dùng Action cho V5)
+                if (c.actions && c.actions.length > 0) {
+                    eConfig.cloudSyncAction = c.actions.find(a => (a.name || "").toLowerCase().includes("cloud") || a.pin === "V5") || c.actions[0];
+                }
 
                 document.getElementById('era-status-dot').className = "w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.8)]";
                 document.getElementById('era-status-text').innerText = "SYSTEM LIVE";
@@ -556,6 +566,7 @@
             },
             onValues: (v) => {
                 try {
+                    // Update cache liên tục từ các chân phụ
                     if (eConfig.name && v[eConfig.name.id]) latestData.name = v[eConfig.name.id].value;
                     if (eConfig.mssv && v[eConfig.mssv.id]) latestData.mssv = v[eConfig.mssv.id].value;
                     if (eConfig.class && v[eConfig.class.id]) latestData.class = v[eConfig.class.id].value;
@@ -570,7 +581,7 @@
                         lastUid = uidVal;
                         isProcessing = true;
 
-                        // FIX QUAN TRỌNG: Đợi 600ms để đảm bảo dữ liệu V1, V2, V10, V9 từ ESP32 bay lên kịp Web
+                        // FIX QUAN TRỌNG: Đợi 600ms để đảm bảo dữ liệu Tên, MSSV từ mạch bay lên kịp rồi mới chốt!
                         setTimeout(() => {
                             handleHardwareScan({ 
                                 uid: String(uidVal).trim().toUpperCase(),
@@ -584,7 +595,6 @@
                 } catch (err) {
                     console.error("Lỗi onValues:", err);
                 } finally {
-                    // Mở khóa quét thẻ sau 4 giây
                     setTimeout(() => { isProcessing = false; }, 4000);
                 }
             }
@@ -602,13 +612,12 @@
             
             const uid = data.uid;
             const cloudMember = membersDb[uid];
-            const hardcodedMember = ESP32_STUDENTS[uid]; // KIỂM TRA TRỰC TIẾP TRÊN WEB
+            const hardcodedMember = ESP32_STUDENTS[uid]; 
             
-            // XÁC MINH DỮ LIỆU TỪ ESP32
             let espName = data.name ? String(data.name).trim() : "";
             const espNameValid = espName !== "" && espName !== "None" && espName !== "0" && espName.toUpperCase() !== "NGUOI LA" && espName.toUpperCase() !== "NGƯỜI LẠ";
 
-            // NGUYÊN TẮC BẢO VỆ: THẺ CỨNG (TRÊN WEB) > DỮ LIỆU TỪ ESP32 (V1) > THẺ ĐÁM MÂY (FIREBASE)
+            // THỨ TỰ ƯU TIÊN: THẺ CỨNG (WEB) > DỮ LIỆU (ESP32 GỬI LÊN) > THẺ (CLOUD FIREBASE)
             let finalName = hardcodedMember ? hardcodedMember.name : (espNameValid ? espName : (cloudMember ? cloudMember.name : null));
             let finalMssv = hardcodedMember ? hardcodedMember.mssv : (espNameValid ? data.mssv : (cloudMember ? cloudMember.mssv : "---"));
             let finalClass = hardcodedMember ? hardcodedMember.class : (espNameValid ? data.class : (cloudMember ? cloudMember.class : "---"));
@@ -755,10 +764,20 @@
                 }
             }
 
-            if (eConfig.cloudSync && eConfig.cloudSync.id) {
-                // Thêm timestamp vào để ERa luôn thấy đây là tin mới
-                let responsePayload = `${payloadStatus}|${finalName || "NGUOI LA"}|${finalMssv || "---"}|${finalShiftReg || "---"}|${finalClass || "---"}|${Date.now()}`;
+            // GỬI PHẢN HỒI LẠI ESP32 QUA ACTION V5 (ƯU TIÊN) HOẶC DATASTREAM V5
+            let responsePayload = `${payloadStatus}|${finalName || "NGUOI LA"}|${finalMssv || "---"}|${finalShiftReg || "---"}|${finalClass || "---"}|${Date.now()}`;
+            
+            if (eConfig.cloudSyncAction && eConfig.cloudSyncAction.id) {
+                // Gửi qua chân Action
+                eraWidgetConfig.triggerAction(eConfig.cloudSyncAction.id, responsePayload);
+                console.log("Đã gửi qua Action V5:", responsePayload);
+            } else if (eConfig.cloudSync && eConfig.cloudSync.id) {
+                // Gửi qua chân DataStream
                 eraWidgetConfig.updateRealtimeConfigs([{ id: eConfig.cloudSync.id, value: responsePayload }]);
+                console.log("Đã gửi qua DataStream V5:", responsePayload);
+            } else {
+                console.warn("LỖI: Chưa có DataStream hay Action V5 (Cloud)! ESP32 sẽ không nhận được phản hồi.");
+                window.showToast("Cảnh báo: Chưa cài đặt Action V5 trên Widget!", "error");
             }
 
             setTimeout(() => {
