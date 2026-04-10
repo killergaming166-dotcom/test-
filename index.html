@@ -344,7 +344,7 @@
     </div>
     
     <div class="mt-12 mb-6 border-t border-slate-200/60 pt-8 pb-4 text-center max-w-7xl mx-auto px-4">
-        <p class="text-sm font-black text-slate-400 uppercase tracking-widest mb-3 flex items-center justify-center gap-2"><i class="fa-solid fa-code-merge text-orange-500"></i> Hệ Thống Điểm Danh Fpoly <span class="bg-slate-200 text-slate-600 px-2 py-0.5 rounded text-[10px]">V4.9.3 (Đã Fix Lỗi Treo Mạch)</span></p>
+        <p class="text-sm font-black text-slate-400 uppercase tracking-widest mb-3 flex items-center justify-center gap-2"><i class="fa-solid fa-code-merge text-orange-500"></i> Hệ Thống Điểm Danh Fpoly <span class="bg-slate-200 text-slate-600 px-2 py-0.5 rounded text-[10px]">V4.9.5 (Final Reliable Fix)</span></p>
     </div>
 
     <!-- MODAL QUẢN LÝ -->
@@ -386,22 +386,45 @@
                 const app = initializeApp(config);
                 const auth = getAuth(app); db = getFirestore(app); 
                 appId = typeof __app_id !== 'undefined' ? __app_id : 'demo-app';
-                onAuthStateChanged(auth, (user) => { if (user) { currentUser = user; document.getElementById('cloud-status').innerText = "ONLINE"; loadData(); } });
-                signInAnonymously(auth);
+                
+                const initAuth = async () => {
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        await signInWithCustomToken(auth, __initial_auth_token);
+                    } else {
+                        await signInAnonymously(auth);
+                    }
+                };
+                initAuth();
+
+                onAuthStateChanged(auth, (user) => { 
+                    if (user) { 
+                        currentUser = user; 
+                        document.getElementById('cloud-status').innerText = "ONLINE"; 
+                        loadData(); 
+                    } 
+                });
             }
         } catch (e) { console.error("Firebase Init Error:", e); }
 
         function loadData() {
+            if (!currentUser) return;
             onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'members'), (snap) => { membersDb = {}; snap.forEach(d => membersDb[d.id] = d.data()); renderAll(); });
             onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'attendance_logs'), (snap) => { logsDb = []; snap.forEach(d => { let data = d.data(); data.id = d.id; logsDb.push(data); }); logsDb.sort((a, b) => b.timestamp - a.timestamp); renderAll(); });
         }
 
+        // BẮT BUỘC DÙNG HOTLINE ĐỂ TRÁNH LỖI WIDGET
         async function hotlineToESP32(payload) {
-            try { await fetch(`https://broker-v2.era.io/api/v1/device/update/vpin?token=${eraToken}&pin=V5&value=${encodeURIComponent(payload)}`); } catch (err) { console.error("Hotline API error:", err); }
+            try { 
+                const url = `https://broker-v2.era.io/api/v1/device/update/vpin?token=${eraToken}&pin=V5&value=${encodeURIComponent(payload)}`;
+                await fetch(url); 
+                console.log("-> Hotline Sent V5:", payload);
+            } catch (err) { 
+                console.error("Hotline API error:", err); 
+            }
         }
 
         const eraWidget = new EraWidget();
-        let eCfg = { uid: null, name: null, mssv: null, shift: null, cloud: null };
+        let eCfg = { uid: null, name: null, mssv: null, shift: null };
         let tempCache = { name: null, mssv: null, shift: null };
 
         eraWidget.init({
@@ -413,7 +436,6 @@
                     if(n.includes("name") || n.includes("v1") || n === "trạng thái truy cập") eCfg.name = cfg;
                     if(n.includes("mssv") || n.includes("v2")) eCfg.mssv = cfg;
                     if(n.includes("ca") || n.includes("v9")) eCfg.shift = cfg;
-                    if(n.includes("cloud") || n.includes("v5")) eCfg.cloud = cfg;
                 });
                 document.getElementById('era-status-text').innerText = "SYSTEM LIVE"; document.getElementById('era-status-dot').className = "w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse";
             },
@@ -423,7 +445,7 @@
                 if (eCfg.shift && v[eCfg.shift.id]) tempCache.shift = v[eCfg.shift.id].value;
                 if (!eCfg.uid) return; const u = v[eCfg.uid.id]?.value;
                 
-                // Lõi V4.9.3 Fix: Bắt try-catch để không bao giờ bị kẹt isProcessing
+                // An toàn chống treo biến isProcessing
                 if (u && u !== "0" && u !== "" && u !== "None" && u !== lastUid && !isProcessing) {
                     lastUid = u; isProcessing = true;
                     setTimeout(() => { 
@@ -469,14 +491,13 @@
                     renderAll();
                 }
                 window.showToast(`Xin chào ${fName}!`);
+            } else {
+                window.showToast(`Phát hiện thẻ lạ: ${uid}`, "warning");
             }
 
+            // GỬI PHẢN HỒI XUỐNG MẠCH BẰNG API LUÔN
             const payloadRes = `${status}|${fName || "NGUOI LA"}|${fMssv}|${fShift}|${Date.now()}`;
-            if (eCfg.cloud && eCfg.cloud.id) {
-                eraWidget.updateRealtimeConfigs([{ id: eCfg.cloud.id, value: payloadRes }]);
-            } else {
-                hotlineToESP32(payloadRes); // Dự phòng gọi qua API nếu Realtime lỗi
-            }
+            hotlineToESP32(payloadRes);
 
             setTimeout(() => { if(lastUid === uid) { document.getElementById('display-name').innerText = "SẴN SÀNG"; document.getElementById('display-details').classList.add('hidden'); document.getElementById('avatar-container').className = "avatar-circle glow-idle"; } }, 6000);
         }
