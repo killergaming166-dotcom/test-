@@ -495,7 +495,7 @@
                     if(n.includes("name") || n.includes("v1") || n === "trạng thái truy cập") eCfg.name = cfg;
                     if(n.includes("mssv") || n.includes("v2")) eCfg.mssv = cfg;
                     if(n.includes("ca") || n.includes("v9")) eCfg.shift = cfg;
-                    if(n.includes("cloud") || n.includes("v3")) eCfg.cloud = cfg; // Cập nhật cấu hình đón V3
+                    if(n.includes("cloud") || n.includes("v3")) eCfg.cloud = cfg; // Tự động bắt đúng chữ Cloud
                 });
                 document.getElementById('era-status-text').innerText = "SYSTEM LIVE"; document.getElementById('era-status-dot').className = "w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse";
             },
