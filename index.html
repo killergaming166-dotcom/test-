@@ -289,10 +289,10 @@
     <!-- Footer -->
     <div class="mt-12 mb-6 border-t border-slate-200/60 pt-8 pb-4 text-center max-w-7xl mx-auto px-4">
         <p class="text-sm font-black text-slate-400 uppercase tracking-widest mb-3 flex items-center justify-center gap-2">
-            <i class="fa-solid fa-code-merge text-orange-500"></i> Hệ Thống Điểm Danh Fpoly <span class="bg-slate-200 text-slate-600 px-2 py-0.5 rounded text-[10px]">V3.2.0</span>
+            <i class="fa-solid fa-code-merge text-orange-500"></i> Hệ Thống Điểm Danh Fpoly <span class="bg-slate-200 text-slate-600 px-2 py-0.5 rounded text-[10px]">V3.3.0</span>
         </p>
         <p class="text-[11px] font-semibold text-slate-400 max-w-2xl mx-auto">
-            Bản nâng cấp V3.2.0: Bổ sung <b>Đồng bộ Actions V5</b>. Web sẽ dùng lệnh triggerAction để bắn dữ liệu xuống ESP32.
+            Bản nâng cấp V3.3.0: Sửa lỗi nhận diện thẻ nội bộ. Đã <b>khôi phục quyền ưu tiên cao nhất</b> cho các thẻ được nạp cứng trực tiếp trên vi điều khiển ESP32 (như thẻ của Danh).
         </p>
     </div>
 
@@ -562,15 +562,20 @@
             maxRealtimeConfigsCount: 5,  // 5 Data (V0, V1, V2, V10, V9)
             maxActionsCount: 1,          // 1 Action (V5)
             onConfiguration: (c) => {
-                eConfig.uid = c.realtime_configs[0];
-                eConfig.name = c.realtime_configs[1];
-                eConfig.mssv = c.realtime_configs[2];
-                eConfig.class = c.realtime_configs[3];
-                eConfig.shift = c.realtime_configs[4];
+                
+                // KIỂM TRA & GÁN DATASTREAM (Dựa vào tên Datastream để tránh lỗi lệch thứ tự)
+                c.realtime_configs.forEach(config => {
+                    if(config.name === "đọc thẻ" || config.name === "UID") eConfig.uid = config;
+                    if(config.name === "trạng thái truy cập" || config.name === "Name") eConfig.name = config;
+                    if(config.name === "MSSV") eConfig.mssv = config;
+                    if(config.name === "Class") eConfig.class = config;
+                    if(config.name === "Ca") eConfig.shift = config;
+                });
                 
                 // Lấy Action ID của Chân V5 để Web có thể gửi lệnh Trigger
                 if (c.actions && c.actions.length > 0) {
-                    eConfig.cloudAction = c.actions[0]; 
+                    // Tìm đúng action có tên là "Cloud" hoặc chân là "V5"
+                    eConfig.cloudAction = c.actions.find(a => a.name === "Cloud" || a.pin === "V5") || c.actions[0];
                 }
 
                 document.getElementById('era-status-dot').className = "w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.8)]";
@@ -579,14 +584,28 @@
             },
             onValues: (v) => {
                 try {
-                    const uidVal = v[eConfig.uid?.id]?.value;
+                    if (!eConfig.uid) return; // Nếu chưa nhận được config UID thì bỏ qua
+                    
+                    const uidVal = v[eConfig.uid.id]?.value;
                     if (!uidVal || uidVal === "" || uidVal === "0" || uidVal === "None") return;
                     if (uidVal === lastUid && isProcessing) return;
 
                     lastUid = uidVal;
                     isProcessing = true;
 
-                    handleHardwareScan({ uid: uidVal });
+                    // FIX: Đọc TẤT CẢ các giá trị từ ESP32 gửi lên
+                    const nameVal = eConfig.name ? v[eConfig.name.id]?.value : null;
+                    const mssvVal = eConfig.mssv ? v[eConfig.mssv.id]?.value : null;
+                    const classVal = eConfig.class ? v[eConfig.class.id]?.value : null;
+                    const shiftVal = eConfig.shift ? v[eConfig.shift.id]?.value : null;
+
+                    handleHardwareScan({ 
+                        uid: uidVal,
+                        name: nameVal,
+                        mssv: mssvVal,
+                        class: classVal,
+                        shift: shiftVal
+                    });
                 } catch (err) {
                     console.error("Lỗi onValues:", err);
                 } finally {
@@ -608,10 +627,14 @@
             const uid = data.uid;
             
             const cloudMember = membersDb[uid];
-            let finalName = cloudMember ? cloudMember.name : null;
-            let finalMssv = cloudMember ? cloudMember.mssv : "---";
-            let finalClass = cloudMember ? cloudMember.class : "---";
-            let finalShiftReg = cloudMember ? cloudMember.shift : "---"; 
+            // KIỂM TRA NẾU TÊN TỪ ESP32 LÀ HỢP LỆ (Thẻ nạp cứng trên ESP32)
+            const espNameValid = data.name && data.name !== "None" && data.name !== "0" && data.name !== "NGUOI LA" && data.name !== "nguoi la" && data.name !== "Người lạ";
+            
+            // ƯU TIÊN THẺ TRÊN ESP32 TRƯỚC, NẾU KHÔNG CÓ MỚI LẤY TRÊN CLOUD/WEB
+            let finalName = espNameValid ? data.name : (cloudMember ? cloudMember.name : null);
+            let finalMssv = espNameValid ? data.mssv : (cloudMember ? cloudMember.mssv : "---");
+            let finalClass = espNameValid ? data.class : (cloudMember ? cloudMember.class : "---");
+            let finalShiftReg = espNameValid && data.shift && data.shift !== "---" && data.shift !== "None" ? data.shift : (cloudMember ? cloudMember.shift : "---"); 
 
             const now = new Date();
             const timeStr = now.toLocaleTimeString('vi-VN', { hour12: false });
@@ -756,12 +779,13 @@
                 }
             }
 
-            // GỬI PHẢN HỒI LẠI CHO ESP32 (SỬ DỤNG ACTION ID)
+            // GỬI PHẢN HỒI LẠI CHO ESP32 (SỬ DỤNG ACTION ID ĐÃ TÌM ĐƯỢC)
             if (eConfig.cloudAction && eConfig.cloudAction.id) {
                 let responsePayload = `${payloadStatus}|${finalName || "NGUOI LA"}|${finalMssv || "---"}|${finalShiftReg || "---"}|${finalClass || "---"}`;
+                console.log("Triggering Action ID: ", eConfig.cloudAction.id, " with Payload: ", responsePayload);
                 eraWidgetConfig.triggerAction(eConfig.cloudAction.id, responsePayload);
             } else {
-                console.warn("CHƯA CÓ ACTIONS: Hãy vào cài đặt Widget -> Actions -> Thêm Cloud (V5)");
+                console.warn("CHƯA TÌM THẤY ACTIONS 'Cloud'! Vui lòng kiểm tra lại cấu hình Actions trên ERa.");
             }
 
             setTimeout(() => {
