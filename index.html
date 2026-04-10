@@ -14,12 +14,10 @@
         
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f1f5f9; color: #334155; margin: 0; padding: 20px; background-image: radial-gradient(#e2e8f0 1px, transparent 1px); background-size: 20px 20px; }
         
-        /* Modern Cards */
         .card { background: white; border-radius: 28px; box-shadow: 0 10px 40px -10px rgba(0,0,0,0.05); border: 1px solid rgba(255,255,255,0.8); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
         .card-dark { background: linear-gradient(145deg, #0f172a, #1e293b); border-radius: 28px; box-shadow: 0 20px 40px -10px rgba(249, 115, 22, 0.15); border: 1px solid rgba(255,255,255,0.05); position: relative; overflow: hidden; }
         .card-dark::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(249,115,22,0.1) 0%, transparent 50%); pointer-events: none; }
         
-        /* Stats Cards Gradients */
         .stat-card { border-radius: 24px; padding: 20px; display: flex; align-items: center; justify-content: space-between; position: relative; overflow: hidden; box-shadow: 0 10px 30px -10px rgba(0,0,0,0.05); border: 1px solid white; }
         .stat-total { background: linear-gradient(135deg, #fffaf5, #fff7ed); }
         .stat-present { background: linear-gradient(135deg, #f0fdf4, #ecfdf5); }
@@ -27,17 +25,14 @@
         
         .stat-icon-wrapper { width: 56px; height: 56px; border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 24px; box-shadow: inset 0 2px 4px rgba(255,255,255,0.5); }
         
-        /* Avatar & Scanning Effects */
         .avatar-circle { width: 150px; height: 150px; border-radius: 50%; background: rgba(255,255,255,0.05); backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: center; border: 4px solid rgba(255,255,255,0.1); margin: 0 auto 24px; transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); box-shadow: 0 0 40px rgba(0,0,0,0.2); }
         
-        /* Glowing states for Avatar */
         .glow-idle { box-shadow: 0 0 30px rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.2); }
         .glow-unknown { box-shadow: 0 0 60px rgba(249, 115, 22, 0.5), inset 0 0 20px rgba(249, 115, 22, 0.3); border-color: #f97316; animation: pulse-orange 2s infinite; background: rgba(249, 115, 22, 0.1); }
         .glow-in { box-shadow: 0 0 60px rgba(16, 185, 129, 0.5), inset 0 0 20px rgba(16, 185, 129, 0.3); border-color: #10b981; background: rgba(16, 185, 129, 0.1); }
         .glow-out { box-shadow: 0 0 60px rgba(244, 63, 94, 0.5), inset 0 0 20px rgba(244, 63, 94, 0.3); border-color: #f43f5e; background: rgba(244, 63, 94, 0.1); }
         .glow-wrong { box-shadow: 0 0 60px rgba(245, 158, 11, 0.5), inset 0 0 20px rgba(245, 158, 11, 0.3); border-color: #f59e0b; background: rgba(245, 158, 11, 0.1); }
 
-        /* Inputs & Buttons */
         .input-box { background: #f8fafc; border: 2px solid transparent; border-radius: 16px; padding: 12px 16px; font-size: 13px; width: 100%; transition: 0.3s; font-weight: 600; color: #1e293b; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); }
         .input-box:focus { border-color: #f97316; outline: none; background: white; box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.1); }
         select.input-box { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23f97316'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; background-size: 16px; padding-right: 36px; }
@@ -48,7 +43,6 @@
         .btn-secondary { background: white; color: #0f172a; border: 2px solid #e2e8f0; border-radius: 16px; font-weight: 800; padding: 12px 20px; transition: all 0.3s ease; cursor: pointer; text-transform: uppercase; font-size: 11px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
         .btn-secondary:hover { border-color: #cbd5e1; background: #f8fafc; transform: translateY(-2px); }
 
-        /* Tables & Scrollbars */
         .log-table-container { max-height: 400px; overflow-y: auto; overflow-x: auto; border-radius: 16px; }
         .custom-scrollbar::-webkit-scrollbar { width: 8px; height: 8px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 10px; }
@@ -62,7 +56,6 @@
         
         @keyframes pulse-orange { 0% { box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.4), inset 0 0 20px rgba(249, 115, 22, 0.2); } 70% { box-shadow: 0 0 0 20px rgba(249, 115, 22, 0), inset 0 0 10px rgba(249, 115, 22, 0); } 100% { box-shadow: 0 0 0 0 rgba(249, 115, 22, 0), inset 0 0 20px rgba(249, 115, 22, 0.2); } }
 
-        /* Toast */
         #toast-container { position: fixed; top: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 12px; pointer-events: none; }
         .toast { background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); border-radius: 16px; padding: 16px 24px; box-shadow: 0 20px 40px -10px rgba(0,0,0,0.1); border-left: 6px solid #f97316; display: flex; align-items: center; gap: 12px; font-size: 14px; font-weight: 700; animation: slideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; color: #1e293b; pointer-events: auto; }
         .toast.success { border-color: #10b981; }
@@ -74,7 +67,6 @@
 <body>
     <div id="toast-container"></div>
 
-    <!-- Header -->
     <div class="flex flex-col md:flex-row justify-between items-center mb-8 px-4 gap-6 max-w-7xl mx-auto">
         <div class="flex flex-col md:flex-row items-center gap-5 text-center md:text-left">
             <div class="w-14 h-14 bg-gradient-to-br from-orange-400 to-orange-600 rounded-2xl shadow-xl shadow-orange-500/30 flex items-center justify-center text-white font-black text-3xl mx-auto md:mx-0 border border-orange-300">F</div>
@@ -92,13 +84,10 @@
         </div>
     </div>
 
-    <!-- Main Grid -->
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 max-w-7xl mx-auto">
         
-        <!-- CỘT TRÁI (8 phần) -->
         <div class="lg:col-span-8 space-y-6">
             
-            <!-- Màn hình quét chính (DARK MODE THEME) -->
             <div class="card-dark p-10 flex flex-col items-center justify-center min-h-[400px]" id="main-display-card">
                 <div class="avatar-circle glow-idle" id="avatar-container">
                     <i class="fa-solid fa-expand text-7xl text-slate-400/50 transition-colors" id="avatar-icon"></i>
@@ -121,7 +110,6 @@
                 </div>
             </div>
 
-            <!-- Panel Đăng Ký Sinh Viên -->
             <div class="card p-6 md:p-8 border-t-4 border-orange-500 relative overflow-hidden">
                 <div class="absolute top-0 right-0 w-32 h-32 bg-orange-50 rounded-bl-full -z-10 opacity-50"></div>
                 <div class="flex flex-col sm:flex-row justify-between gap-3 mb-6">
@@ -178,7 +166,6 @@
                 </div>
             </div>
 
-            <!-- Bảng Lịch Sử -->
             <div class="card p-6 md:p-8 w-full overflow-hidden">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
                     <div class="flex items-center gap-3">
@@ -223,9 +210,7 @@
             </div>
         </div>
 
-        <!-- CỘT PHẢI (4 phần) -->
         <div class="lg:col-span-4 space-y-6">
-            <!-- Thống kê -->
             <div class="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-1 gap-4">
                 <div class="stat-card stat-total">
                     <div>
@@ -256,7 +241,6 @@
                 </div>
             </div>
 
-            <!-- Biểu đồ -->
             <div class="card p-6">
                 <div class="flex items-center gap-2 mb-6">
                     <i class="fa-solid fa-chart-simple text-orange-500"></i>
@@ -267,7 +251,6 @@
                 </div>
             </div>
 
-            <!-- Console phần cứng -->
             <div class="card p-6 bg-slate-800 text-slate-300 relative overflow-hidden">
                 <div class="absolute -right-4 -top-4 text-slate-700 opacity-20 text-6xl">
                     <i class="fa-solid fa-microchip"></i>
@@ -287,17 +270,15 @@
         </div>
     </div>
     
-    <!-- Footer -->
     <div class="mt-12 mb-6 border-t border-slate-200/60 pt-8 pb-4 text-center max-w-7xl mx-auto px-4">
         <p class="text-sm font-black text-slate-400 uppercase tracking-widest mb-3 flex items-center justify-center gap-2">
-            <i class="fa-solid fa-code-merge text-orange-500"></i> Hệ Thống Điểm Danh Fpoly <span class="bg-slate-200 text-slate-600 px-2 py-0.5 rounded text-[10px]">V4.1.0</span>
+            <i class="fa-solid fa-code-merge text-orange-500"></i> Hệ Thống Điểm Danh Fpoly <span class="bg-slate-200 text-slate-600 px-2 py-0.5 rounded text-[10px]">V4.2.0</span>
         </p>
         <p class="text-[11px] font-semibold text-slate-400 max-w-2xl mx-auto">
-            Bản nâng cấp V4.1.0: Thay đổi logic đồng bộ Cloud. Truyền trực tiếp dữ liệu cấu hình xuống chân V5 (DataStream) thay vì dùng Actions để đảm bảo tốc độ phản hồi cho màn hình LCD nhanh nhất.
+            Bản nâng cấp V4.2.0: <b>Sửa lỗi thẻ cứng</b>. Đã cấu hình Web nhận đầy đủ Tên, Lớp, MSSV, Ca từ phần cứng ESP32 gửi lên và ƯU TIÊN tuyệt đối trước khi đối chiếu với Web Database.
         </p>
     </div>
 
-    <!-- MODAL QUẢN LÝ THẺ -->
     <div id="manage-members-modal" class="fixed inset-0 bg-slate-900/70 z-[100] hidden flex items-center justify-center p-4 backdrop-blur-sm transition-opacity">
         <div class="bg-white rounded-[28px] w-full max-w-4xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh] border border-white">
             <div class="px-8 py-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
@@ -342,6 +323,11 @@
             { id: "ca3", name: "Ca 3", start: "13:00", end: "15:00", index: 2 },
             { id: "ca4", name: "Ca 4", start: "15:00", end: "17:00", index: 3 },
             { id: "ca5", name: "Ca 5", start: "17:15", end: "19:30", index: 4 }
+        ];
+
+        const ESP32_STUDENTS = [
+            { uid: "96576E05", shift: "Ca 2" },
+            { uid: "A1B2C3D4", shift: "Ca 1" }
         ];
 
         let ctx = document.getElementById('attendanceChart').getContext('2d');
@@ -485,12 +471,15 @@
             
             document.getElementById('current-shift-badge').innerText = currentShift ? currentShift.name.toUpperCase() : "NGOÀI CA";
             
+            let baseEspForThisShift = 0;
             let webRegisteredForThisShift = 0;
+
             if (currentShift) {
+                baseEspForThisShift = ESP32_STUDENTS.filter(s => s.shift === currentShift.name).length;
                 webRegisteredForThisShift = Object.values(membersDb).filter(m => m.shift === currentShift.name).length;
             }
             
-            let totalStudentsForShift = webRegisteredForThisShift;
+            let totalStudentsForShift = baseEspForThisShift + webRegisteredForThisShift;
             
             document.getElementById('total-count').innerText = totalStudentsForShift;
             document.getElementById('registered-count-badge').innerHTML = `<i class="fa-solid fa-database"></i> ĐÃ LƯU: ${Object.keys(membersDb).length}`;
@@ -546,17 +535,20 @@
         }
 
         const eraWidgetConfig = new EraWidget();
-        let eConfig = { uid: null, cloudSync: null };
+        let eConfig = { uid: null, name: null, mssv: null, class: null, shift: null, cloudSync: null };
 
-        // --- BƯỚC 1: SỬ DỤNG REALTIME CONFIG THAY CHO ACTIONS ---
+        // --- CẤU HÌNH LẠI ONVALUES ĐỂ BẮT 100% DATA TỪ ESP32 ---
         eraWidgetConfig.init({
             needRealtimeConfigs: true,
-            maxRealtimeConfigsCount: 6,  // Có 6 DataStream (V0, V1, V2, V10, V9, V5)
+            maxRealtimeConfigsCount: 6,
             onConfiguration: (c) => {
                 
-                // Lấy Data Stream UID (V0) và Cloud (V5)
                 c.realtime_configs.forEach(config => {
                     if(config.name === "đọc thẻ" || config.name === "UID") eConfig.uid = config;
+                    if(config.name === "trạng thái truy cập" || config.name === "Name") eConfig.name = config;
+                    if(config.name === "MSSV") eConfig.mssv = config;
+                    if(config.name === "Class") eConfig.class = config;
+                    if(config.name === "Ca") eConfig.shift = config;
                     if(config.name === "Cloud" || config.name === "Cloud Sync") eConfig.cloudSync = config;
                 });
 
@@ -575,8 +567,19 @@
                     lastUid = uidVal;
                     isProcessing = true;
 
-                    // Nhận được UID từ ESP32, tiến hành xử lý
-                    handleHardwareScan({ uid: uidVal });
+                    // ĐỌC THÔNG TIN TỪ ESP32 GỬI LÊN (NẾU CÓ)
+                    const nameVal = eConfig.name ? v[eConfig.name.id]?.value : null;
+                    const mssvVal = eConfig.mssv ? v[eConfig.mssv.id]?.value : null;
+                    const classVal = eConfig.class ? v[eConfig.class.id]?.value : null;
+                    const shiftVal = eConfig.shift ? v[eConfig.shift.id]?.value : null;
+
+                    handleHardwareScan({ 
+                        uid: uidVal,
+                        name: nameVal,
+                        mssv: mssvVal,
+                        class: classVal,
+                        shift: shiftVal
+                    });
                 } catch (err) {
                     console.error("Lỗi onValues:", err);
                 } finally {
@@ -585,7 +588,7 @@
             }
         });
 
-        // --- XỬ LÝ DỮ LIỆU VÀ PHẢN HỒI XUỐNG ESP32 ---
+        // --- XỬ LÝ LÔ GIC & ƯU TIÊN THẺ CỨNG ---
         function handleHardwareScan(data) {
             const nameEl = document.getElementById('display-name');
             const subEl = document.getElementById('display-sub');
@@ -599,11 +602,14 @@
             const uid = data.uid;
             const cloudMember = membersDb[uid];
             
-            // Lấy thông tin từ Database
-            let finalName = cloudMember ? cloudMember.name : null;
-            let finalMssv = cloudMember ? cloudMember.mssv : "---";
-            let finalClass = cloudMember ? cloudMember.class : "---";
-            let finalShiftReg = cloudMember ? cloudMember.shift : "---"; 
+            // XÁC MINH ESP32 CÓ GỬI THẺ CỨNG HAY KHÔNG (Khác NGUOI LA, Khác None)
+            const espNameValid = data.name && data.name !== "None" && data.name !== "0" && data.name !== "NGUOI LA" && data.name !== "nguoi la" && data.name !== "Người lạ";
+
+            // NGUYÊN TẮC: LẤY CỦA ESP32 TRƯỚC, NẾU KHÔNG CÓ THÌ MỚI LẤY CỦA CLOUD
+            let finalName = espNameValid ? data.name : (cloudMember ? cloudMember.name : null);
+            let finalMssv = espNameValid ? data.mssv : (cloudMember ? cloudMember.mssv : "---");
+            let finalClass = espNameValid ? data.class : (cloudMember ? cloudMember.class : "---");
+            let finalShiftReg = espNameValid && data.shift && data.shift !== "---" && data.shift !== "None" ? data.shift : (cloudMember ? cloudMember.shift : "---"); 
 
             const now = new Date();
             const timeStr = now.toLocaleTimeString('vi-VN', { hour12: false });
@@ -699,7 +705,7 @@
                     }
 
                     if (isCheckOut && !canCheckOut) {
-                        payloadStatus = 3; // Chưa đến giờ ra (Cooldown)
+                        payloadStatus = 3; // Chưa đến giờ ra
                         let remainingMins = Math.ceil(CHECKOUT_COOLDOWN_MINUTES - diffMins);
                         
                         nameEl.innerText = "CHƯA ĐẾN GIỜ RA";
@@ -748,10 +754,10 @@
                 }
             }
 
-            // --- BƯỚC 2: GỬI LẠI ESP BẰNG CONFIG (THAY VÌ ACTION) ---
+            // --- BƯỚC 2: GỬI KẾT QUẢ ĐÃ LỌC VỀ CHO LCD ESP32 ---
             if (eConfig.cloudSync && eConfig.cloudSync.id) {
                 let responsePayload = `${payloadStatus}|${finalName || "NGUOI LA"}|${finalMssv || "---"}|${finalShiftReg || "---"}|${finalClass || "---"}`;
-                console.log("-> Bắn tín hiệu DataStream ID: ", eConfig.cloudSync.id, " Payload: ", responsePayload);
+                console.log("-> Bắn DataStream ID: ", eConfig.cloudSync.id, " Payload: ", responsePayload);
                 eraWidgetConfig.updateRealtimeConfigs([{ id: eConfig.cloudSync.id, value: responsePayload }]);
             } else {
                 console.warn("LỖI: Chưa có DataStream V5 (Cloud)! ESP32 sẽ không nhận được phản hồi.");
