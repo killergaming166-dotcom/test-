@@ -197,7 +197,6 @@
                     
                     <!-- EXCEL DATE FILTER & BUTTONS -->
                     <div class="flex gap-2 w-full sm:w-auto items-center flex-wrap sm:flex-nowrap">
-                        <!-- Chọn ngày -->
                         <input type="date" id="export-date" class="bg-white border border-emerald-100 text-slate-600 text-[10px] font-black px-3 py-2.5 rounded-xl hover:border-emerald-300 focus:border-emerald-500 focus:outline-none transition-colors shadow-sm cursor-pointer uppercase flex-1 sm:flex-none">
                         
                         <button onclick="window.exportExcel()" class="flex-1 sm:flex-none bg-emerald-50 text-emerald-600 border border-emerald-100 text-[10px] font-black px-4 py-2.5 rounded-xl hover:bg-emerald-500 hover:text-white transition-all duration-300 shadow-sm whitespace-nowrap">
@@ -291,13 +290,13 @@
         </div>
     </div>
     
-    <!-- Footer V2.x.x -->
+    <!-- Footer -->
     <div class="mt-12 mb-6 border-t border-slate-200/60 pt-8 pb-4 text-center max-w-7xl mx-auto px-4">
         <p class="text-sm font-black text-slate-400 uppercase tracking-widest mb-3 flex items-center justify-center gap-2">
-            <i class="fa-solid fa-code-merge text-orange-500"></i> Hệ Thống Điểm Danh Fpoly <span class="bg-slate-200 text-slate-600 px-2 py-0.5 rounded text-[10px]">V2.4.0</span>
+            <i class="fa-solid fa-code-merge text-orange-500"></i> Hệ Thống Điểm Danh Fpoly <span class="bg-slate-200 text-slate-600 px-2 py-0.5 rounded text-[10px]">V3.0.0</span>
         </p>
         <p class="text-[11px] font-semibold text-slate-400 max-w-2xl mx-auto">
-            Bản nâng cấp V2.4.0: Sửa lỗi đếm sĩ số. Sĩ số giờ đây = Số thẻ nạp sẵn + Số thẻ lưu trên Web. Cảnh báo rõ ràng và ghi lại nhật ký nếu Sinh viên quét thẻ <b>SAI CA</b>.
+            Bản nâng cấp V3.0.0: Bổ sung <b>Đồng bộ hai chiều với LCD</b>. Giao diện Web bây giờ sẽ tự động bắn dữ liệu qua Datastream Cloud (V5) để mạch ESP32 hiển thị lên màn hình cứng. Khắc phục triệt để lỗi thẻ bị nhận diện nhầm.
         </p>
     </div>
 
@@ -350,12 +349,6 @@
             { id: "ca4", name: "Ca 4", start: "15:00", end: "17:00", index: 3 },
             { id: "ca5", name: "Ca 5", start: "17:15", end: "19:30", index: 4 }
         ];
-        
-        // DANH SÁCH THẺ ĐƯỢC NẠP CỨNG VÀO ESP32
-        const ESP32_STUDENTS = [
-            { uid: "96576E05", shift: "Ca 2" }, // Danh - Thuộc Ca 2
-            { uid: "A1B2C3D4", shift: "Ca 1" }  // Ví dụ 1 thẻ khác thuộc Ca 1
-        ];
 
         // Khởi tạo Chart
         let ctx = document.getElementById('attendanceChart').getContext('2d');
@@ -387,7 +380,6 @@
             }
         });
 
-        // Đặt ngày hiện tại cho Input Xuất Excel
         const todayIso = new Date().toISOString().split('T')[0];
         document.getElementById('export-date').value = todayIso;
 
@@ -431,9 +423,7 @@
             if (type === 'error') icon = 'circle-exclamation';
             if (type === 'warning') icon = 'triangle-exclamation';
             
-            let colorTheme = type === 'warning' ? 'orange' : (type === 'error' ? 'rose' : 'emerald');
-            // Cập nhật dùng cho báo lỗi VÀNG
-            if (type === 'warning') colorTheme = 'amber';
+            let colorTheme = type === 'warning' ? 'amber' : (type === 'error' ? 'rose' : 'emerald');
             
             toast.className = `toast ${type}`;
             toast.innerHTML = `<div class="w-8 h-8 rounded-full bg-${colorTheme}-100 flex items-center justify-center text-${colorTheme}-500"><i class="fa-solid fa-${icon} text-lg"></i></div> ${msg}`;
@@ -516,16 +506,14 @@
             
             document.getElementById('current-shift-badge').innerText = currentShift ? currentShift.name.toUpperCase() : "NGOÀI CA";
             
-            // TÍNH SĨ SỐ CHÍNH XÁC (Không dùng số cứng 15 nữa)
-            let esp32RegisteredForThisShift = 0;
+            // Sĩ số chỉ lấy từ Web (Bỏ qua ESP32_STUDENTS cũ để không lỗi)
             let webRegisteredForThisShift = 0;
 
             if (currentShift) {
-                esp32RegisteredForThisShift = ESP32_STUDENTS.filter(s => s.shift === currentShift.name).length;
                 webRegisteredForThisShift = Object.values(membersDb).filter(m => m.shift === currentShift.name).length;
             }
             
-            let totalStudentsForShift = esp32RegisteredForThisShift + webRegisteredForThisShift;
+            let totalStudentsForShift = webRegisteredForThisShift;
             
             document.getElementById('total-count').innerText = totalStudentsForShift;
             document.getElementById('registered-count-badge').innerHTML = `<i class="fa-solid fa-database"></i> ĐÃ LƯU: ${Object.keys(membersDb).length}`;
@@ -533,12 +521,10 @@
             let todayLogsForTable = [];
             let presentInCurrentShift = new Set();
 
-            // Hiển thị TOÀN BỘ log trong ngày
             logsDb.forEach(log => {
                 if (log.date === todayStr) {
                     todayLogsForTable.push(log);
                     
-                    // Sĩ số (Stats) chỉ đếm ca hiện tại và không đếm "SAI CA"
                     if (currentShift && log.shiftId === currentShift.id) {
                         if (log.status === "VÀO LỚP") presentInCurrentShift.add(log.uid); 
                         if (log.status === "RA LỚP") presentInCurrentShift.delete(log.uid);
@@ -555,7 +541,7 @@
                     if (l.status === 'VÀO LỚP') borderCol = 'border-emerald-200 bg-emerald-50 text-emerald-600';
                     else if (l.status === 'RA LỚP') borderCol = 'border-rose-200 bg-rose-50 text-rose-600';
                     else if (l.status === 'SAI CA') borderCol = 'border-amber-200 bg-amber-50 text-amber-600';
-                    else borderCol = 'border-orange-200 bg-orange-50 text-orange-600'; // THẺ LẠ
+                    else borderCol = 'border-orange-200 bg-orange-50 text-orange-600';
                     
                     return `
                     <tr class="hover:bg-slate-50 transition-colors">
@@ -584,17 +570,22 @@
         }
 
         const eraWidgetConfig = new EraWidget();
-        let eConfig = { uid: null, name: null, mssv: null, class: null, shift: null };
+        let eConfig = { uid: null, name: null, mssv: null, class: null, shift: null, cloud: null };
 
+        // --- CẬP NHẬT INIT: THÊM ĐỦ 6 CONFIG ---
         eraWidgetConfig.init({
             needRealtimeConfigs: true,
-            maxRealtimeConfigsCount: 5,
+            maxRealtimeConfigsCount: 6, // 6 cái (V0, V1, V2, V10, V9, V5)
             onConfiguration: (c) => {
                 eConfig.uid = c.realtime_configs[0];
                 eConfig.name = c.realtime_configs[1];
                 eConfig.mssv = c.realtime_configs[2];
                 eConfig.class = c.realtime_configs[3];
                 eConfig.shift = c.realtime_configs[4];
+                
+                // Mới: Gán cấu hình V5 cho biến cloud để trả lời ESP32
+                eConfig.cloud = c.realtime_configs[5]; 
+
                 document.getElementById('era-status-dot').className = "w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.8)]";
                 document.getElementById('era-status-text').innerText = "SYSTEM LIVE";
                 document.getElementById('era-status-text').classList.replace('text-slate-500', 'text-emerald-600');
@@ -602,18 +593,14 @@
             onValues: (v) => {
                 try {
                     const uidVal = v[eConfig.uid?.id]?.value;
-                    const nameVal = v[eConfig.name?.id]?.value;
-                    const mssvVal = v[eConfig.mssv?.id]?.value;
-                    const classVal = v[eConfig.class?.id]?.value;
-                    const shiftVal = eConfig.shift ? v[eConfig.shift?.id]?.value : ""; 
-
                     if (!uidVal || uidVal === "" || uidVal === "0" || uidVal === "None") return;
                     if (uidVal === lastUid && isProcessing) return;
 
                     lastUid = uidVal;
                     isProcessing = true;
 
-                    handleHardwareScan({ uid: uidVal, name: nameVal, mssv: mssvVal, class: classVal, shift: shiftVal });
+                    // Chỉ quan tâm uid gửi lên, Web sẽ tự tra soát CSDL
+                    handleHardwareScan({ uid: uidVal });
                 } catch (err) {
                     console.error("Lỗi onValues:", err);
                 } finally {
@@ -628,20 +615,19 @@
             const avatar = document.getElementById('avatar-container');
             const avatarIcon = document.getElementById('avatar-icon');
             const scanStatusDot = document.getElementById('scan-status-dot');
-            
             const displayDetails = document.getElementById('display-details');
             const displayMssv = document.getElementById('display-mssv');
             const displayUid = document.getElementById('display-uid');
             
             const uid = data.uid;
+            
+            // WEB TỰ TRA CỨU CLOUD DB MÀ KHÔNG CẦN ESP32 GỬI TÊN LÊN NỮA
             const cloudMember = membersDb[uid];
             
-            const espNameValid = data.name && data.name !== "None" && data.name !== "0" && data.name !== "NGUOI LA" && data.name !== "nguoi la" && data.name !== "Người lạ";
-            
-            let finalName = cloudMember ? cloudMember.name : (espNameValid ? data.name : null);
-            let finalMssv = cloudMember ? cloudMember.mssv : (espNameValid ? data.mssv : "---");
-            let finalClass = cloudMember ? cloudMember.class : (espNameValid ? data.class : "---");
-            let finalShiftReg = cloudMember ? cloudMember.shift : (espNameValid && data.shift && data.shift !== "---" && data.shift !== "None" ? data.shift : ""); 
+            let finalName = cloudMember ? cloudMember.name : null;
+            let finalMssv = cloudMember ? cloudMember.mssv : "---";
+            let finalClass = cloudMember ? cloudMember.class : "---";
+            let finalShiftReg = cloudMember ? cloudMember.shift : "---"; 
 
             const now = new Date();
             const timeStr = now.toLocaleTimeString('vi-VN', { hour12: false });
@@ -649,18 +635,21 @@
 
             document.getElementById('reg-uid').value = uid;
 
-            // Reset classes
+            // Reset UI
             nameEl.className = "text-4xl md:text-5xl font-black uppercase mb-3 tracking-tighter transition-all duration-300";
             avatar.className = "avatar-circle";
             scanStatusDot.className = "w-2 h-2 rounded-full animate-pulse";
             
-            // Hiển thị rõ MSSV và UID
             displayDetails.classList.remove('hidden');
             displayMssv.innerText = "MSSV: " + finalMssv;
             displayUid.innerText = "UID: " + uid;
 
+            let payloadStatus = 1; // Biến trạng thái để gửi về LCD
+
             if (!finalName) {
                 // TÌNH HUỐNG 1: THẺ LẠ
+                payloadStatus = 0;
+
                 nameEl.innerText = "THẺ CHƯA ĐĂNG KÝ";
                 nameEl.classList.add('text-orange-500');
                 subEl.innerText = "HÃY NHẬP THÔNG TIN BÊN DƯỚI";
@@ -691,34 +680,26 @@
                     shiftIndex: currentShift ? currentShift.index : -1
                 };
 
-                if (isCloudActive && currentUser) {
-                    const logRef = collection(db, 'artifacts', appId, 'public', 'data', 'attendance_logs');
-                    setDoc(doc(logRef), logEntry).catch(err => console.error("Lỗi lưu log:", err));
-                } else {
-                    logEntry.id = Date.now().toString();
-                    logsDb.unshift(logEntry);
-                    saveToLocal();
-                    processLogsAndRender(); 
-                }
+                saveLogToDb(logEntry);
 
             } else {
                 // TÌNH HUỐNG 2: THÀNH VIÊN ĐÃ ĐĂNG KÝ
                 
                 let isWrongShift = false;
-                // KIỂM TRA QUÉT ĐÚNG CA HAY KHÔNG
                 if (currentShift && finalShiftReg && finalShiftReg !== currentShift.name) {
                     isWrongShift = true;
                 }
 
                 if (isWrongShift) {
-                    // UI Điểm danh SAI CA
+                    payloadStatus = 2; // Gửi 2 xuống LCD là Sai Ca
+
                     nameEl.innerText = finalName;
                     nameEl.classList.add('text-amber-500');
                     subEl.innerText = `THẺ LỚP ${finalShiftReg.toUpperCase()} - QUÉT SAI CA`;
                     subEl.className = "text-[11px] font-black uppercase tracking-widest text-amber-500";
                     
                     avatar.style.borderColor = "#f59e0b";
-                    avatar.classList.add('glow-unknown'); // Dùng Glow vàng
+                    avatar.classList.add('glow-unknown'); 
                     avatarIcon.className = "fa-solid fa-triangle-exclamation text-7xl text-amber-500";
                     scanStatusDot.classList.add('bg-amber-500');
                     
@@ -738,19 +719,10 @@
                         shiftId: currentShift ? currentShift.id : "none",
                         shiftIndex: currentShift ? currentShift.index : -1
                     };
-
-                    if (isCloudActive && currentUser) {
-                        const logRef = collection(db, 'artifacts', appId, 'public', 'data', 'attendance_logs');
-                        setDoc(doc(logRef), logEntry).catch(err => console.error("Lỗi lưu log:", err));
-                    } else {
-                        logEntry.id = Date.now().toString();
-                        logsDb.unshift(logEntry);
-                        saveToLocal();
-                        processLogsAndRender(); 
-                    }
+                    
+                    saveLogToDb(logEntry);
 
                 } else {
-                    // ĐIỂM DANH HỢP LỆ VÀO/RA LỚP
                     let isCheckOut = false;
                     let canCheckOut = true;
                     let diffMins = 0;
@@ -770,7 +742,9 @@
                     }
 
                     if (isCheckOut && !canCheckOut) {
+                        payloadStatus = 3; // Cảnh báo chưa đến giờ ra
                         let remainingMins = Math.ceil(CHECKOUT_COOLDOWN_MINUTES - diffMins);
+                        
                         nameEl.innerText = "CHƯA ĐẾN GIỜ RA";
                         nameEl.classList.add('text-orange-500');
                         subEl.innerText = `ĐỢI THÊM ${remainingMins} PHÚT NỮA ĐỂ QUÉT RA!`;
@@ -783,67 +757,56 @@
                         
                         window.showToast(`Bạn mới quét Vào Lớp, hãy đợi thêm để quét Ra!`, 'warning');
                         
-                        setTimeout(() => {
-                            if(lastUid === uid) {
-                                nameEl.innerText = "SẴN SÀNG";
-                                nameEl.className = "text-4xl md:text-5xl font-black text-white uppercase mb-3 tracking-tighter transition-all duration-300";
-                                subEl.innerText = "HÃY ĐẶT THẺ VÀO ĐẦU ĐỌC";
-                                subEl.className = "text-slate-300 text-[11px] font-bold uppercase tracking-widest";
-                                avatar.className = "avatar-circle glow-idle";
-                                avatarIcon.className = "fa-solid fa-expand text-7xl text-slate-400/50 transition-colors";
-                                scanStatusDot.className = "w-2 h-2 rounded-full bg-orange-500 animate-pulse";
-                                displayDetails.classList.add('hidden');
-                            }
-                        }, 8000);
-                        return; 
-                    }
-
-                    nameEl.innerText = finalName;
-                    subEl.classList.replace('text-slate-300', 'text-emerald-300');
-                    let statusStr = isCheckOut ? "RA LỚP" : "VÀO LỚP";
-                    let colorClass = isCheckOut ? "bg-rose-50 text-rose-600 border-rose-100" : "bg-emerald-50 text-emerald-600 border-emerald-100";
-
-                    if (isCheckOut) {
-                        nameEl.classList.add('text-rose-500');
-                        subEl.innerText = "TẠM BIỆT! ĐÃ ĐIỂM DANH RA LỚP";
-                        subEl.className = "text-[11px] font-black uppercase tracking-widest text-rose-300";
-                        avatar.classList.add('glow-out');
-                        avatarIcon.className = "fa-solid fa-person-walking-arrow-right text-7xl text-rose-500";
-                        scanStatusDot.classList.add('bg-rose-500');
                     } else {
-                        nameEl.classList.add('text-emerald-400');
-                        subEl.innerText = "XIN CHÀO! ĐÃ ĐIỂM DANH VÀO LỚP";
-                        subEl.className = "text-[11px] font-black uppercase tracking-widest text-emerald-300";
-                        avatar.classList.add('glow-in');
-                        avatarIcon.className = "fa-solid fa-user-shield text-7xl text-emerald-500";
-                        scanStatusDot.classList.add('bg-emerald-400');
-                    }
+                        payloadStatus = 1; // Hợp lệ
+                        nameEl.innerText = finalName;
+                        subEl.classList.replace('text-slate-300', 'text-emerald-300');
+                        let statusStr = isCheckOut ? "RA LỚP" : "VÀO LỚP";
+                        let colorClass = isCheckOut ? "bg-rose-50 text-rose-600 border-rose-100" : "bg-emerald-50 text-emerald-600 border-emerald-100";
 
-                    let logEntry = {
-                        uid: uid,
-                        name: finalName,
-                        mssv: finalMssv,
-                        class: finalClass,
-                        shiftReg: finalShiftReg,
-                        time: timeStr,
-                        timestamp: now.getTime(),
-                        date: currentDateString,
-                        status: statusStr,
-                        color: colorClass,
-                        shiftId: currentShift ? currentShift.id : "none",
-                        shiftIndex: currentShift ? currentShift.index : -1
-                    };
+                        if (isCheckOut) {
+                            nameEl.classList.add('text-rose-500');
+                            subEl.innerText = "TẠM BIỆT! ĐÃ ĐIỂM DANH RA LỚP";
+                            subEl.className = "text-[11px] font-black uppercase tracking-widest text-rose-300";
+                            avatar.classList.add('glow-out');
+                            avatarIcon.className = "fa-solid fa-person-walking-arrow-right text-7xl text-rose-500";
+                            scanStatusDot.classList.add('bg-rose-500');
+                        } else {
+                            nameEl.classList.add('text-emerald-400');
+                            subEl.innerText = "XIN CHÀO! ĐÃ ĐIỂM DANH VÀO LỚP";
+                            subEl.className = "text-[11px] font-black uppercase tracking-widest text-emerald-300";
+                            avatar.classList.add('glow-in');
+                            avatarIcon.className = "fa-solid fa-user-shield text-7xl text-emerald-500";
+                            scanStatusDot.classList.add('bg-emerald-400');
+                        }
 
-                    if (isCloudActive && currentUser) {
-                        const logRef = collection(db, 'artifacts', appId, 'public', 'data', 'attendance_logs');
-                        setDoc(doc(logRef), logEntry).catch(err => console.error("Lỗi lưu log:", err));
-                    } else {
-                        logEntry.id = Date.now().toString();
-                        logsDb.unshift(logEntry);
-                        saveToLocal();
-                        processLogsAndRender(); 
+                        let logEntry = {
+                            uid: uid,
+                            name: finalName,
+                            mssv: finalMssv,
+                            class: finalClass,
+                            shiftReg: finalShiftReg,
+                            time: timeStr,
+                            timestamp: now.getTime(),
+                            date: currentDateString,
+                            status: statusStr,
+                            color: colorClass,
+                            shiftId: currentShift ? currentShift.id : "none",
+                            shiftIndex: currentShift ? currentShift.index : -1
+                        };
+
+                        saveLogToDb(logEntry);
                     }
                 }
+            }
+
+            // GỬI PHẢN HỒI LẠI CHO ESP32 HIỂN THỊ LÊN MÀN HÌNH LCD
+            if (eConfig.cloud && eConfig.cloud.id) {
+                // Định dạng: Trạng_Thái|Tên|MSSV|Ca|Lớp
+                let responsePayload = `${payloadStatus}|${finalName || "NGUOI LA"}|${finalMssv || "---"}|${finalShiftReg || "---"}|${finalClass || "---"}`;
+                eraWidgetConfig.triggerAction(eConfig.cloud.id, responsePayload);
+            } else {
+                console.warn("Chưa cấu hình Datastream Cloud (V5) trên Widget!");
             }
 
             setTimeout(() => {
@@ -858,6 +821,19 @@
                     displayDetails.classList.add('hidden');
                 }
             }, 8000);
+        }
+
+        // Tách hàm lưu Log để gọn code
+        function saveLogToDb(logEntry) {
+            if (isCloudActive && currentUser) {
+                const logRef = collection(db, 'artifacts', appId, 'public', 'data', 'attendance_logs');
+                setDoc(doc(logRef), logEntry).catch(err => console.error("Lỗi lưu log:", err));
+            } else {
+                logEntry.id = Date.now().toString();
+                logsDb.unshift(logEntry);
+                saveToLocal();
+                processLogsAndRender(); 
+            }
         }
 
         window.saveNewMember = async function() {
@@ -982,7 +958,6 @@
         window.exportExcel = function() {
             if (logsDb.length === 0) return window.showToast("Chưa có dữ liệu điểm danh để xuất!", "warning");
             
-            // Xử lý Filter theo ngày (Tùy chọn tương lai) - Mặc định xuất tất cả log
             const exportData = logsDb.map((l, index) => ({
                 "STT": index + 1,
                 "Ngày": l.date,
