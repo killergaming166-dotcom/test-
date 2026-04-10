@@ -92,31 +92,11 @@
             box-shadow: 0 0 40px rgba(0,0,0,0.2); 
         }
         
-        .glow-idle { 
-            box-shadow: 0 0 30px rgba(255,255,255,0.05); 
-            border-color: rgba(255,255,255,0.2); 
-        }
-        .glow-unknown { 
-            box-shadow: 0 0 60px rgba(249, 115, 22, 0.5), inset 0 0 20px rgba(249, 115, 22, 0.3); 
-            border-color: #f97316; 
-            animation: pulse-orange 2s infinite; 
-            background: rgba(249, 115, 22, 0.1); 
-        }
-        .glow-in { 
-            box-shadow: 0 0 60px rgba(16, 185, 129, 0.5), inset 0 0 20px rgba(16, 185, 129, 0.3); 
-            border-color: #10b981; 
-            background: rgba(16, 185, 129, 0.1); 
-        }
-        .glow-out { 
-            box-shadow: 0 0 60px rgba(244, 63, 94, 0.5), inset 0 0 20px rgba(244, 63, 94, 0.3); 
-            border-color: #f43f5e; 
-            background: rgba(244, 63, 94, 0.1); 
-        }
-        .glow-wrong { 
-            box-shadow: 0 0 60px rgba(245, 158, 11, 0.5), inset 0 0 20px rgba(245, 158, 11, 0.3); 
-            border-color: #f59e0b; 
-            background: rgba(245, 158, 11, 0.1); 
-        }
+        .glow-idle { box-shadow: 0 0 30px rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.2); }
+        .glow-unknown { box-shadow: 0 0 60px rgba(249, 115, 22, 0.5), inset 0 0 20px rgba(249, 115, 22, 0.3); border-color: #f97316; animation: pulse-orange 2s infinite; background: rgba(249, 115, 22, 0.1); }
+        .glow-in { box-shadow: 0 0 60px rgba(16, 185, 129, 0.5), inset 0 0 20px rgba(16, 185, 129, 0.3); border-color: #10b981; background: rgba(16, 185, 129, 0.1); }
+        .glow-out { box-shadow: 0 0 60px rgba(244, 63, 94, 0.5), inset 0 0 20px rgba(244, 63, 94, 0.3); border-color: #f43f5e; background: rgba(244, 63, 94, 0.1); }
+        .glow-wrong { box-shadow: 0 0 60px rgba(245, 158, 11, 0.5), inset 0 0 20px rgba(245, 158, 11, 0.3); border-color: #f59e0b; background: rgba(245, 158, 11, 0.1); }
 
         .input-box { 
             background: #f8fafc; 
@@ -249,6 +229,7 @@
     <!-- Main Content -->
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 max-w-7xl mx-auto">
         <div class="lg:col-span-8 space-y-6">
+            <!-- Scan Hero -->
             <div class="card-dark p-10 flex flex-col items-center justify-center min-h-[400px]" id="main-display-card">
                 <div class="avatar-circle glow-idle" id="avatar-container"><i class="fa-solid fa-expand text-7xl text-slate-400/50 transition-colors" id="avatar-icon"></i></div>
                 <div class="text-center z-10 w-full">
@@ -307,6 +288,7 @@
                 </div>
                 <div class="log-table-container custom-scrollbar rounded-xl border border-slate-100 bg-slate-50/50 p-1">
                     <table class="log-table">
+                        <!-- CHỈ ĐÚNG 4 CỘT -->
                         <thead>
                             <tr>
                                 <th class="rounded-tl-lg">THỜI GIAN</th>
@@ -344,7 +326,7 @@
     </div>
     
     <div class="mt-12 mb-6 border-t border-slate-200/60 pt-8 pb-4 text-center max-w-7xl mx-auto px-4">
-        <p class="text-sm font-black text-slate-400 uppercase tracking-widest mb-3 flex items-center justify-center gap-2"><i class="fa-solid fa-code-merge text-orange-500"></i> Hệ Thống Điểm Danh Fpoly <span class="bg-slate-200 text-slate-600 px-2 py-0.5 rounded text-[10px]">V4.9.5 (Final Reliable Fix)</span></p>
+        <p class="text-sm font-black text-slate-400 uppercase tracking-widest mb-3 flex items-center justify-center gap-2"><i class="fa-solid fa-code-merge text-orange-500"></i> Hệ Thống Điểm Danh Fpoly <span class="bg-slate-200 text-slate-600 px-2 py-0.5 rounded text-[10px]">V5.0 FINAL FIX</span></p>
     </div>
 
     <!-- MODAL QUẢN LÝ -->
@@ -371,6 +353,8 @@
         import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const SHIFTS = [ { id: "ca1", name: "Ca 1", start: "07:00", end: "09:15" }, { id: "ca2", name: "Ca 2", start: "09:30", end: "11:45" }, { id: "ca3", name: "Ca 3", start: "13:00", end: "15:00" }, { id: "ca4", name: "Ca 4", start: "15:00", end: "17:00" }, { id: "ca5", name: "Ca 5", start: "17:15", end: "19:30" } ];
+        
+        // Cấu hình mã thẻ cứng
         const ESP32_HARD_STUDENTS = { "96576E05": { name: "Nguyen Dinh Danh", mssv: "PS45028", shift: "Ca 2" } }; 
 
         let db, appId, currentUser, membersDb = {}, logsDb = [], lastUid = "", isProcessing = false, currentShift = null;
@@ -380,6 +364,7 @@
         let gradient = ctx.createLinearGradient(0,0,0,200); gradient.addColorStop(0, '#f97316'); gradient.addColorStop(1, '#fdba74');
         let attendanceChart = new Chart(ctx, { type: 'bar', data: { labels: ['Ca 1', 'Ca 2', 'Ca 3', 'Ca 4', 'Ca 5'], datasets: [{ label: 'Hiện diện', data: [0,0,0,0,0], backgroundColor: gradient, borderRadius: 6, barThickness: 24 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { display: true, grid: { color: '#f1f5f9' }, ticks: { stepSize: 5 } }, x: { grid: { display: false } } } } });
 
+        // Khởi tạo Firebase
         try {
             if (typeof __firebase_config !== 'undefined') {
                 const config = JSON.parse(__firebase_config);
@@ -404,7 +389,7 @@
                     } 
                 });
             }
-        } catch (e) { console.error("Firebase Init Error:", e); }
+        } catch (e) { console.error("Firebase Error:", e); }
 
         function loadData() {
             if (!currentUser) return;
@@ -412,19 +397,16 @@
             onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'attendance_logs'), (snap) => { logsDb = []; snap.forEach(d => { let data = d.data(); data.id = d.id; logsDb.push(data); }); logsDb.sort((a, b) => b.timestamp - a.timestamp); renderAll(); });
         }
 
-        // BẮT BUỘC DÙNG HOTLINE ĐỂ TRÁNH LỖI WIDGET
+        // HOTLINE ĐẾN ESP32
         async function hotlineToESP32(payload) {
             try { 
                 const url = `https://broker-v2.era.io/api/v1/device/update/vpin?token=${eraToken}&pin=V5&value=${encodeURIComponent(payload)}`;
                 await fetch(url); 
-                console.log("-> Hotline Sent V5:", payload);
-            } catch (err) { 
-                console.error("Hotline API error:", err); 
-            }
+            } catch (err) { console.error("Hotline API error:", err); }
         }
 
         const eraWidget = new EraWidget();
-        let eCfg = { uid: null, name: null, mssv: null, shift: null };
+        let eCfg = { uid: null, name: null, mssv: null, shift: null, cloud: null };
         let tempCache = { name: null, mssv: null, shift: null };
 
         eraWidget.init({
@@ -436,6 +418,7 @@
                     if(n.includes("name") || n.includes("v1") || n === "trạng thái truy cập") eCfg.name = cfg;
                     if(n.includes("mssv") || n.includes("v2")) eCfg.mssv = cfg;
                     if(n.includes("ca") || n.includes("v9")) eCfg.shift = cfg;
+                    if(n.includes("cloud") || n.includes("v5")) eCfg.cloud = cfg;
                 });
                 document.getElementById('era-status-text').innerText = "SYSTEM LIVE"; document.getElementById('era-status-dot').className = "w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse";
             },
@@ -445,16 +428,16 @@
                 if (eCfg.shift && v[eCfg.shift.id]) tempCache.shift = v[eCfg.shift.id].value;
                 if (!eCfg.uid) return; const u = v[eCfg.uid.id]?.value;
                 
-                // An toàn chống treo biến isProcessing
+                // LỖI KẸT THẺ FIX TẠI ĐÂY BẰNG TRY-FINALLY
                 if (u && u !== "0" && u !== "" && u !== "None" && u !== lastUid && !isProcessing) {
                     lastUid = u; isProcessing = true;
                     setTimeout(() => { 
                         try {
                             handleScan(u, tempCache); 
                         } catch (error) {
-                            console.error("Lỗi kẹt hệ thống:", error);
+                            console.error("Lỗi xử lý thẻ:", error);
                         } finally {
-                            isProcessing = false; 
+                            isProcessing = false; // Luôn mở khóa cho thẻ tiếp theo
                         }
                     }, 150);
                 }
@@ -472,17 +455,51 @@
             const now = new Date(); currentShift = getShiftByTime(now);
             
             document.getElementById('reg-uid').value = uid;
-            document.getElementById('display-name').innerText = fName || "THẺ CHƯA ĐĂNG KÝ";
             document.getElementById('display-details').classList.remove('hidden');
             document.getElementById('display-mssv').innerText = fMssv;
             document.getElementById('display-uid').innerText = uid;
-            document.getElementById('avatar-container').className = fName ? "avatar-circle glow-in" : "avatar-circle glow-unknown";
+
+            const uiName = document.getElementById('display-name');
+            const uiTarget = document.getElementById('avatar-container');
+            const uiIcon = document.getElementById('avatar-icon');
+            const uiSub = document.getElementById('display-sub');
+            const uiDot = document.getElementById('scan-status-dot');
 
             let status = fName ? 1 : 0;
             if (fName && currentShift && fShift !== "---" && fShift !== currentShift.name) status = 2;
 
+            // XỬ LÝ ĐỔI MÀU GIAO DIỆN (LẠ, SAI CA, ĐÚNG)
+            if (!fName) {
+                uiName.innerText = "THẺ CHƯA ĐĂNG KÝ";
+                uiName.className = "text-4xl md:text-5xl font-black text-orange-500 uppercase mb-4 tracking-tighter transition-all duration-300 drop-shadow-md";
+                uiTarget.className = "avatar-circle glow-unknown";
+                if(uiIcon) uiIcon.className = "fa-solid fa-fingerprint text-7xl text-orange-500 transition-colors";
+                if(uiSub) uiSub.innerText = "VUI LÒNG ĐĂNG KÝ THẺ TẠI WEB";
+                if(uiDot) uiDot.className = "w-2.5 h-2.5 rounded-full bg-orange-500 animate-pulse";
+                window.showToast(`Phát hiện thẻ lạ: ${uid}`, "warning");
+            } else if (status === 2) {
+                uiName.innerText = fName;
+                uiName.className = "text-4xl md:text-5xl font-black text-amber-500 uppercase mb-4 tracking-tighter transition-all duration-300 drop-shadow-md";
+                uiTarget.className = "avatar-circle glow-wrong";
+                if(uiIcon) uiIcon.className = "fa-solid fa-triangle-exclamation text-7xl text-amber-500 transition-colors";
+                if(uiSub) uiSub.innerText = `QUÉT SAI CA (${fShift})`;
+                if(uiDot) uiDot.className = "w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse";
+                window.showToast(`Cảnh báo: Sinh viên ${fName} đi sai ca.`, "warning");
+            } else {
+                uiName.innerText = fName;
+                uiName.className = "text-4xl md:text-5xl font-black text-emerald-400 uppercase mb-4 tracking-tighter transition-all duration-300 drop-shadow-md";
+                uiTarget.className = "avatar-circle glow-in";
+                if(uiIcon) uiIcon.className = "fa-solid fa-check text-7xl text-emerald-400 transition-colors";
+                if(uiSub) uiSub.innerText = "ĐIỂM DANH THÀNH CÔNG";
+                if(uiDot) uiDot.className = "w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse";
+                window.showToast(`Xin chào ${fName}!`);
+            }
+
             if (fName) {
-                const entry = { uid, name: fName, mssv: fMssv, shiftReg: fShift, time: now.toLocaleTimeString('vi-VN', {hour12: false}), timestamp: now.getTime(), date: now.toDateString(), status: status === 2 ? "SAI CA" : "VÀO LỚP", shiftId: currentShift?.id || "none", shiftIndex: SHIFTS.findIndex(s => s.name === fShift) };
+                // Tự động tìm Index của ca để truyền vào Chart.js
+                let sIdx = SHIFTS.findIndex(s => s.name === fShift);
+                const entry = { uid, name: fName, mssv: fMssv, shiftReg: fShift, time: now.toLocaleTimeString('vi-VN', {hour12: false}), timestamp: now.getTime(), date: now.toDateString(), status: status === 2 ? "SAI CA" : "VÀO LỚP", shiftId: currentShift?.id || "none", shiftIndex: sIdx };
+                
                 if (db && appId) {
                     setDoc(doc(collection(db, 'artifacts', appId, 'public', 'data', 'attendance_logs')), entry).catch(e => console.error("Lỗi Firestore:", e));
                 } else {
@@ -490,16 +507,24 @@
                     logsDb.unshift(entry);
                     renderAll();
                 }
-                window.showToast(`Xin chào ${fName}!`);
-            } else {
-                window.showToast(`Phát hiện thẻ lạ: ${uid}`, "warning");
             }
 
-            // GỬI PHẢN HỒI XUỐNG MẠCH BẰNG API LUÔN
+            // Gọi Hotline API về ESP32
             const payloadRes = `${status}|${fName || "NGUOI LA"}|${fMssv}|${fShift}|${Date.now()}`;
             hotlineToESP32(payloadRes);
 
-            setTimeout(() => { if(lastUid === uid) { document.getElementById('display-name').innerText = "SẴN SÀNG"; document.getElementById('display-details').classList.add('hidden'); document.getElementById('avatar-container').className = "avatar-circle glow-idle"; } }, 6000);
+            // Trả giao diện về Sẵn Sàng
+            setTimeout(() => { 
+                if(lastUid === uid) { 
+                    uiName.innerText = "SẴN SÀNG";
+                    uiName.className = "text-4xl md:text-5xl font-black text-white uppercase mb-4 tracking-tighter transition-all duration-300 drop-shadow-md";
+                    document.getElementById('display-details').classList.add('hidden');
+                    uiTarget.className = "avatar-circle glow-idle";
+                    if(uiIcon) uiIcon.className = "fa-solid fa-expand text-7xl text-slate-400/50 transition-colors";
+                    if(uiSub) uiSub.innerText = "HÃY ĐẶT THẺ VÀO ĐẦU ĐỌC";
+                    if(uiDot) uiDot.className = "w-2.5 h-2.5 rounded-full bg-orange-500 animate-pulse";
+                } 
+            }, 6000);
         }
 
         function getShiftByTime(n) { const t = n.getHours()*60 + n.getMinutes(); return SHIFTS.find(s => { const [h, m] = s.start.split(':').map(Number); const [eh, em] = s.end.split(':').map(Number); return t >= (h*60+m) && t <= (eh*60+em); }); }
@@ -511,10 +536,16 @@
             let present = new Set();
             let totalInShift = (currentShift ? Object.values(ESP32_HARD_STUDENTS).filter(s => s.shift === currentShift.name).length : 0) + (currentShift ? Object.values(membersDb).filter(m => m.shift === currentShift.name).length : 0);
             
+            // Render đúng 4 cột
             tbody.innerHTML = logs.map(l => {
                 if (currentShift && l.shiftId === currentShift.id && l.status === "VÀO LỚP") present.add(l.uid);
                 let badge = l.status === "VÀO LỚP" ? "bg-emerald-50 text-emerald-600 border-emerald-200" : (l.status === "SAI CA" ? "bg-amber-50 text-amber-600 border-amber-200" : "bg-orange-50 text-orange-600 border-orange-200");
-                return `<tr class="hover:bg-slate-50 transition-colors"><td>${l.time}</td><td class="font-bold uppercase">${l.name}</td><td>${l.mssv} <span class="bg-slate-100 text-[9px] px-1 rounded border border-slate-200 ml-1">${l.shiftReg}</span></td><td class="text-right"><span class="px-4 py-1.5 rounded-lg text-[10px] font-black border ${badge}">${l.status}</span></td></tr>`;
+                return `<tr class="hover:bg-slate-50 transition-colors">
+                    <td>${l.time}</td>
+                    <td class="font-bold uppercase">${l.name}</td>
+                    <td>${l.mssv} <span class="bg-slate-100 text-[9px] px-1 rounded border border-slate-200 ml-1">${l.shiftReg}</span></td>
+                    <td class="text-right"><span class="px-4 py-1.5 rounded-lg text-[10px] font-black border ${badge}">${l.status}</span></td>
+                </tr>`;
             }).join('');
             
             if(!logs.length) tbody.innerHTML = `<tr><td colspan="4" class="py-12 text-center text-slate-300 font-bold uppercase text-xs">Chưa có nhật ký hôm nay</td></tr>`;
@@ -522,9 +553,10 @@
             document.getElementById('present-count').innerText = present.size;
             document.getElementById('absent-count').innerText = Math.max(0, totalInShift - present.size);
             
+            // Fix lỗi Chart js Crash
             let sets = [new Set(), new Set(), new Set(), new Set(), new Set()];
             logsDb.forEach(l => { 
-                if(l.date === today && l.shiftIndex >= 0 && l.shiftIndex < 5 && l.status === "VÀO LỚP") {
+                if(l.date === today && l.shiftIndex !== undefined && l.shiftIndex >= 0 && l.shiftIndex < 5 && l.status === "VÀO LỚP") {
                     sets[l.shiftIndex].add(l.uid); 
                 }
             });
