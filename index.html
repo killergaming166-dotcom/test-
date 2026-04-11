@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FPOLY LIVE ATTENDANCE SYSTEM V1.4.2</title>
+    <title>FPOLY LIVE ATTENDANCE SYSTEM V1.4.4</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://www.unpkg.com/@eohjsc/era-widget@1.1.3/src/index.js"></script>
@@ -59,8 +59,8 @@
         .badge-wrong { border-color: #f59e0b; color: #f59e0b; background: #fffbeb; }
         .badge-unknown { border-color: #f97316; color: #f97316; background: #fff7ed; }
 
-        #toast-container { position: fixed; top: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 12px; }
-        .toast { background: white; border-radius: 14px; padding: 16px 24px; box-shadow: 0 15px 35px -5px rgba(0,0,0,0.15); border-left: 5px solid; font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 12px; animation: slideIn 0.4s ease forwards; }
+        #toast-container { position: fixed; top: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 12px; pointer-events: none; }
+        .toast { background: white; border-radius: 14px; padding: 16px 24px; box-shadow: 0 15px 35px -5px rgba(0,0,0,0.15); border-left: 5px solid; font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 12px; animation: slideIn 0.4s ease forwards; pointer-events: auto;}
         
         @keyframes ring { 0% { transform: rotate(0); } 15% { transform: rotate(15deg); } 30% { transform: rotate(-15deg); } 45% { transform: rotate(10deg); } 60% { transform: rotate(-10deg); } 75% { transform: rotate(5deg); } 85% { transform: rotate(-5deg); } 100% { transform: rotate(0); } }
         .animate-ring { animation: ring 1s ease-in-out infinite; }
@@ -127,15 +127,16 @@
                 </div>
 
                 <div class="flex flex-col sm:flex-row gap-4">
-                    <button class="btn-primary !bg-emerald-600 hover:!bg-emerald-700 flex-1 flex items-center justify-center" onclick="taoChuoi()"><i class="fa-solid fa-paper-plane text-lg mr-2"></i> Lưu Vào Bộ Nhớ ESP32</button>
-                    <button class="btn-secondary flex items-center justify-center" onclick="openModal()"><i class="fa-solid fa-bars-staggered text-lg mr-2"></i> Quản lý Thẻ</button>
+                    <button class="btn-primary !bg-emerald-600 hover:!bg-emerald-700 flex-1 flex items-center justify-center" onclick="taoChuoi()"><i class="fa-solid fa-paper-plane text-lg mr-2"></i> Lưu & Bắn API (V6)</button>
+                    <button class="btn-secondary flex items-center justify-center" onclick="openModal()"><i class="fa-solid fa-bars-staggered text-lg mr-2"></i> Quản lý Thẻ (Web)</button>
                 </div>
 
-                <!-- Khu vực Ẩn đi để lưu trữ chuỗi bí mật truyền qua ERa V6 -->
-                <div id="copy-section" class="hidden mt-6 pt-6 border-t-2 border-dashed border-slate-200 transition-all duration-300">
-                    <label class="text-[11px] font-black text-emerald-600 mb-3 flex items-center gap-2 bg-emerald-50 w-max px-3 py-1.5 rounded-lg border border-emerald-100"><i class="fa-solid fa-circle-check text-lg"></i> ĐÃ GỬI LỆNH ĐỒNG BỘ VÀO V6</label>
+                <!-- Khu vực Copy Code - Giữ lại như Sếp yêu cầu để làm phương án dự phòng -->
+                <div id="copy-section" class="mt-6 pt-6 border-t-2 border-dashed border-slate-200 hidden transition-all duration-300">
+                    <label class="text-[11px] font-black text-emerald-600 mb-3 flex items-center gap-2 bg-emerald-50 w-max px-3 py-1.5 rounded-lg border border-emerald-100"><i class="fa-solid fa-circle-check text-lg"></i> ĐÃ SAO CHÉP! HÃY DÁN VÀO V6 TRÊN ERA ĐỂ ĐỒNG BỘ</label>
                     <div class="flex gap-3">
                         <input type="text" id="ketQua" class="input-box flex-1 font-mono text-slate-700 bg-slate-100 shadow-inner" readonly placeholder="Chuỗi mã đồng bộ...">
+                        <button class="bg-slate-800 hover:bg-slate-700 text-white px-6 rounded-xl font-black text-[11px] uppercase transition-all shadow-lg hover:shadow-xl flex items-center" onclick="copyChuoi()"><i class="fa-solid fa-copy mr-2"></i> COPY LẠI</button>
                     </div>
                 </div>
             </div>
@@ -204,9 +205,9 @@
                     <span class="w-3 h-3 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_12px_rgba(16,185,129,0.9)]"></span>
                 </div>
                 <div class="bg-black/50 p-4 rounded-xl mb-5 border border-slate-700 shadow-inner relative z-10 backdrop-blur-sm">
-                    <p class="text-emerald-400 font-mono text-[12px] font-bold tracking-wider">AUTO API V1.4.1 (V6, V7, V8)</p>
+                    <p class="text-emerald-400 font-mono text-[12px] font-bold tracking-wider">AUTO API V1.4.4 (V6, V7, V8)</p>
                 </div>
-                <p class="text-[11px] text-slate-400 mb-5 leading-relaxed font-semibold relative z-10">Logic tự động hóa 100%. Tự động gọi API V6 (Dữ liệu), V7 (Đồng ý), V8 (Từ chối) xuống ESP32. KHÔNG CẦN COPY-PASTE BẰNG TAY!</p>
+                <p class="text-[11px] text-slate-400 mb-5 leading-relaxed font-semibold relative z-10">Logic Tự Động Hóa 100%. Tự động tìm & gọi API V6 (Dữ liệu), V7 (Đồng ý), V8 (Từ chối). Có sẵn tính năng Copy Backup.</p>
                 <button onclick="location.reload()" class="w-full py-3.5 bg-blue-600 hover:bg-blue-500 rounded-xl text-[11px] font-black text-white uppercase tracking-widest transition-all shadow-lg shadow-blue-600/30 relative z-10"><i class="fa-solid fa-rotate-right mr-2"></i>Tải lại Giao diện</button>
             </div>
         </div>
@@ -338,7 +339,7 @@
         let pendingReqUid = "";
         let handledReqUid = "";
 
-        // API BẮN V7 = 1 (ĐỒNG Ý)
+        // BẮN V7 = 1 (ĐỒNG Ý)
         window.acceptRequest = () => {
             document.getElementById('request-modal').classList.add('hidden');
             document.getElementById('reg-uid').value = pendingReqUid;
@@ -346,27 +347,25 @@
             document.getElementById('register-block').scrollIntoView({behavior: "smooth", block: "center"});
             
             if (configV7) {
-                // Tự động bắn số 1 xuống V7
-                eraWidget.updateRealtimeConfigs([{ id: configV7.id, value: "1" }]);
-                showToast("Đã gửi tín hiệu ĐỒNG Ý! Hãy điền tên và bấm Lưu để chuyển dữ liệu vào mạch.", "success");
+                eraWidget.updateRealtimeConfigs([{ id: configV7.id, value: 1 }]);
+                showToast("Đã gửi tín hiệu ĐỒNG Ý (V7)! Hãy điền tên và bấm Lưu để nạp vào mạch.", "success");
             } else {
                 showToast("LỖI: Chưa kết nối chân V7 vào Widget HTML!", "error");
             }
         };
 
-        // API BẮN V8 = 0 (TỪ CHỐI)
+        // BẮN V8 = 0 (TỪ CHỐI)
         window.rejectRequest = () => {
             document.getElementById('request-modal').classList.add('hidden');
             if (configV8) {
-                // Tự động bắn số 0 xuống V8
-                eraWidget.updateRealtimeConfigs([{ id: configV8.id, value: "0" }]);
-                showToast("Đã gửi lệnh TỪ CHỐI xuống thiết bị!", "error");
+                eraWidget.updateRealtimeConfigs([{ id: configV8.id, value: 0 }]);
+                showToast("Đã gửi lệnh TỪ CHỐI (V8) xuống thiết bị!", "error");
             } else {
                 showToast("LỖI: Chưa kết nối chân V8 vào Widget HTML!", "error");
             }
         };
 
-        // LƯU & TỰ ĐỘNG BẮN DỮ LIỆU QUA V6
+        // BẮN DỮ LIỆU QUA V6 VÀ COPY DỰ PHÒNG
         window.taoChuoi = () => {
             const u = document.getElementById('reg-uid').value.trim();
             const n = document.getElementById('reg-name').value.trim();
@@ -386,83 +385,92 @@
             const m_noAccent = removeVietnameseTones(m);
             const s_noAccent = removeVietnameseTones(s);
 
-            // MÃ CHUỖI V6 
             const chuoi = `${u}|${n_noAccent}|${m_noAccent}|${s_noAccent}`;
             
             if (configV6) {
-                // TỰ ĐỘNG BẮN CHUỖI DỮ LIỆU XUỐNG V6 KHÔNG CẦN COPY BẰNG TAY!
                 eraWidget.updateRealtimeConfigs([{ id: configV6.id, value: chuoi }]);
-                showToast("✅ Đã tự động gửi thông tin cấp thẻ xuống ESP32!", "success");
+                showToast("✅ Đã gửi thông tin cấp thẻ xuống ESP32 qua API (V6)!", "success");
             } else {
                 showToast("LỖI: Chưa kết nối chân V6 vào Widget HTML!", "error");
             }
             
-            // Backup cái chuỗi vào ô copy phòng hờ
+            // Backup cái chuỗi vào ô copy (Vẫn giữ đoạn code Copy này như sếp dặn)
             const ketQuaInput = document.getElementById('ketQua');
             ketQuaInput.value = chuoi;
             document.getElementById('copy-section').classList.remove('hidden');
+            ketQuaInput.select();
+            document.execCommand("copy");
             
             document.getElementById('reg-name').value = "";
             document.getElementById('reg-mssv').value = "";
         };
 
+        window.copyChuoi = () => {
+            const copyText = document.getElementById("ketQua");
+            if(!copyText.value) return;
+            copyText.select();
+            document.execCommand("copy");
+            showToast("Đã sao chép mã đồng bộ!", "success");
+        };
+
         eraWidget.init({
             needRealtimeConfigs: true, 
-            maxRealtimeConfigsCount: 15, 
+            maxRealtimeConfigsCount: 20, 
             onConfiguration: (c) => {
                 let foundV6 = false, foundV7 = false, foundV8 = false;
                 
                 c.realtime_configs.forEach(cfg => {
-                    const nameLower = cfg.name.toLowerCase().trim();
-                    if(nameLower.includes("uid") || nameLower.includes("v0")) configUid = cfg;
+                    const pinId = parseInt(cfg.id);
+                    const nameLower = cfg.name ? cfg.name.toLowerCase().trim() : "";
                     
-                    // Tìm V6, V7, V8 từ ERa Config linh hoạt hơn
-                    if(nameLower.includes("v6") || nameLower.includes("yêu cầu") || nameLower.includes("yeu cau")) { configV6 = cfg; foundV6 = true; }
-                    if(nameLower.includes("v7") || nameLower.includes("đồng ý") || nameLower.includes("dong y")) { configV7 = cfg; foundV7 = true; }
-                    if(nameLower.includes("v8") || nameLower.includes("từ chối") || nameLower.includes("tu choi")) { configV8 = cfg; foundV8 = true; }
+                    if(pinId === 0 || nameLower.includes("uid") || nameLower.includes("v0")) configUid = cfg;
+                    
+                    // Cơ chế bắt chân siêu thông minh: Dựa theo số ID hoặc tên
+                    if(pinId === 6 || nameLower === "v6" || nameLower.includes("v6") || nameLower.includes("yêu cầu")) { configV6 = cfg; foundV6 = true; }
+                    if(pinId === 7 || nameLower === "v7" || nameLower.includes("v7") || nameLower.includes("đồng ý")) { configV7 = cfg; foundV7 = true; }
+                    if(pinId === 8 || nameLower === "v8" || nameLower.includes("v8") || nameLower.includes("từ chối")) { configV8 = cfg; foundV8 = true; }
                 });
                 
                 document.getElementById('era-status-text').innerText = "ĐÃ KẾT NỐI ESP32"; 
                 document.getElementById('era-status-dot').classList.replace('bg-slate-300', 'bg-emerald-500');
 
-                // Cảnh báo nếu cấu hình ERa bị thiếu
+                // Báo đỏ nếu sếp quên cấu hình
                 setTimeout(() => {
-                    if (!foundV6) showToast("Lỗi: Chưa thêm cấu hình V6 vào Widget HTML!", "error");
-                    if (!foundV7) showToast("Lỗi: Chưa thêm cấu hình V7 vào Widget HTML!", "error");
-                    if (!foundV8) showToast("Lỗi: Chưa thêm cấu hình V8 vào Widget HTML!", "error");
+                    if (!foundV6) showToast("Lỗi: Chưa tìm thấy V6 trong Config Widget!", "error");
+                    if (!foundV7) showToast("Lỗi: Chưa tìm thấy V7 trong Config Widget!", "error");
+                    if (!foundV8) showToast("Lỗi: Chưa tìm thấy V8 trong Config Widget!", "error");
                 }, 2000);
             },
             onValues: (v) => {
-                // XỬ LÝ KHI ESP32 GỌI WEB QUA V6 (CÓ NGƯỜI CHẠM)
+                // XỬ LÝ ESP32 GỌI WEB QUA V6
                 if (configV6 && v[configV6.id]) {
-                    const valV6 = v[configV6.id].value;
-                    // Lọc để chắc chắn đó là UID cảnh báo chứ không phải là chuỗi Code có dấu |
+                    const valV6 = String(v[configV6.id].value).trim();
                     if (valV6 && valV6 !== "0" && valV6 !== "None" && !valV6.includes("|")) {
                         if (valV6 !== handledReqUid) {
                             pendingReqUid = valV6;
-                            handledReqUid = valV6; // Chống popup hiện lặp lại
+                            handledReqUid = valV6; 
                             document.getElementById('req-uid-text').innerText = valV6;
                             document.getElementById('request-modal').classList.remove('hidden');
                         }
-                    } else {
-                        handledReqUid = ""; // Mở khoá khi ESP32 reset V6
+                    } else if (!valV6 || valV6 === "" || valV6 === "0") {
+                        handledReqUid = ""; // Reset Cờ
                     }
                 }
 
-                // XỬ LÝ QUÉT THẺ BÌNH THƯỜNG (V0)
+                // XỬ LÝ QUÉT THẺ BÌNH THƯỜNG V0
                 if (!configUid) return; 
-                const u = v[configUid.id]?.value;
+                const u = String(v[configUid.id]?.value).trim();
                 
                 if (u && u !== "0" && u !== "" && u !== "None" && u !== lastUid && !isProcessing) {
                     lastUid = u; isProcessing = true;
-                    handledReqUid = ""; // Mở khóa Popup cho thẻ mới
+                    handledReqUid = ""; 
                     handleScan(u); 
                     setTimeout(() => { isProcessing = false; }, 1000); 
                 }
             }
         });
 
-        // XỬ LÝ LOGIC ĐIỂM DANH (LƯU LOG VÀ ĐỔI MÀU MÀN HÌNH HTML)
+        // XỬ LÝ LOGIC ĐIỂM DANH
         let resetTimer = null;
         function handleScan(uid) {
             const hardcoded = ESP32_HARD_STUDENTS[uid];
@@ -481,7 +489,7 @@
             let actionStr = "VÀO LỚP";
 
             if (fName && currentShift && fShift !== "---" && fShift !== currentShift.name) {
-                status = 2; // Sai Ca
+                status = 2; 
                 actionStr = "SAI CA"; 
             } else if (fName && currentShift && fShift === currentShift.name) {
                 const todayStr = now.toDateString();
@@ -622,7 +630,6 @@
         };
         window.closeModal = () => { modalEl.classList.add('hidden'); };
         
-        // HÀM XÓA THẺ TỰ ĐỘNG BẮN LỆNH VÀO V6 KHÔNG CẦN COPY BẰNG TAY
         window.delMember = (u) => { 
             if(confirm("Xóa thẻ này khỏi hệ thống?\n\nLệnh xóa thẻ sẽ được gửi TỰ ĐỘNG xuống thiết bị đọc thẻ.")) { 
                 delete membersDb[u]; 
