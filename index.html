@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FPOLY LIVE ATTENDANCE SYSTEM V1.3.6</title>
+    <title>FPOLY LIVE ATTENDANCE SYSTEM V1.3.7</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://www.unpkg.com/@eohjsc/era-widget@1.1.3/src/index.js"></script>
@@ -11,39 +11,22 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
-        body { 
-            font-family: 'Plus Jakarta Sans', sans-serif; 
-            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); 
-            color: #334155; 
-            margin: 0; 
-            padding: 20px; 
-            min-height: 100vh;
-        }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); color: #334155; margin: 0; padding: 20px; min-height: 100vh; }
         
         .card { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); border-radius: 20px; box-shadow: 0 10px 25px -5px rgba(56, 189, 248, 0.15); border: 1px solid rgba(255,255,255,1); padding: 24px; transition: transform 0.3s; }
         .card-dark { background: linear-gradient(145deg, #1e1b4b, #0f172a); border-radius: 20px; box-shadow: 0 20px 40px -10px rgba(99, 102, 241, 0.3); padding: 32px; position: relative; overflow: hidden; }
-        .card-dark::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, transparent 60%); pointer-events: none; animation: pulse-slow 8s infinite alternate; }
         
-        @keyframes pulse-slow { 0% { transform: scale(1); opacity: 0.8; } 100% { transform: scale(1.1); opacity: 1; } }
-
-        .stat-card { border-radius: 16px; padding: 20px; display: flex; align-items: center; justify-content: space-between; border: 1px solid rgba(255,255,255,0.5); box-shadow: 0 10px 20px -5px rgba(0,0,0,0.05); transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        .stat-card { border-radius: 16px; padding: 20px; display: flex; align-items: center; justify-content: space-between; border: 1px solid rgba(255,255,255,0.5); box-shadow: 0 10px 20px -5px rgba(0,0,0,0.05); transition: transform 0.3s; }
         .stat-card:hover { transform: translateY(-4px) scale(1.02); }
-        
         .stat-total { background: linear-gradient(135deg, #eff6ff, #dbeafe); border-color: #bfdbfe; }
         .stat-total .stat-icon { background: #bfdbfe; color: #2563eb; }
-        .stat-total h4 { color: #1d4ed8; }
-        
         .stat-present { background: linear-gradient(135deg, #ecfdf5, #d1fae5); border-color: #a7f3d0; }
         .stat-present .stat-icon { background: #a7f3d0; color: #059669; }
-        .stat-present h4 { color: #047857; }
-        
         .stat-absent { background: linear-gradient(135deg, #fff1f2, #ffe4e6); border-color: #fecdd3; }
         .stat-absent .stat-icon { background: #fecdd3; color: #e11d48; }
-        .stat-absent h4 { color: #be123c; }
-
-        .stat-icon { width: 54px; height: 54px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .stat-icon { width: 54px; height: 54px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 24px; }
         
-        .avatar-circle { width: 130px; height: 130px; border-radius: 50%; background: #1e293b; display: flex; align-items: center; justify-content: center; border: 4px solid #475569; margin: 0 auto 20px; transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); position: relative; z-index: 10; }
+        .avatar-circle { width: 130px; height: 130px; border-radius: 50%; background: #1e293b; display: flex; align-items: center; justify-content: center; border: 4px solid #475569; margin: 0 auto 20px; transition: all 0.4s; }
         
         .glow-unknown { border-color: #f97316; box-shadow: 0 0 50px rgba(249, 115, 22, 0.6), inset 0 0 20px rgba(249, 115, 22, 0.4); background: rgba(249, 115, 22, 0.1); }
         .glow-in { border-color: #10b981; box-shadow: 0 0 50px rgba(16, 185, 129, 0.6), inset 0 0 20px rgba(16, 185, 129, 0.4); background: rgba(16, 185, 129, 0.1); transform: scale(1.05); }
@@ -55,22 +38,21 @@
         .input-box:focus { border-color: #3b82f6; background: white; box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15); }
         select.input-box { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%233b82f6'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; background-size: 16px; padding-right: 36px; }
         
-        .btn-primary { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; border-radius: 12px; font-weight: 800; padding: 14px 20px; cursor: pointer; text-transform: uppercase; font-size: 12px; border: none; transition: 0.3s; box-shadow: 0 10px 20px -5px rgba(37, 99, 235, 0.4); letter-spacing: 0.5px; }
+        .btn-primary { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; border-radius: 12px; font-weight: 800; padding: 14px 20px; cursor: pointer; text-transform: uppercase; font-size: 12px; border: none; transition: 0.3s; box-shadow: 0 10px 20px -5px rgba(37, 99, 235, 0.4); }
         .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 15px 25px -5px rgba(37, 99, 235, 0.5); }
         
         .btn-secondary { background: white; color: #1e293b; border: 2px solid #cbd5e1; border-radius: 12px; font-weight: 800; padding: 14px 20px; cursor: pointer; text-transform: uppercase; font-size: 11px; transition: 0.3s; }
-        .btn-secondary:hover { background: #f8fafc; border-color: #94a3b8; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .btn-secondary:hover { background: #f8fafc; border-color: #94a3b8; transform: translateY(-2px); }
 
         .log-table-container { max-height: 400px; overflow-y: auto; border-radius: 14px; border: 1px solid #e2e8f0; background: white; }
         .log-table { width: 100%; border-collapse: collapse; min-width: 600px; }
-        /* CĂN GIỮA CỘT TRẠNG THÁI VÀ ĐỂ ĐỘ RỘNG CỐ ĐỊNH */
-        .log-table th { font-size: 10px; color: #64748b; text-transform: uppercase; padding: 16px; border-bottom: 2px solid #e2e8f0; text-align: left; position: sticky; top: 0; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px); z-index: 10; font-weight: 800; letter-spacing: 0.5px; }
+        .log-table th { font-size: 10px; color: #64748b; text-transform: uppercase; padding: 16px; border-bottom: 2px solid #e2e8f0; text-align: left; position: sticky; top: 0; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px); z-index: 10; font-weight: 800; }
         .log-table th.col-status { text-align: center; width: 120px; } 
         .log-table td { padding: 16px; font-size: 13px; border-bottom: 1px solid #f1f5f9; font-weight: 600; color: #334155; }
         .log-table td.col-status { text-align: center; }
         .log-table tr:hover td { background-color: #f8fafc; }
 
-        .badge { padding: 6px 12px; border-radius: 8px; font-size: 10px; font-weight: 900; border: 1px solid; display: inline-block; letter-spacing: 0.5px; width: 100px; text-align: center;}
+        .badge { padding: 6px 12px; border-radius: 8px; font-size: 10px; font-weight: 900; border: 1px solid; display: inline-block; width: 100px; text-align: center;}
         .badge-in { border-color: #10b981; color: #10b981; background: #ecfdf5; }
         .badge-out { border-color: #f43f5e; color: #f43f5e; background: #fff1f2; }
         .badge-late { border-color: #eab308; color: #ca8a04; background: #fefce8; }
@@ -79,6 +61,10 @@
 
         #toast-container { position: fixed; top: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 12px; }
         .toast { background: white; border-radius: 14px; padding: 16px 24px; box-shadow: 0 15px 35px -5px rgba(0,0,0,0.15); border-left: 5px solid; font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 12px; animation: slideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+        
+        /* Hiệu ứng rung chuông xin đăng ký */
+        @keyframes ring { 0% { transform: rotate(0); } 15% { transform: rotate(15deg); } 30% { transform: rotate(-15deg); } 45% { transform: rotate(10deg); } 60% { transform: rotate(-10deg); } 75% { transform: rotate(5deg); } 85% { transform: rotate(-5deg); } 100% { transform: rotate(0); } }
+        .animate-ring { animation: ring 1s ease-in-out infinite; }
         @keyframes slideIn { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
     </style>
 </head>
@@ -123,11 +109,10 @@
                         <p id="display-sub" class="text-slate-300 text-[11px] font-bold uppercase tracking-widest">HÃY ĐẶT THẺ VÀO ĐẦU ĐỌC</p>
                     </div>
                 </div>
-                <div class="absolute right-[-20px] bottom-[-40px] opacity-[0.03] pointer-events-none transform -rotate-12"><i class="fa-solid fa-fingerprint text-[250px] text-white"></i></div>
             </div>
 
             <!-- ĐĂNG KÝ THẺ SINH VIÊN -->
-            <div class="card border-t-4 border-blue-500 relative overflow-hidden">
+            <div class="card border-t-4 border-blue-500 relative overflow-hidden" id="register-block">
                 <div class="absolute top-0 right-0 w-40 h-40 bg-blue-50 rounded-bl-full -z-10 opacity-50"></div>
                 <div class="flex justify-between items-center mb-6">
                     <h3 class="font-black text-sm uppercase text-slate-800 flex items-center"><div class="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center mr-3"><i class="fa-solid fa-id-card"></i></div> Đăng Ký Thẻ Sinh Viên</h3>
@@ -184,7 +169,7 @@
                                 <th class="pl-4">THỜI GIAN</th>
                                 <th>THÀNH VIÊN</th>
                                 <th>MSSV & CA ĐK</th>
-                                <th class="col-status">TRẠNG THÁI</th> <!-- CỘT TRẠNG THÁI ĐÃ CĂN GIỮA -->
+                                <th class="col-status">TRẠNG THÁI</th> 
                             </tr>
                         </thead>
                         <tbody id="log-body"></tbody>
@@ -222,15 +207,15 @@
                     <span class="w-3 h-3 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_12px_rgba(16,185,129,0.9)]"></span>
                 </div>
                 <div class="bg-black/50 p-4 rounded-xl mb-5 border border-slate-700 shadow-inner relative z-10 backdrop-blur-sm">
-                    <p class="text-blue-400 font-mono text-[12px] font-bold tracking-wider">OFFLINE MASTER V1.3.6</p>
+                    <p class="text-blue-400 font-mono text-[12px] font-bold tracking-wider">OFFLINE MASTER V1.3.7</p>
                 </div>
-                <p class="text-[11px] text-slate-400 mb-5 leading-relaxed font-semibold relative z-10">Logic độc lập siêu tốc! Web dùng UID tra cứu trực tiếp sổ bộ nhớ, tính toán Trễ/Sai Ca nâng cao.</p>
+                <p class="text-[11px] text-slate-400 mb-5 leading-relaxed font-semibold relative z-10">Logic độc lập + Hỗ trợ tương tác cảm biến chạm. Web xử lý duyệt thẻ Realtime.</p>
                 <button onclick="location.reload()" class="w-full py-3.5 bg-blue-600 hover:bg-blue-500 rounded-xl text-[11px] font-black text-white uppercase tracking-widest transition-all shadow-lg shadow-blue-600/30 relative z-10"><i class="fa-solid fa-rotate-right mr-2"></i>Tải lại Giao diện</button>
             </div>
         </div>
     </div>
 
-    <!-- MODAL -->
+    <!-- MODAL QUẢN LÝ THẺ -->
     <div id="manage-members-modal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-4 transition-opacity">
         <div class="bg-white rounded-[24px] w-full max-w-4xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh] border border-slate-200">
             <div class="px-8 py-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/80 backdrop-blur">
@@ -249,6 +234,21 @@
         </div>
     </div>
 
+    <!-- MODAL POPUP YÊU CẦU ĐĂNG KÝ -->
+    <div id="request-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-[200] hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-[24px] w-full max-w-sm shadow-2xl overflow-hidden flex flex-col border border-slate-200 p-8 text-center">
+            <div class="w-20 h-20 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-5 text-4xl shadow-inner">
+                <i class="fa-solid fa-bell animate-ring"></i>
+            </div>
+            <h3 class="font-black text-slate-800 uppercase text-xl mb-2">Sinh Viên Xin Đăng Ký</h3>
+            <p class="text-sm text-slate-500 mb-6 font-semibold leading-relaxed">Có một sinh viên ở cửa đang chạm cảm biến yêu cầu cấp thẻ. Mã thẻ (UID): <br><span id="req-uid-text" class="font-mono font-black text-orange-500 bg-orange-50 px-3 py-1.5 rounded-lg border border-orange-100 inline-block mt-2 text-lg"></span></p>
+            <div class="flex gap-3">
+                <button onclick="rejectRequest()" class="flex-1 bg-rose-50 hover:bg-rose-500 text-rose-600 hover:text-white font-black text-xs uppercase px-4 py-3.5 rounded-xl transition-colors border border-rose-100">Từ chối</button>
+                <button onclick="acceptRequest()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-black text-xs uppercase px-4 py-3.5 rounded-xl transition-colors shadow-lg shadow-blue-500/30">Đồng ý đăng ký</button>
+            </div>
+        </div>
+    </div>
+
     <script type="module">
         const SHIFTS = [ 
             { id: "ca1", name: "Ca 1", start: "07:00", end: "09:15", index: 0 }, 
@@ -259,11 +259,7 @@
         ];
         
         const CHECKOUT_COOLDOWN_MINUTES = 15; 
-        
-        // DANH SÁCH THẺ VIP ĐƯỢC ƯU TIÊN MẶC ĐỊNH
-        const ESP32_HARD_STUDENTS = { 
-            "96576E05": { name: "Nguyen Dinh Danh", mssv: "PS45028", shift: "Ca 2" } 
-        }; 
+        const ESP32_HARD_STUDENTS = { "96576E05": { name: "Nguyen Dinh Danh", mssv: "PS45028", shift: "Ca 2" } }; 
 
         let isProcessing = false;
         let lastUid = "";
@@ -280,7 +276,6 @@
             renderAll();
         });
 
-        // LƯU TRỮ LOCAL
         let membersDb = JSON.parse(localStorage.getItem('era_members')) || {};
         let logsDb = JSON.parse(localStorage.getItem('era_logs')) || [];
 
@@ -289,7 +284,6 @@
             localStorage.setItem('era_logs', JSON.stringify(logsDb));
         }
 
-        // KHỞI TẠO BIỂU ĐỒ 
         let ctx = document.getElementById('attendanceChart').getContext('2d');
         let gradientChart = ctx.createLinearGradient(0,0,0,200); 
         gradientChart.addColorStop(0, '#3b82f6'); 
@@ -301,12 +295,11 @@
             options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { display: true, ticks: { stepSize: 1 } }, x: { grid: { display: false } } } } 
         });
 
-        // TOAST CHUYÊN NGHIỆP
         window.showToast = (msg, type='success') => {
             const c = document.getElementById('toast-container');
             const t = document.createElement('div');
             let borderColor = type === 'success' ? '#10b981' : (type === 'warning' ? '#f59e0b' : '#f43f5e');
-            let icon = type === 'success' ? 'fa-check-circle' : 'fa-triangle-exclamation';
+            let icon = type === 'success' ? 'fa-check-circle' : (type === 'warning' ? 'fa-triangle-exclamation' : 'fa-circle-xmark');
             let iconColor = type === 'success' ? '#10b981' : (type === 'warning' ? '#f59e0b' : '#f43f5e');
             
             t.className = `toast`;
@@ -336,9 +329,6 @@
             return str;
         }
 
-        // ==========================================
-        // LƯU & COPY MÃ NẠP
-        // ==========================================
         window.taoChuoi = () => {
             const u = document.getElementById('reg-uid').value.trim();
             const n = document.getElementById('reg-name').value.trim();
@@ -346,7 +336,7 @@
             const s = document.getElementById('reg-shift').value.trim();
 
             if (!u || !n) {
-                showToast("Vui lòng quét thẻ lạ để lấy UID và nhập tên!", "warning");
+                showToast("Vui lòng nhập đầy đủ Mã thẻ và Họ tên!", "warning");
                 return;
             }
 
@@ -367,7 +357,7 @@
             ketQuaInput.select();
             document.execCommand("copy");
             
-            showToast("Đã lưu và tự động sao chép mã đồng bộ!", "success");
+            showToast("✅ ĐÃ LƯU & TỰ ĐỘNG SAO CHÉP MÃ ĐỒNG BỘ! Hãy dán (Ctrl+V) vào V10 trên ERa.", "success");
             
             document.getElementById('reg-name').value = "";
             document.getElementById('reg-mssv').value = "";
@@ -378,31 +368,73 @@
             if(!copyText.value) return;
             copyText.select();
             document.execCommand("copy");
-            showToast("Đã sao chép mã đồng bộ!", "success");
+            showToast("✅ Đã sao chép mã đồng bộ!", "success");
         };
 
         // ==========================================
-        // ERA WIDGET GIAO TIẾP VỚI ESP32 (CHỈ LẤY UID)
+        // QUẢN LÝ POPUP XIN ĐĂNG KÝ (TỪ CẢM BIẾN CHẠM V6)
+        // ==========================================
+        let pendingReqUid = "";
+        let handledReqUid = "";
+
+        window.acceptRequest = () => {
+            document.getElementById('request-modal').classList.add('hidden');
+            document.getElementById('reg-uid').value = pendingReqUid;
+            document.getElementById('reg-name').focus();
+            document.getElementById('register-block').scrollIntoView({behavior: "smooth", block: "center"});
+            showToast("Hãy nhập thông tin sinh viên và bấm Lưu & Sao chép mã!", "success");
+        };
+
+        window.rejectRequest = () => {
+            document.getElementById('request-modal').classList.add('hidden');
+            const chuoiTuChoi = `${pendingReqUid}|REJECT|---|---`;
+            const ketQuaInput = document.getElementById('ketQua');
+            ketQuaInput.value = chuoiTuChoi;
+            document.getElementById('copy-section').classList.remove('hidden');
+            
+            ketQuaInput.select();
+            document.execCommand("copy");
+            
+            showToast("⚠️ Đã copy MÃ TỪ CHỐI! Hãy dán (Ctrl+V) vào V10 để ESP32 báo lại cho sinh viên.", "error");
+        };
+
+        // ==========================================
+        // ERA WIDGET GIAO TIẾP VỚI ESP32 
         // ==========================================
         const eraWidget = new EraWidget();
         let configUid = null;
+        let configReq = null; // Cấu hình cho chân V6
 
         eraWidget.init({
             needRealtimeConfigs: true, maxRealtimeConfigsCount: 5,
             onConfiguration: (c) => {
                 c.realtime_configs.forEach(cfg => {
                     if(cfg.name.toLowerCase().includes("uid") || cfg.name.toLowerCase().includes("v0")) configUid = cfg;
+                    // Bắt cấu hình V6 (Tên Datastream có thể là V6 hoặc Yêu cầu)
+                    if(cfg.name.toLowerCase().includes("v6") || cfg.name.toLowerCase().includes("yêu cầu")) configReq = cfg;
                 });
                 document.getElementById('era-status-text').innerText = "ĐÃ KẾT NỐI ESP32"; 
                 document.getElementById('era-status-dot').classList.replace('bg-slate-300', 'bg-emerald-500');
             },
             onValues: (v) => {
+                // XỬ LÝ KHI CÓ NGƯỜI CHẠM CẢM BIẾN (Chân V6 nhảy UID)
+                if (configReq && v[configReq.id]?.value) {
+                    const reqUid = v[configReq.id].value;
+                    if (reqUid && reqUid !== "0" && reqUid !== "None" && reqUid !== handledReqUid) {
+                        pendingReqUid = reqUid;
+                        handledReqUid = reqUid; // Chống popup hiện lặp lại
+                        document.getElementById('req-uid-text').innerText = reqUid;
+                        document.getElementById('request-modal').classList.remove('hidden');
+                    }
+                }
+
+                // XỬ LÝ KHI CÓ NGƯỜI QUẸT THẺ (Chân V0 nhảy UID)
                 if (!configUid) return; 
                 const u = v[configUid.id]?.value;
                 
                 if (u && u !== "0" && u !== "" && u !== "None" && u !== lastUid && !isProcessing) {
                     lastUid = u; isProcessing = true;
-                    // FIX TRIỆT ĐỂ: Chỉ dùng UID để xử lý
+                    handledReqUid = ""; // Mở khoá cờ chặn Popup khi có người mới quẹt thẻ
                     handleScan(u); 
                     setTimeout(() => { isProcessing = false; }, 1000); 
                 }
@@ -412,8 +444,6 @@
         // XỬ LÝ LOGIC ĐIỂM DANH HOÀN TOÀN ĐỘC LẬP TỪ UID
         let resetTimer = null;
         function handleScan(uid) {
-            
-            // 1. TÌM KIẾM UID TRỰC TIẾP TRONG DATABASE CỦA WEB & THẺ VIP
             const hardcoded = ESP32_HARD_STUDENTS[uid];
             const localMember = membersDb[uid]; 
             
@@ -424,7 +454,6 @@
             const now = new Date(); 
             currentShift = getShiftByTime(now);
             
-            // Hiện UID lên thanh đăng ký
             document.getElementById('reg-uid').value = uid;
 
             let status = fName ? 1 : 0;
@@ -432,7 +461,7 @@
 
             if (fName && currentShift && fShift !== "---" && fShift !== currentShift.name) {
                 status = 2; // Sai Ca
-                actionStr = "SAI CA"; // FIX LỖI: Gán biến chữ chuẩn xác khi sai ca
+                actionStr = "SAI CA"; 
             } else if (fName && currentShift && fShift === currentShift.name) {
                 const todayStr = now.toDateString();
                 const hasCheckedIn = logsDb.some(l => l.date === todayStr && l.uid === uid && l.shiftId === currentShift.id && (l.status.includes("VÀO LỚP") || l.status.includes("TRỄ")));
@@ -454,7 +483,6 @@
                 }
             }
 
-            // GIAO DIỆN CẬP NHẬT
             const UI = {
                 name: document.getElementById('display-name'),
                 sub: document.getElementById('display-sub'),
@@ -475,40 +503,33 @@
                 UI.avatar.classList.add('glow-unknown');
                 UI.icon.className = "fa-solid fa-fingerprint text-6xl text-orange-500 transition-transform transform scale-110";
                 UI.sub.innerText = "VUI LÒNG ĐĂNG KÝ THẺ MỚI BÊN DƯỚI";
-                showToast(`Phát hiện thẻ lạ: ${uid}`, "warning");
             } else if (status === 2) {
                 UI.name.innerText = fName; UI.name.className = "text-4xl md:text-5xl font-black text-amber-500 mb-4 tracking-tighter drop-shadow-md";
                 UI.avatar.classList.add('glow-wrong');
                 UI.icon.className = "fa-solid fa-triangle-exclamation text-6xl text-amber-500 transition-transform transform scale-110";
                 UI.sub.innerText = `QUÉT SAI CA (${fShift})`;
-                showToast(`Sinh viên ${fName} đi sai ca.`, "warning");
             } else if (status === 3) {
                 UI.name.innerText = "CHƯA ĐẾN GIỜ RA"; UI.name.className = "text-4xl md:text-5xl font-black text-orange-500 mb-4 tracking-tighter drop-shadow-md";
                 UI.avatar.classList.add('glow-wrong');
                 UI.icon.className = "fa-solid fa-clock text-6xl text-orange-500 transition-transform transform scale-110";
                 UI.sub.innerText = "VUI LÒNG ĐỢI ĐẾN CUỐI CA HỌC";
-                showToast(`Chưa đến giờ ra!`, "warning");
             } else if (status === 4) {
                 UI.name.innerText = fName; UI.name.className = "text-4xl md:text-5xl font-black text-yellow-400 mb-4 tracking-tighter drop-shadow-md";
                 UI.avatar.classList.add('glow-late');
                 UI.icon.className = "fa-solid fa-clock-rotate-left text-6xl text-yellow-500 transition-transform transform scale-110";
                 UI.sub.innerText = "VÀO LỚP TRỄ";
-                showToast(`${fName} đi trễ!`, "warning");
             } else if (status === 5) {
                 UI.name.innerText = fName; UI.name.className = "text-4xl md:text-5xl font-black text-rose-400 mb-4 tracking-tighter drop-shadow-md";
                 UI.avatar.classList.add('glow-out');
                 UI.icon.className = "fa-solid fa-person-walking-arrow-right text-6xl text-rose-500 transition-transform transform scale-110";
                 UI.sub.innerText = "ĐÃ ĐIỂM DANH RA LỚP";
-                showToast(`Tạm biệt ${fName}!`);
             } else {
                 UI.name.innerText = fName; UI.name.className = "text-4xl md:text-5xl font-black text-emerald-400 mb-4 tracking-tighter drop-shadow-md";
                 UI.avatar.classList.add('glow-in');
                 UI.icon.className = "fa-solid fa-check text-6xl text-emerald-500 transition-transform transform scale-110";
                 UI.sub.innerText = "ĐIỂM DANH VÀO LỚP THÀNH CÔNG";
-                showToast(`Xin chào ${fName}!`);
             }
 
-            // GHI LOG
             if (fName && status !== 3) {
                 let sIdx = SHIFTS.findIndex(s => s.name === fShift);
                 const entry = { id: Date.now().toString(), uid, name: fName, mssv: fMssv, shiftReg: fShift, time: now.toLocaleTimeString('vi-VN', {hour12: false}), timestamp: now.getTime(), date: now.toDateString(), status: actionStr, shiftId: currentShift?.id || "none", shiftIndex: sIdx };
@@ -517,7 +538,6 @@
                 renderAll();
             }
 
-            // Tự reset giao diện
             if(resetTimer) clearTimeout(resetTimer);
             resetTimer = setTimeout(() => { 
                 if(lastUid === uid) { 
@@ -596,14 +616,13 @@
                 ketQuaInput.select();
                 document.execCommand("copy");
                 
-                window.showToast("Đã tạo và sao chép MÃ XÓA THẺ!", "warning");
+                window.showToast("⚠️ Đã tạo và sao chép MÃ XÓA THẺ!", "warning");
             } 
         };
         
         window.clearLogs = () => { const displayDate = document.getElementById('filter-date').value.split('-').reverse().join('/'); if(confirm(`Xóa toàn bộ nhật ký của ngày ${displayDate}?`)) { logsDb = logsDb.filter(l => l.date !== selectedDateStr); syncLocal(); renderAll(); showToast("Đã xóa nhật ký ngày đang chọn!"); } };
-        window.exportExcel = () => { const logsToExport = logsDb.filter(l => l.date === selectedDateStr); if(logsToExport.length===0) return window.showToast("Trống!","warning"); const ws = XLSX.utils.json_to_sheet(logsToExport.map(l => ({ "Giờ": l.time, "Tên": l.name, "MSSV": l.mssv, "Trạng thái": l.status }))); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Attendance"); XLSX.writeFile(wb, `FPOLY_${selectedDateStr.replace(/ /g,'_')}.xlsx`); };
+        window.exportExcel = () => { const logsToExport = logsDb.filter(l => l.date === selectedDateStr); if(logsToExport.length===0) return showToast("Trống!","warning"); const ws = XLSX.utils.json_to_sheet(logsToExport.map(l => ({ "Giờ": l.time, "Tên": l.name, "MSSV": l.mssv, "Trạng thái": l.status }))); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Attendance"); XLSX.writeFile(wb, `FPOLY_${selectedDateStr.replace(/ /g,'_')}.xlsx`); };
 
-        // FIX LỖI CA -- BẰNG CÁCH CHẠY LỆNH GÁN NGAY KHI KHỞI ĐỘNG
         function initClock() {
             const now = new Date();
             currentShift = getShiftByTime(now);
