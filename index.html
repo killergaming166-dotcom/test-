@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FPOLY LIVE ATTENDANCE SYSTEM V1.2.7</title>
+    <title>FPOLY LIVE ATTENDANCE SYSTEM V1.3.0</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://www.unpkg.com/@eohjsc/era-widget@1.1.3/src/index.js"></script>
@@ -11,97 +11,18 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
-        
-        :root {
-            --ease-out-back: cubic-bezier(0.34, 1.56, 0.64, 1);
-            --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        body { 
-            font-family: 'Plus Jakarta Sans', sans-serif; 
-            background-color: #f1f5f9; 
-            color: #334155; 
-            margin: 0; 
-            padding: 20px; 
-            background-image: radial-gradient(#e2e8f0 1px, transparent 1px); 
-            background-size: 20px 20px; 
-            -webkit-font-smoothing: antialiased;
-        }
-        
-        .card { 
-            background: white; 
-            border-radius: 28px; 
-            box-shadow: 0 10px 40px -10px rgba(0,0,0,0.05); 
-            border: 1px solid rgba(255,255,255,0.8); 
-            transition: all 0.3s var(--ease-smooth); 
-        }
-
-        .card-dark { 
-            background: linear-gradient(145deg, #0f172a, #1e293b); 
-            border-radius: 28px; 
-            box-shadow: 0 20px 40px -10px rgba(249, 115, 22, 0.15); 
-            border: 1px solid rgba(255,255,255,0.05); 
-            position: relative; 
-            overflow: hidden; 
-            transform: translateZ(0);
-        }
-
-        .card-dark::before { 
-            content: ''; 
-            position: absolute; 
-            top: -50%; 
-            left: -50%; 
-            width: 200%; 
-            height: 200%; 
-            background: radial-gradient(circle, rgba(249,115,22,0.1) 0%, transparent 50%); 
-            pointer-events: none; 
-        }
-        
-        .stat-card { 
-            border-radius: 24px; 
-            padding: 20px; 
-            display: flex; 
-            align-items: center; 
-            justify-content: space-between; 
-            position: relative; 
-            overflow: hidden; 
-            box-shadow: 0 10px 30px -10px rgba(0,0,0,0.05); 
-            border: 1px solid white; 
-            transition: transform 0.3s ease;
-        }
+        :root { --ease-out-back: cubic-bezier(0.34, 1.56, 0.64, 1); --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1); }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f1f5f9; color: #334155; margin: 0; padding: 20px; background-image: radial-gradient(#e2e8f0 1px, transparent 1px); background-size: 20px 20px; -webkit-font-smoothing: antialiased; }
+        .card { background: white; border-radius: 28px; box-shadow: 0 10px 40px -10px rgba(0,0,0,0.05); border: 1px solid rgba(255,255,255,0.8); transition: all 0.3s var(--ease-smooth); }
+        .card-dark { background: linear-gradient(145deg, #0f172a, #1e293b); border-radius: 28px; box-shadow: 0 20px 40px -10px rgba(249, 115, 22, 0.15); border: 1px solid rgba(255,255,255,0.05); position: relative; overflow: hidden; transform: translateZ(0); }
+        .card-dark::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(249,115,22,0.1) 0%, transparent 50%); pointer-events: none; }
+        .stat-card { border-radius: 24px; padding: 20px; display: flex; align-items: center; justify-content: space-between; position: relative; overflow: hidden; box-shadow: 0 10px 30px -10px rgba(0,0,0,0.05); border: 1px solid white; transition: transform 0.3s ease; }
         .stat-card:hover { transform: translateY(-2px); }
-
         .stat-total { background: linear-gradient(135deg, #fffaf5, #fff7ed); }
         .stat-present { background: linear-gradient(135deg, #f0fdf4, #ecfdf5); }
         .stat-absent { background: linear-gradient(135deg, #fff1f2, #ffe4e6); }
-        
-        .stat-icon-wrapper { 
-            width: 56px; 
-            height: 56px; 
-            border-radius: 20px; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            font-size: 24px; 
-            box-shadow: inset 0 2px 4px rgba(255,255,255,0.5); 
-        }
-        
-        .avatar-circle { 
-            width: 150px; 
-            height: 150px; 
-            border-radius: 50%; 
-            background: rgba(255,255,255,0.05); 
-            backdrop-filter: blur(10px); 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            border: 4px solid rgba(255,255,255,0.1); 
-            margin: 0 auto 24px; 
-            transition: all 0.5s var(--ease-out-back); 
-            box-shadow: 0 0 40px rgba(0,0,0,0.2); 
-            transform-origin: center;
-        }
-        
+        .stat-icon-wrapper { width: 56px; height: 56px; border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 24px; box-shadow: inset 0 2px 4px rgba(255,255,255,0.5); }
+        .avatar-circle { width: 150px; height: 150px; border-radius: 50%; background: rgba(255,255,255,0.05); backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: center; border: 4px solid rgba(255,255,255,0.1); margin: 0 auto 24px; transition: all 0.5s var(--ease-out-back); box-shadow: 0 0 40px rgba(0,0,0,0.2); transform-origin: center; }
         .glow-idle { box-shadow: 0 0 30px rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.2); transform: scale(1); }
         .glow-unknown { box-shadow: 0 0 60px rgba(249, 115, 22, 0.5), inset 0 0 20px rgba(249, 115, 22, 0.3); border-color: #f97316; animation: pulse-orange 2s infinite; background: rgba(249, 115, 22, 0.1); transform: scale(1.05); }
         .glow-in { box-shadow: 0 0 60px rgba(16, 185, 129, 0.5), inset 0 0 20px rgba(16, 185, 129, 0.3); border-color: #10b981; background: rgba(16, 185, 129, 0.1); transform: scale(1.05); }
@@ -109,37 +30,25 @@
         .glow-out { border-color: #f43f5e; box-shadow: 0 0 60px rgba(244, 63, 94, 0.5), inset 0 0 20px rgba(244, 63, 94, 0.3); background: rgba(244, 63, 94, 0.1); transform: scale(1.05); }
         .glow-out i { color: #f43f5e; transform: scale(1.1); }
         .glow-wrong { box-shadow: 0 0 60px rgba(245, 158, 11, 0.5), inset 0 0 20px rgba(245, 158, 11, 0.3); border-color: #f59e0b; background: rgba(245, 158, 11, 0.1); transform: scale(1.05); }
-
-        .input-box { 
-            background: #f8fafc; border: 2px solid transparent; border-radius: 16px; 
-            padding: 12px 16px; font-size: 13px; width: 100%; transition: all 0.3s var(--ease-smooth); 
-            font-weight: 600; color: #1e293b; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); 
-        }
+        .input-box { background: #f8fafc; border: 2px solid transparent; border-radius: 12px; padding: 12px 16px; font-size: 13px; width: 100%; transition: all 0.3s var(--ease-smooth); font-weight: 600; color: #1e293b; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); }
         .input-box:focus { border-color: #f97316; outline: none; background: white; box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.1); }
         select.input-box { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23f97316'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; background-size: 16px; padding-right: 36px; }
-        
-        .btn-primary { background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); color: white; border-radius: 16px; font-weight: 800; padding: 14px 20px; transition: all 0.3s var(--ease-smooth); cursor: pointer; text-transform: uppercase; font-size: 12px; letter-spacing: 0.5px; box-shadow: 0 10px 20px -5px rgba(249, 115, 22, 0.4); border: 1px solid rgba(255,255,255,0.2); }
+        .btn-primary { background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); color: white; border-radius: 12px; font-weight: 800; padding: 12px 20px; transition: all 0.3s var(--ease-smooth); cursor: pointer; text-transform: uppercase; font-size: 12px; letter-spacing: 0.5px; box-shadow: 0 10px 20px -5px rgba(249, 115, 22, 0.4); border: 1px solid rgba(255,255,255,0.2); }
         .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 15px 25px -5px rgba(249, 115, 22, 0.5); }
-        
-        .btn-secondary { background: white; color: #0f172a; border: 2px solid #e2e8f0; border-radius: 16px; font-weight: 800; padding: 12px 20px; transition: all 0.3s ease; cursor: pointer; text-transform: uppercase; font-size: 11px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+        .btn-secondary { background: white; color: #0f172a; border: 2px solid #e2e8f0; border-radius: 12px; font-weight: 800; padding: 12px 20px; transition: all 0.3s ease; cursor: pointer; text-transform: uppercase; font-size: 11px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
         .btn-secondary:hover { border-color: #cbd5e1; background: #f8fafc; transform: translateY(-2px); }
-
         .log-table-container { max-height: 400px; overflow-y: auto; overflow-x: auto; border-radius: 16px; }
         .custom-scrollbar::-webkit-scrollbar { width: 8px; height: 8px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 10px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; border: 2px solid #f1f5f9; }
-
         .log-table { width: 100%; border-collapse: separate; border-spacing: 0; min-width: 600px; }
         .log-table th { font-size: 10px; color: #64748b; text-transform: uppercase; padding: 16px; border-bottom: 2px solid #e2e8f0; text-align: left; position: sticky; top: 0; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px); z-index: 10; font-weight: 800; }
         .log-table td { padding: 16px; font-size: 13px; border-bottom: 1px solid #f1f5f9; font-weight: 600; color: #334155; }
         .log-table tr:hover td { background-color: #f8fafc; }
-
         .badge-out { border-color: #f43f5e; color: #f43f5e; background: #fff1f2; }
         .badge-late { border-color: #eab308; color: #ca8a04; background: #fefce8; }
-
         @keyframes fadeInRow { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
         .animate-fade-in { animation: fadeInRow 0.3s var(--ease-smooth) forwards; }
-
         @keyframes slideIn { from { transform: translateX(120%) scale(0.95); opacity: 0; } to { transform: translateX(0) scale(1); opacity: 1; } }
         #toast-container { position: fixed; top: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 12px; pointer-events: none; }
         .toast { background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); border-radius: 16px; padding: 16px 24px; box-shadow: 0 20px 40px -10px rgba(0,0,0,0.1); border-left: 6px solid #f97316; display: flex; align-items: center; gap: 12px; font-size: 14px; font-weight: 700; animation: slideIn 0.4s var(--ease-out-back) forwards; pointer-events: auto; }
@@ -148,7 +57,6 @@
 </head>
 <body>
     <div id="toast-container"></div>
-    
     <div class="flex flex-col md:flex-row justify-between items-center mb-8 px-4 gap-6 max-w-7xl mx-auto">
         <div class="flex flex-col md:flex-row items-center gap-5">
             <div class="w-14 h-14 bg-gradient-to-br from-orange-400 to-orange-600 rounded-2xl shadow-xl flex items-center justify-center text-white font-black text-3xl hover:scale-105 transition-transform duration-300">F</div>
@@ -169,7 +77,7 @@
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 max-w-7xl mx-auto">
         <div class="lg:col-span-8 space-y-6">
             <!-- Scan Hero -->
-            <div class="card-dark p-10 flex flex-col items-center justify-center min-h-[400px]" id="main-display-card">
+            <div class="card-dark p-10 flex flex-col items-center justify-center min-h-[380px]" id="main-display-card">
                 <div class="avatar-circle glow-idle" id="avatar-container"><i class="fa-solid fa-expand text-7xl text-slate-400/50 transition-colors duration-300" id="avatar-icon"></i></div>
                 <div class="text-center z-10 w-full">
                     <h2 id="display-name" class="text-4xl md:text-5xl font-black text-white uppercase mb-4 tracking-tighter transition-all duration-300 drop-shadow-md">SẴN SÀNG</h2>
@@ -185,16 +93,17 @@
                 <div class="absolute top-0 right-0 p-6 opacity-10 pointer-events-none transition-transform duration-500 hover:scale-110"><i class="fa-solid fa-fingerprint text-[150px] text-white"></i></div>
             </div>
 
-            <!-- Đăng ký thành viên -->
+            <!-- TẠO MÃ NẠP ESP (OFFLINE MODE) -->
             <div class="card p-6 md:p-8 border-t-4 border-orange-500 relative overflow-hidden">
                 <div class="absolute top-0 right-0 w-32 h-32 bg-orange-50 rounded-bl-full -z-10 opacity-50"></div>
                 <div class="flex flex-col sm:flex-row justify-between gap-3 mb-6">
                     <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center text-orange-500 text-lg"><i class="fa-solid fa-address-card"></i></div>
-                        <div><h3 class="font-black text-sm uppercase text-slate-800">Cấp mới thẻ sinh viên</h3><p class="text-[10px] font-bold text-slate-400">Quét thẻ lạ để hệ thống nhận UID</p></div>
+                        <div class="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center text-orange-500 text-lg"><i class="fa-solid fa-code"></i></div>
+                        <div><h3 class="font-black text-sm uppercase text-slate-800">Tạo Mã Nạp ESP32</h3><p class="text-[10px] font-bold text-slate-400">Tạo chuỗi để lưu thẻ cứng vào bộ nhớ ESP</p></div>
                     </div>
                     <span id="registered-count-badge" class="text-[11px] font-black text-orange-600 bg-orange-100 border border-orange-200 px-4 py-2 rounded-xl flex items-center gap-2 transition-all"><i class="fa-solid fa-database"></i> ĐÃ LƯU: 0</span>
                 </div>
+                
                 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-5 mb-6">
                     <div class="space-y-1.5"><label class="text-[10px] font-extrabold text-slate-500 uppercase">Mã thẻ</label><input type="text" id="reg-uid" placeholder="Chờ quẹt..." class="input-box font-mono text-orange-500 bg-orange-50/50 border-orange-100 text-center tracking-wider transition-colors" readonly></div>
                     <div class="space-y-1.5"><label class="text-[10px] font-extrabold text-slate-500 uppercase">Họ Tên</label><input type="text" id="reg-name" placeholder="Nguyễn Văn A" class="input-box"></div>
@@ -203,9 +112,19 @@
                         <select id="reg-shift" class="input-box font-bold text-orange-600"><option value="Ca 1">Ca 1</option><option value="Ca 2">Ca 2</option><option value="Ca 3">Ca 3</option><option value="Ca 4">Ca 4</option><option value="Ca 5">Ca 5</option></select>
                     </div>
                 </div>
+
                 <div class="flex flex-col sm:flex-row gap-4">
-                    <button class="btn-primary flex-1 flex items-center justify-center gap-2" onclick="window.saveNewMember()"><i class="fa-solid fa-floppy-disk text-lg"></i> Lưu Thông Tin</button>
-                    <button class="btn-secondary flex items-center justify-center gap-2 px-6 text-slate-600 hover:text-slate-900" onclick="window.openManageMembersModal()"><i class="fa-solid fa-bars-staggered mr-2"></i> Quản lý thẻ</button>
+                    <button class="btn-primary flex-1 flex items-center justify-center gap-2" onclick="window.taoChuoi()"><i class="fa-solid fa-wand-magic-sparkles text-lg"></i> Lưu & Tạo Mã Nạp</button>
+                    <button class="btn-secondary flex items-center justify-center gap-2 px-6 text-slate-600 hover:text-slate-900" onclick="window.openManageMembersModal()"><i class="fa-solid fa-bars-staggered mr-2"></i> Quản lý Web</button>
+                </div>
+
+                <!-- Khu vực Copy Code -->
+                <div id="copy-section" class="mt-6 pt-6 border-t-2 border-dashed border-slate-200 hidden transition-all duration-300">
+                    <label class="text-[11px] font-black text-slate-500 uppercase flex items-center gap-2"><i class="fa-solid fa-paste text-orange-500"></i> Mã Nạp ESP32 (Dán vào Text Input V10 trên ERa)</label>
+                    <div class="flex gap-2 mt-2">
+                        <input type="text" id="ketQua" class="input-box flex-1 font-mono text-slate-700 bg-slate-100 font-bold" readonly>
+                        <button class="bg-emerald-500 hover:bg-emerald-600 text-white px-6 rounded-xl font-black text-[11px] uppercase transition-colors flex items-center gap-2 shadow-lg shadow-emerald-500/30" onclick="window.copyChuoi()"><i class="fa-solid fa-copy"></i> Copy</button>
+                    </div>
                 </div>
             </div>
 
@@ -255,22 +174,23 @@
 
             <div class="card p-6 bg-slate-800 text-slate-300 relative overflow-hidden">
                 <div class="absolute -right-4 -top-4 text-slate-700 opacity-20 text-6xl"><i class="fa-solid fa-microchip"></i></div>
-                <div class="flex items-center justify-between text-[11px] font-black uppercase mb-4 relative z-10"><span class="text-slate-100"><i class="fa-solid fa-server text-emerald-400 mr-2"></i>System Status</span><span id="device-dot" class="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.8)] animate-pulse transition-colors duration-300"></span></div>
-                <div class="bg-slate-900 p-4 rounded-xl border border-slate-700 text-[12px] font-mono mb-4 relative z-10"><p id="cloud-status" class="font-bold text-blue-400 transition-colors duration-300">Initializing...</p></div>
-                <button onclick="location.reload()" class="w-full py-3.5 bg-slate-700 hover:bg-slate-600 rounded-xl text-[11px] font-black text-white uppercase tracking-widest relative z-10 transition-all active:scale-95"><i class="fa-solid fa-rotate-right mr-2"></i>Kết nối lại</button>
+                <div class="flex items-center justify-between text-[11px] font-black uppercase mb-4 relative z-10"><span class="text-slate-100"><i class="fa-solid fa-server text-emerald-400 mr-2"></i>Web Mode</span><span id="device-dot" class="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.8)] animate-pulse transition-colors duration-300"></span></div>
+                <div class="bg-slate-900 p-4 rounded-xl border border-slate-700 text-[12px] font-mono mb-4 relative z-10"><p id="cloud-status" class="font-bold text-amber-400 transition-colors duration-300">OFFLINE (LOCAL STORAGE)</p></div>
+                <p class="text-[10px] text-slate-500 font-bold mb-4 relative z-10">Web chỉ đóng vai trò hiển thị và lưu Log. Logic kiểm soát ra vào chạy hoàn toàn độc lập trên bộ nhớ của ESP32.</p>
+                <button onclick="location.reload()" class="w-full py-3.5 bg-slate-700 hover:bg-slate-600 rounded-xl text-[11px] font-black text-white uppercase tracking-widest relative z-10 transition-all active:scale-95"><i class="fa-solid fa-rotate-right mr-2"></i>Tải lại Web</button>
             </div>
         </div>
     </div>
     
     <div class="mt-12 mb-6 border-t border-slate-200/60 pt-8 pb-4 text-center max-w-7xl mx-auto px-4">
-        <p class="text-sm font-black text-slate-400 uppercase tracking-widest mb-3 flex items-center justify-center gap-2"><i class="fa-solid fa-code-merge text-orange-500"></i> Hệ Thống Điểm Danh Fpoly <span class="bg-slate-200 text-slate-600 px-2 py-0.5 rounded text-[10px]">V1.2.7 (Fix Đếm Lặp & Báo Trễ)</span></p>
+        <p class="text-sm font-black text-slate-400 uppercase tracking-widest mb-3 flex items-center justify-center gap-2"><i class="fa-solid fa-code-merge text-orange-500"></i> Hệ Thống Điểm Danh Fpoly <span class="bg-slate-200 text-slate-600 px-2 py-0.5 rounded text-[10px]">V1.3.0 (Offline Architecture)</span></p>
     </div>
 
     <!-- MODAL QUẢN LÝ -->
     <div id="manage-members-modal" class="fixed inset-0 bg-slate-900/70 z-[100] hidden flex items-center justify-center p-4 backdrop-blur-sm transition-opacity duration-300 opacity-0">
         <div class="bg-white rounded-[28px] w-full max-w-4xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh] border border-white transform scale-95 transition-transform duration-300">
             <div class="px-8 py-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-                <h3 class="font-black text-slate-800 uppercase text-base flex items-center gap-3"><div class="w-8 h-8 rounded-lg bg-teal-100 text-teal-600 flex items-center justify-center"><i class="fa-solid fa-list-check"></i></div>Danh sách đã lưu (Web)</h3>
+                <h3 class="font-black text-slate-800 uppercase text-base flex items-center gap-3"><div class="w-8 h-8 rounded-lg bg-teal-100 text-teal-600 flex items-center justify-center"><i class="fa-solid fa-list-check"></i></div>Danh sách đã lưu (Web Log)</h3>
                 <button onclick="window.closeManageMembersModal()" class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 hover:bg-rose-100 hover:text-rose-500 transition-colors flex items-center justify-center"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
             <div class="p-6 overflow-y-auto custom-scrollbar flex-grow bg-white">
@@ -283,13 +203,11 @@
         </div>
     </div>
 
-    <!-- FIREBASE & LOGIC CHÍNH V1.2.7 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // CẤU HÌNH THỜI GIAN CÁC CA HỌC
         const SHIFTS = [ 
             { id: "ca1", name: "Ca 1", start: "07:00", end: "09:15" }, 
             { id: "ca2", name: "Ca 2", start: "09:30", end: "11:45" }, 
@@ -298,7 +216,7 @@
             { id: "ca5", name: "Ca 5", start: "17:15", end: "19:30" } 
         ];
         
-        const CHECKOUT_COOLDOWN_MINUTES = 15; // Còn <= 15 phút sát giờ về mới được ra
+        const CHECKOUT_COOLDOWN_MINUTES = 15; 
         const ESP32_HARD_STUDENTS = { "96576E05": { name: "Nguyen Dinh Danh", mssv: "PS45028", shift: "Ca 2" } }; 
 
         const UI = {
@@ -325,9 +243,7 @@
             if(filterDateInput.value) {
                 const [y, m, d] = filterDateInput.value.split('-');
                 selectedDateStr = new Date(y, m-1, d).toDateString();
-            } else {
-                selectedDateStr = new Date().toDateString();
-            }
+            } else { selectedDateStr = new Date().toDateString(); }
             requestAnimationFrame(renderAll);
         });
 
@@ -343,68 +259,46 @@
         let gradient = ctx.createLinearGradient(0,0,0,200); gradient.addColorStop(0, '#10b981'); gradient.addColorStop(1, '#6ee7b7');
         let attendanceChart = new Chart(ctx, { type: 'bar', data: { labels: ['Ca 1', 'Ca 2', 'Ca 3', 'Ca 4', 'Ca 5'], datasets: [{ label: 'Hiện diện', data: [0,0,0,0,0], backgroundColor: gradient, borderRadius: 6, barThickness: 24 }] }, options: { responsive: true, maintainAspectRatio: false, animation: { duration: 500 }, plugins: { legend: { display: false } }, scales: { y: { display: true, grid: { color: '#f1f5f9' }, ticks: { stepSize: 1 } }, x: { grid: { display: false } } } } });
 
-        try {
-            if (typeof __firebase_config !== 'undefined' && __firebase_config) {
-                const config = JSON.parse(__firebase_config);
-                const app = initializeApp(config);
-                const auth = getAuth(app); db = getFirestore(app); 
-                appId = typeof __app_id !== 'undefined' ? __app_id : 'demo-app';
-                
-                const initAuth = async () => {
-                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                        await signInWithCustomToken(auth, __initial_auth_token);
-                    } else {
-                        await signInAnonymously(auth);
-                    }
-                };
-                initAuth();
+        // TÍNH NĂNG TẠO CHUỖI NẠP ESP32
+        window.taoChuoi = () => {
+            const u = document.getElementById('reg-uid').value.trim();
+            const n = document.getElementById('reg-name').value.trim();
+            const m = document.getElementById('reg-mssv').value.trim();
+            const s = document.getElementById('reg-shift').value.trim();
 
-                onAuthStateChanged(auth, (user) => { 
-                    if (user) { 
-                        currentUser = user; 
-                        document.getElementById('cloud-status').innerText = "ONLINE (CLOUD SYNC)"; 
-                        loadCloudData(); 
-                    } 
-                });
-            } else {
-                document.getElementById('cloud-status').innerText = "LOCAL STORAGE (OFFLINE)";
-                document.getElementById('cloud-status').className = "font-bold text-amber-400 transition-colors duration-300";
-                requestAnimationFrame(renderAll);
+            if (!u || !n) {
+                window.showToast("Vui lòng quét thẻ và nhập tên!", "warning");
+                return;
             }
-        } catch (e) { 
-            document.getElementById('cloud-status').innerText = "LOCAL STORAGE (OFFLINE)";
-            document.getElementById('cloud-status').className = "font-bold text-amber-400 transition-colors duration-300";
-            requestAnimationFrame(renderAll); 
-        }
 
-        function loadCloudData() {
-            if (!currentUser) return;
-            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'members'), (snap) => { membersDb = {}; snap.forEach(d => membersDb[d.id] = d.data()); syncLocal(); requestAnimationFrame(renderAll); });
-            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'attendance_logs'), (snap) => { logsDb = []; snap.forEach(d => { let data = d.data(); data.id = d.id; logsDb.push(data); }); logsDb.sort((a, b) => b.timestamp - a.timestamp); syncLocal(); requestAnimationFrame(renderAll); });
-        }
+            // Ghi vào Web DB để làm Modal Quản lý
+            if (db && appId) setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'members', u), { name: n, mssv: m, shift: s, timestamp: Date.now() }).catch(e => {}); 
+            else { membersDb[u] = { name: n, mssv: m, shift: s, timestamp: Date.now() }; syncLocal(); requestAnimationFrame(renderAll); }
+            
+            // Tạo chuỗi
+            const chuoi = `${u}|${n}|${m}|${s}`;
+            document.getElementById('ketQua').value = chuoi;
+            document.getElementById('copy-section').classList.remove('hidden');
+            window.showToast("Lưu Web OK! Bấm Copy để đưa xuống mạch nhé.");
+        };
 
-        // =========================================================
-        // FIX KẾT NỐI: GỌI ĐỒNG THỜI REST API + NATIVE WIDGET
-        // Đảm bảo 100% mạch nhận được tín hiệu
-        // =========================================================
-        const eraToken = "53f7b5a4-c19e-4760-9940-ff280ac07374";
+        window.copyChuoi = () => {
+            const copyText = document.getElementById("ketQua");
+            if(!copyText.value) return;
+            
+            try {
+                document.execCommand('copy');
+                copyText.select();
+                document.execCommand("copy");
+                window.showToast("Đã Copy! Hãy dán vào V10 trên ERa Dashboard.");
+            } catch(err) {
+                window.showToast("Lỗi trình duyệt! Bôi đen copy thủ công nhé.", "warning");
+            }
+        };
+
         const eraWidget = new EraWidget();
-        let eCfg = { uid: null, name: null, mssv: null, shift: null, cloud: null };
+        let eCfg = { uid: null, name: null, mssv: null, shift: null };
         let tempCache = { name: null, mssv: null, shift: null };
-
-        async function hotlineToESP32(payload) {
-            try { 
-                // Cách 1: Bắn qua API (Bỏ no-cors để bắt lỗi thực tế)
-                const url = `https://broker-v2.era.io/api/v1/device/update/vpin?token=${eraToken}&pin=V3&value=${encodeURIComponent(payload)}`;
-                fetch(url).catch(e => console.log("API Fetch Warning (Ignore if working):", e)); 
-
-                // Cách 2: Bắn thẳng qua Widget (Backup chắc chắn 100%)
-                if (eCfg.cloud && eCfg.cloud.id) {
-                    eraWidget.updateRealtimeConfigs([{ id: eCfg.cloud.id, value: payload }]);
-                }
-                console.log("-> Đã ra lệnh cho ESP32:", payload);
-            } catch (err) { console.error("Hotline error:", err); }
-        }
 
         eraWidget.init({
             needRealtimeConfigs: true, maxRealtimeConfigsCount: 5,
@@ -415,7 +309,6 @@
                     if(n.includes("name") || n.includes("v1") || n === "trạng thái truy cập") eCfg.name = cfg;
                     if(n.includes("mssv") || n.includes("v2")) eCfg.mssv = cfg;
                     if(n.includes("ca") || n.includes("v9")) eCfg.shift = cfg;
-                    if(n.includes("cloud") || n.includes("v3")) eCfg.cloud = cfg; 
                 });
                 document.getElementById('era-status-text').innerText = "SYSTEM LIVE"; document.getElementById('era-status-dot').className = "w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse";
             },
@@ -429,74 +322,66 @@
                 if (u && u !== "0" && u !== "" && u !== "None" && u !== lastUid && !isProcessing) {
                     lastUid = u; isProcessing = true;
                     setTimeout(() => { 
-                        try {
-                            handleScan(u, tempCache); 
-                        } catch (error) {
-                            console.error("Lỗi xử lý thẻ:", error);
-                        } finally {
-                            isProcessing = false; 
-                        }
-                    }, 100);
+                        try { handleScan(u, tempCache); } catch (error) {} finally { isProcessing = false; }
+                    }, 50);
                 }
             }
         });
 
+        // HÀM XỬ LÝ GIAO DIỆN WEB (NHẬN TỪ MẠCH)
         function handleScan(uid, data) {
-            const hard = ESP32_HARD_STUDENTS[uid]; const cloud = membersDb[uid];
+            // Lấy data do ESP32 truyền lên
             const espValid = data.name && data.name !== "None" && data.name !== "0" && data.name.toUpperCase() !== "NGUOI LA";
-            
-            let fName = hard ? hard.name : (espValid ? data.name : (cloud ? cloud.name : null));
-            let fMssv = hard ? hard.mssv : (espValid ? data.mssv : (cloud ? cloud.mssv : "---"));
-            let fShift = hard ? hard.shift : (espValid && data.shift !== "None" ? data.shift : (cloud ? cloud.shift : "---"));
+            let fName = espValid ? data.name : null;
+            let fMssv = espValid ? data.mssv : "---";
+            let fShift = espValid ? data.shift : "---";
             
             const now = new Date(); currentShift = getShiftByTime(now);
             document.getElementById('reg-uid').value = uid;
 
             let status = fName ? 1 : 0;
             let actionStr = "VÀO LỚP";
-            let lateMins = 0; // Số phút đi trễ
+            let lateMins = 0; 
+            let isCheckOut = false;
 
-            // === LOGIC TÍNH TRỄ & XUẤT LỚP ===
+            // KIỂM TRA ĐIỀU KIỆN TRÊN WEB
             if (fName && currentShift && fShift !== "---" && fShift !== currentShift.name) {
                 status = 2; // Sai Ca
             } else if (fName && currentShift && fShift === currentShift.name) {
                 const todayStr = now.toDateString();
-                
-                // Kiểm tra xem hôm nay sinh viên đã quét thẻ (VÀO LỚP hoặc VÀO TRỄ) chưa
                 const hasCheckedIn = logsDb.some(l => l.date === todayStr && l.uid === uid && l.shiftId === currentShift.id && (l.status.includes("VÀO LỚP") || l.status.includes("TRỄ")));
                 
                 if (hasCheckedIn) {
-                    // Logic tính giờ RA
+                    isCheckOut = true;
                     const [endH, endM] = currentShift.end.split(':').map(Number);
                     const endMins = endH * 60 + endM;
                     const currMins = now.getHours() * 60 + now.getMinutes();
                     let remainingMins = endMins - currMins;
                     
                     if (remainingMins <= CHECKOUT_COOLDOWN_MINUTES) { 
-                        status = 5; // Trạng thái 5: Ra lớp
+                        status = 5; 
                         actionStr = "RA LỚP";
                     } else {
-                        status = 3; // Chưa tới giờ ra
+                        status = 3; 
                         actionStr = "CHƯA ĐẾN GIỜ RA";
                     }
                 } else {
-                    // Logic tính giờ VÀO TRỄ
                     const [sh, sm] = currentShift.start.split(':').map(Number);
                     const startMins = sh * 60 + sm;
                     const currMins = now.getHours() * 60 + now.getMinutes();
                     lateMins = currMins - startMins;
 
                     if (lateMins > 0) {
-                        status = 4; // Trạng thái 4: Vào trễ
+                        status = 4; 
                         actionStr = `VÀO TRỄ (${lateMins}p)`;
                     } else {
-                        status = 1; // Vào đúng giờ
+                        status = 1; 
                         actionStr = "VÀO LỚP";
                     }
                 }
             }
 
-            // HIỂN THỊ GIAO DIỆN
+            // GIAO DIỆN WEB
             requestAnimationFrame(() => {
                 UI.details.classList.remove('hidden');
                 UI.details.classList.remove('opacity-0', 'translate-y-4');
@@ -504,26 +389,20 @@
                 UI.uid.innerText = uid;
 
                 if (!fName) {
-                    // LẠ
                     UI.name.innerText = "THẺ CHƯA ĐĂNG KÝ";
                     UI.name.className = "text-4xl md:text-5xl font-black text-orange-500 uppercase mb-4 tracking-tighter transition-all duration-300 drop-shadow-md scale-105";
                     UI.target.className = "avatar-circle glow-unknown";
                     if(UI.icon) UI.icon.className = "fa-solid fa-fingerprint text-7xl text-orange-500 transition-colors";
-                    if(UI.sub) UI.sub.innerText = "VUI LÒNG ĐĂNG KÝ THẺ TẠI WEB";
+                    if(UI.sub) UI.sub.innerText = "VUI LÒNG ĐĂNG KÝ THẺ DƯỚI ĐÂY";
                     if(UI.dot) UI.dot.className = "w-2.5 h-2.5 rounded-full bg-orange-500 animate-pulse transition-colors";
-                    window.showToast(`Phát hiện thẻ lạ: ${uid}`, "warning");
                 } else if (status === 2) {
-                    // SAI CA
                     UI.name.innerText = fName;
                     UI.name.className = "text-4xl md:text-5xl font-black text-amber-500 uppercase mb-4 tracking-tighter transition-all duration-300 drop-shadow-md scale-105";
                     UI.target.className = "avatar-circle glow-wrong";
                     if(UI.icon) UI.icon.className = "fa-solid fa-triangle-exclamation text-7xl text-amber-500 transition-colors";
                     if(UI.sub) UI.sub.innerText = `QUÉT SAI CA (${fShift})`;
                     if(UI.dot) UI.dot.className = "w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse transition-colors";
-                    window.showToast(`Cảnh báo: Sinh viên ${fName} đi sai ca.`, "warning");
                 } else if (status === 3) {
-                    // RA SỚM BỊ TỪ CHỐI
-                    // Tính lại remainingMins để hiển thị
                     const [endH, endM] = currentShift.end.split(':').map(Number);
                     let rem = (endH * 60 + endM) - (now.getHours() * 60 + now.getMinutes());
                     UI.name.innerText = "CHƯA ĐẾN GIỜ RA";
@@ -532,34 +411,27 @@
                     if(UI.icon) UI.icon.className = "fa-solid fa-clock text-7xl text-orange-500 transition-colors";
                     if(UI.sub) UI.sub.innerText = `ĐỢI THÊM ${rem} PHÚT ĐỂ RA LỚP`;
                     if(UI.dot) UI.dot.className = "w-2.5 h-2.5 rounded-full bg-orange-500 animate-pulse transition-colors";
-                    window.showToast(`Chưa đến giờ ra!`, "warning");
                 } else if (status === 4) {
-                    // VÀO LỚP TRỄ
                     UI.name.innerText = fName;
                     UI.name.className = "text-4xl md:text-5xl font-black text-yellow-500 uppercase mb-4 tracking-tighter transition-all duration-300 drop-shadow-md scale-105";
                     UI.target.className = "avatar-circle glow-late";
                     if(UI.icon) UI.icon.className = "fa-solid fa-clock-rotate-left text-7xl text-yellow-500 transition-colors";
                     if(UI.sub) UI.sub.innerText = `BẠN ĐÃ ĐI TRỄ ${lateMins} PHÚT!`;
                     if(UI.dot) UI.dot.className = "w-2.5 h-2.5 rounded-full bg-yellow-500 animate-pulse transition-colors";
-                    window.showToast(`${fName} đi trễ ${lateMins} phút!`, "warning");
                 } else if (status === 5) {
-                    // RA LỚP OK
                     UI.name.innerText = fName;
                     UI.name.className = "text-4xl md:text-5xl font-black text-rose-400 uppercase mb-4 tracking-tighter transition-all duration-300 drop-shadow-md scale-105";
                     UI.target.className = "avatar-circle glow-out";
                     if(UI.icon) UI.icon.className = "fa-solid fa-person-walking-arrow-right text-7xl text-rose-500 transition-colors";
                     if(UI.sub) UI.sub.innerText = "ĐÃ ĐIỂM DANH RA LỚP";
                     if(UI.dot) UI.dot.className = "w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse transition-colors";
-                    window.showToast(`Tạm biệt ${fName}!`);
                 } else {
-                    // VÀO LỚP ĐÚNG GIỜ (Status 1)
                     UI.name.innerText = fName;
                     UI.name.className = "text-4xl md:text-5xl font-black text-emerald-400 uppercase mb-4 tracking-tighter transition-all duration-300 drop-shadow-md scale-105";
                     UI.target.className = "avatar-circle glow-in";
                     if(UI.icon) UI.icon.className = "fa-solid fa-check text-7xl text-emerald-400 transition-colors";
                     if(UI.sub) UI.sub.innerText = "ĐIỂM DANH VÀO LỚP THÀNH CÔNG";
                     if(UI.dot) UI.dot.className = "w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse transition-colors";
-                    window.showToast(`Xin chào ${fName}!`);
                 }
             });
 
@@ -578,11 +450,6 @@
                 }
             }
 
-            // GỬI LỆNH TRẠNG THÁI XUỐNG ESP32
-            // Payload gửi ESP32 thêm số phút trễ ở cuối: Status|Name|MSSV|Ca|LateMins
-            const payloadRes = `${status}|${fName || "NGUOI LA"}|${fMssv}|${fShift}|${lateMins}`;
-            hotlineToESP32(payloadRes);
-
             setTimeout(() => { 
                 if(lastUid === uid) { 
                     requestAnimationFrame(() => {
@@ -599,13 +466,10 @@
             }, 6000);
         }
 
-        function getShiftByTime(n) { const t = n.getHours()*60 + n.getMinutes(); return SHIFTS.find(s => { const [h, m] = s.start.split(':').map(Number); const [eh, em] = s.end.split(':').map(Number); return t >= (h*60+m) && t <= (eh*60+em); }); }
-
         function renderAll() {
             const logsToRender = logsDb.filter(l => l.date === selectedDateStr);
             const tbody = document.getElementById('log-body');
             
-            // FIX LỖI SĨ SỐ (CHỈ ĐẾM UID DUY NHẤT VÀ KHÔNG TÍNH SAI CA)
             let presentUIDs = new Set(); 
             let chartSets = [new Set(), new Set(), new Set(), new Set(), new Set()];
             
@@ -616,15 +480,8 @@
             }
             
             tbody.innerHTML = logsToRender.map(l => {
-                // Đếm người đi học (Trạng thái Vào Lớp, Trễ, Ra Lớp)
-                if (isViewingToday && currentShift && l.shiftId === currentShift.id && (l.status.includes("VÀO LỚP") || l.status.includes("TRỄ") || l.status === "RA LỚP")) {
-                    presentUIDs.add(l.uid);
-                }
-                
-                // Cập nhật cho biểu đồ các ca
-                if(l.shiftIndex !== undefined && l.shiftIndex >= 0 && l.shiftIndex < 5 && (l.status.includes("VÀO LỚP") || l.status.includes("TRỄ") || l.status === "RA LỚP")) {
-                    chartSets[l.shiftIndex].add(l.uid);
-                }
+                if (isViewingToday && currentShift && l.shiftId === currentShift.id && (l.status.includes("VÀO LỚP") || l.status.includes("TRỄ") || l.status === "RA LỚP")) presentUIDs.add(l.uid);
+                if(l.shiftIndex !== undefined && l.shiftIndex >= 0 && l.shiftIndex < 5 && (l.status.includes("VÀO LỚP") || l.status.includes("TRỄ") || l.status === "RA LỚP")) chartSets[l.shiftIndex].add(l.uid);
 
                 let badge = l.status.includes("VÀO LỚP") ? "bg-emerald-50 text-emerald-600 border-emerald-200" : (l.status === "RA LỚP" ? "badge-out" : (l.status.includes("TRỄ") ? "badge-late" : (l.status === "SAI CA" ? "bg-amber-50 text-amber-600 border-amber-200" : "bg-orange-50 text-orange-600 border-orange-200")));
                 
@@ -643,61 +500,22 @@
                 document.getElementById('present-count').innerText = presentUIDs.size;
                 document.getElementById('absent-count').innerText = Math.max(0, totalInShift - presentUIDs.size);
             } else {
-                document.getElementById('total-count').innerText = "--";
-                document.getElementById('present-count').innerText = "--";
-                document.getElementById('absent-count').innerText = "--";
+                document.getElementById('total-count').innerText = "--"; document.getElementById('present-count').innerText = "--"; document.getElementById('absent-count').innerText = "--";
             }
             
             attendanceChart.data.datasets[0].data = chartSets.map(s => s.size); attendanceChart.update();
             document.getElementById('registered-count-badge').innerText = `ĐÃ LƯU: ${Object.keys(membersDb).length}`;
         }
 
-        window.saveNewMember = () => {
-            const u = document.getElementById('reg-uid').value, n = document.getElementById('reg-name').value, m = document.getElementById('reg-mssv').value, s = document.getElementById('reg-shift').value;
-            if (u && n) { 
-                if (db && appId) setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'members', u), { name: n, mssv: m, shift: s, timestamp: Date.now() }).catch(e => {}); 
-                else { membersDb[u] = { name: n, mssv: m, shift: s, timestamp: Date.now() }; syncLocal(); requestAnimationFrame(renderAll); }
-                window.showToast("Lưu thành công!"); document.getElementById('reg-name').value = ""; document.getElementById('reg-mssv').value = "";
-            } else window.showToast("Nhập tên trước!", "warning");
-        };
-
         const modalEl = document.getElementById('manage-members-modal');
         const modalBox = modalEl.querySelector('.bg-white');
-        
         window.openManageMembersModal = () => { 
             document.getElementById('modal-members-list').innerHTML = Object.keys(membersDb).map(u => `<tr class="border-b border-slate-50 transition-colors hover:bg-slate-50"><td class="pl-4 py-4 font-mono text-orange-500">${u}</td><td class="font-bold">${membersDb[u].name}</td><td>${membersDb[u].mssv}</td><td>${membersDb[u].shift}</td><td class="text-right pr-4"><button onclick="window.del('${u}')" class="text-rose-500 font-black px-3 py-1 hover:bg-rose-50 rounded-lg transition-colors">XÓA</button></td></tr>`).join(''); 
-            modalEl.classList.remove('hidden');
-            setTimeout(() => { modalEl.classList.remove('opacity-0'); modalBox.classList.remove('scale-95'); modalBox.classList.add('scale-100'); }, 10);
+            modalEl.classList.remove('hidden'); setTimeout(() => { modalEl.classList.remove('opacity-0'); modalBox.classList.remove('scale-95'); modalBox.classList.add('scale-100'); }, 10);
         };
-        
-        window.closeManageMembersModal = () => { 
-            modalEl.classList.add('opacity-0'); modalBox.classList.remove('scale-100'); modalBox.classList.add('scale-95');
-            setTimeout(() => { modalEl.classList.add('hidden'); }, 300);
-        };
-
-        window.del = async (u) => { 
-            if(confirm("Xóa thẻ?")) { 
-                if (db && appId) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'members', u)); 
-                else { delete membersDb[u]; syncLocal(); renderAll(); }
-                window.openManageMembersModal(); 
-            } 
-        };
-        
-        window.clearLogs = async () => { 
-            const displayDate = document.getElementById('filter-date').value.split('-').reverse().join('/');
-            if(confirm(`Xóa toàn bộ nhật ký của ngày ${displayDate}?`)) { 
-                if (db && appId) {
-                    const logsToDelete = logsDb.filter(l => l.date === selectedDateStr);
-                    for (let l of logsToDelete) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'attendance_logs', l.id)); 
-                } else {
-                    logsDb = logsDb.filter(l => l.date !== selectedDateStr); 
-                    syncLocal(); 
-                    renderAll();
-                }
-                window.showToast("Đã xóa nhật ký ngày đang chọn!");
-            } 
-        };
-        
+        window.closeManageMembersModal = () => { modalEl.classList.add('opacity-0'); modalBox.classList.remove('scale-100'); modalBox.classList.add('scale-95'); setTimeout(() => { modalEl.classList.add('hidden'); }, 300); };
+        window.del = async (u) => { if(confirm("Xóa thẻ?")) { if (db && appId) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'members', u)); else { delete membersDb[u]; syncLocal(); renderAll(); } window.openManageMembersModal(); } };
+        window.clearLogs = async () => { const displayDate = document.getElementById('filter-date').value.split('-').reverse().join('/'); if(confirm(`Xóa toàn bộ nhật ký của ngày ${displayDate}?`)) { if (db && appId) { const logsToDelete = logsDb.filter(l => l.date === selectedDateStr); for (let l of logsToDelete) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'attendance_logs', l.id)); } else { logsDb = logsDb.filter(l => l.date !== selectedDateStr); syncLocal(); renderAll(); } window.showToast("Đã xóa nhật ký ngày đang chọn!"); } };
         window.exportExcel = () => { const logsToExport = logsDb.filter(l => l.date === selectedDateStr); if(logsToExport.length===0) return window.showToast("Trống!","warning"); const ws = XLSX.utils.json_to_sheet(logsToExport.map(l => ({ "Giờ": l.time, "Tên": l.name, "MSSV": l.mssv, "Trạng thái": l.status }))); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Attendance"); XLSX.writeFile(wb, `FPOLY_${selectedDateStr.replace(/ /g,'_')}.xlsx`); };
         window.showToast = (m, t='success') => { const c = document.getElementById('toast-container'), i = document.createElement('div'); let icon = t === 'success' ? 'fa-check-circle text-emerald-500' : 'fa-triangle-exclamation text-amber-500'; i.className = "toast"; i.innerHTML = `<i class="fa-solid ${icon} text-lg"></i> <span class="tracking-wide">${m}</span>`; c.appendChild(i); setTimeout(() => i.remove(), 3500); };
 
@@ -708,17 +526,11 @@
             
             const newShift = getShiftByTime(now);
             if (newShift && (!currentShift || currentShift.id !== newShift.id)) {
-                currentShift = newShift;
-                document.getElementById('current-shift-badge').innerText = currentShift.name.toUpperCase();
-                requestAnimationFrame(renderAll);
-            } else if (!newShift) {
-                document.getElementById('current-shift-badge').innerText = "NGOÀI CA";
-            }
-            
+                currentShift = newShift; document.getElementById('current-shift-badge').innerText = currentShift.name.toUpperCase(); requestAnimationFrame(renderAll);
+            } else if (!newShift) { document.getElementById('current-shift-badge').innerText = "NGOÀI CA"; }
             requestAnimationFrame(updateClock);
         }
         requestAnimationFrame(updateClock);
-
     </script>
 </body>
 </html>
