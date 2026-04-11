@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FPOLY LIVE ATTENDANCE SYSTEM V1.3.0</title>
+    <title>FPOLY LIVE ATTENDANCE SYSTEM V1.3.2</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://www.unpkg.com/@eohjsc/era-widget@1.1.3/src/index.js"></script>
@@ -11,227 +11,209 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
-        :root { --ease-out-back: cubic-bezier(0.34, 1.56, 0.64, 1); --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1); }
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f1f5f9; color: #334155; margin: 0; padding: 20px; background-image: radial-gradient(#e2e8f0 1px, transparent 1px); background-size: 20px 20px; -webkit-font-smoothing: antialiased; }
-        .card { background: white; border-radius: 28px; box-shadow: 0 10px 40px -10px rgba(0,0,0,0.05); border: 1px solid rgba(255,255,255,0.8); transition: all 0.3s var(--ease-smooth); }
-        .card-dark { background: linear-gradient(145deg, #0f172a, #1e293b); border-radius: 28px; box-shadow: 0 20px 40px -10px rgba(249, 115, 22, 0.15); border: 1px solid rgba(255,255,255,0.05); position: relative; overflow: hidden; transform: translateZ(0); }
-        .card-dark::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(249,115,22,0.1) 0%, transparent 50%); pointer-events: none; }
-        .stat-card { border-radius: 24px; padding: 20px; display: flex; align-items: center; justify-content: space-between; position: relative; overflow: hidden; box-shadow: 0 10px 30px -10px rgba(0,0,0,0.05); border: 1px solid white; transition: transform 0.3s ease; }
-        .stat-card:hover { transform: translateY(-2px); }
-        .stat-total { background: linear-gradient(135deg, #fffaf5, #fff7ed); }
-        .stat-present { background: linear-gradient(135deg, #f0fdf4, #ecfdf5); }
-        .stat-absent { background: linear-gradient(135deg, #fff1f2, #ffe4e6); }
-        .stat-icon-wrapper { width: 56px; height: 56px; border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 24px; box-shadow: inset 0 2px 4px rgba(255,255,255,0.5); }
-        .avatar-circle { width: 150px; height: 150px; border-radius: 50%; background: rgba(255,255,255,0.05); backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: center; border: 4px solid rgba(255,255,255,0.1); margin: 0 auto 24px; transition: all 0.5s var(--ease-out-back); box-shadow: 0 0 40px rgba(0,0,0,0.2); transform-origin: center; }
-        .glow-idle { box-shadow: 0 0 30px rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.2); transform: scale(1); }
-        .glow-unknown { box-shadow: 0 0 60px rgba(249, 115, 22, 0.5), inset 0 0 20px rgba(249, 115, 22, 0.3); border-color: #f97316; animation: pulse-orange 2s infinite; background: rgba(249, 115, 22, 0.1); transform: scale(1.05); }
-        .glow-in { box-shadow: 0 0 60px rgba(16, 185, 129, 0.5), inset 0 0 20px rgba(16, 185, 129, 0.3); border-color: #10b981; background: rgba(16, 185, 129, 0.1); transform: scale(1.05); }
-        .glow-late { box-shadow: 0 0 60px rgba(234, 179, 8, 0.5), inset 0 0 20px rgba(234, 179, 8, 0.3); border-color: #eab308; background: rgba(234, 179, 8, 0.1); transform: scale(1.05); }
-        .glow-out { border-color: #f43f5e; box-shadow: 0 0 60px rgba(244, 63, 94, 0.5), inset 0 0 20px rgba(244, 63, 94, 0.3); background: rgba(244, 63, 94, 0.1); transform: scale(1.05); }
-        .glow-out i { color: #f43f5e; transform: scale(1.1); }
-        .glow-wrong { box-shadow: 0 0 60px rgba(245, 158, 11, 0.5), inset 0 0 20px rgba(245, 158, 11, 0.3); border-color: #f59e0b; background: rgba(245, 158, 11, 0.1); transform: scale(1.05); }
-        .input-box { background: #f8fafc; border: 2px solid transparent; border-radius: 12px; padding: 12px 16px; font-size: 13px; width: 100%; transition: all 0.3s var(--ease-smooth); font-weight: 600; color: #1e293b; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); }
-        .input-box:focus { border-color: #f97316; outline: none; background: white; box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.1); }
-        select.input-box { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23f97316'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; background-size: 16px; padding-right: 36px; }
-        .btn-primary { background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); color: white; border-radius: 12px; font-weight: 800; padding: 12px 20px; transition: all 0.3s var(--ease-smooth); cursor: pointer; text-transform: uppercase; font-size: 12px; letter-spacing: 0.5px; box-shadow: 0 10px 20px -5px rgba(249, 115, 22, 0.4); border: 1px solid rgba(255,255,255,0.2); }
-        .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 15px 25px -5px rgba(249, 115, 22, 0.5); }
-        .btn-secondary { background: white; color: #0f172a; border: 2px solid #e2e8f0; border-radius: 12px; font-weight: 800; padding: 12px 20px; transition: all 0.3s ease; cursor: pointer; text-transform: uppercase; font-size: 11px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
-        .btn-secondary:hover { border-color: #cbd5e1; background: #f8fafc; transform: translateY(-2px); }
-        .log-table-container { max-height: 400px; overflow-y: auto; overflow-x: auto; border-radius: 16px; }
-        .custom-scrollbar::-webkit-scrollbar { width: 8px; height: 8px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 10px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; border: 2px solid #f1f5f9; }
-        .log-table { width: 100%; border-collapse: separate; border-spacing: 0; min-width: 600px; }
-        .log-table th { font-size: 10px; color: #64748b; text-transform: uppercase; padding: 16px; border-bottom: 2px solid #e2e8f0; text-align: left; position: sticky; top: 0; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px); z-index: 10; font-weight: 800; }
-        .log-table td { padding: 16px; font-size: 13px; border-bottom: 1px solid #f1f5f9; font-weight: 600; color: #334155; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f1f5f9; color: #334155; margin: 0; padding: 20px; }
+        
+        /* Box & Shadows Tối giản chống vỡ Layout */
+        .card { background: white; border-radius: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; padding: 24px; }
+        .card-dark { background: #0f172a; border-radius: 20px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.2); padding: 32px; position: relative; overflow: hidden; }
+        
+        .stat-card { border-radius: 16px; padding: 20px; display: flex; align-items: center; justify-content: space-between; border: 1px solid #e2e8f0; background: white; }
+        .stat-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+        
+        .avatar-circle { width: 120px; height: 120px; border-radius: 50%; background: #1e293b; display: flex; align-items: center; justify-content: center; border: 4px solid #334155; margin: 0 auto 20px; transition: 0.2s; }
+        
+        /* Hiệu ứng màu an toàn */
+        .glow-unknown { border-color: #f97316; background: #fff7ed; }
+        .glow-in { border-color: #10b981; background: #ecfdf5; }
+        .glow-out { border-color: #f43f5e; background: #fff1f2; }
+        .glow-wrong { border-color: #f59e0b; background: #fffbeb; }
+
+        .input-box { background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px; font-size: 13px; width: 100%; font-weight: 600; color: #1e293b; outline: none; }
+        .input-box:focus { border-color: #f97316; background: white; box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1); }
+        
+        .btn-primary { background: #f97316; color: white; border-radius: 10px; font-weight: 700; padding: 12px 20px; cursor: pointer; text-transform: uppercase; font-size: 12px; border: none; transition: 0.2s; }
+        .btn-primary:hover { background: #ea580c; }
+        
+        .btn-secondary { background: white; color: #334155; border: 1px solid #cbd5e1; border-radius: 10px; font-weight: 700; padding: 12px 20px; cursor: pointer; text-transform: uppercase; font-size: 11px; transition: 0.2s; }
+        .btn-secondary:hover { background: #f1f5f9; border-color: #94a3b8; }
+
+        .log-table-container { max-height: 400px; overflow-y: auto; border-radius: 12px; border: 1px solid #e2e8f0; }
+        .log-table { width: 100%; border-collapse: collapse; min-width: 600px; }
+        .log-table th { font-size: 10px; color: #64748b; text-transform: uppercase; padding: 14px; border-bottom: 2px solid #e2e8f0; text-align: left; position: sticky; top: 0; background: #f8fafc; z-index: 10; font-weight: 800; }
+        .log-table td { padding: 14px; font-size: 13px; border-bottom: 1px solid #f1f5f9; font-weight: 600; color: #334155; }
         .log-table tr:hover td { background-color: #f8fafc; }
+
+        .badge { padding: 4px 10px; border-radius: 6px; font-size: 10px; font-weight: 800; border: 1px solid; display: inline-block; }
+        .badge-in { border-color: #10b981; color: #10b981; background: #ecfdf5; }
         .badge-out { border-color: #f43f5e; color: #f43f5e; background: #fff1f2; }
         .badge-late { border-color: #eab308; color: #ca8a04; background: #fefce8; }
-        @keyframes fadeInRow { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-        .animate-fade-in { animation: fadeInRow 0.3s var(--ease-smooth) forwards; }
-        @keyframes slideIn { from { transform: translateX(120%) scale(0.95); opacity: 0; } to { transform: translateX(0) scale(1); opacity: 1; } }
-        #toast-container { position: fixed; top: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 12px; pointer-events: none; }
-        .toast { background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); border-radius: 16px; padding: 16px 24px; box-shadow: 0 20px 40px -10px rgba(0,0,0,0.1); border-left: 6px solid #f97316; display: flex; align-items: center; gap: 12px; font-size: 14px; font-weight: 700; animation: slideIn 0.4s var(--ease-out-back) forwards; pointer-events: auto; }
-        @keyframes pulse-orange { 0% { box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.4); } 100% { box-shadow: 0 0 0 20px rgba(249, 115, 22, 0); } }
+        .badge-wrong { border-color: #f59e0b; color: #f59e0b; background: #fffbeb; }
+
+        /* Toast thông báo */
+        #toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
+        .toast { background: white; border-radius: 10px; padding: 12px 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); border-left: 4px solid #f97316; font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
     </style>
 </head>
 <body>
     <div id="toast-container"></div>
-    <div class="flex flex-col md:flex-row justify-between items-center mb-8 px-4 gap-6 max-w-7xl mx-auto">
-        <div class="flex flex-col md:flex-row items-center gap-5">
-            <div class="w-14 h-14 bg-gradient-to-br from-orange-400 to-orange-600 rounded-2xl shadow-xl flex items-center justify-center text-white font-black text-3xl hover:scale-105 transition-transform duration-300">F</div>
+    
+    <!-- Top Bar -->
+    <div class="flex flex-col md:flex-row justify-between items-center mb-6 px-4 gap-4 max-w-7xl mx-auto">
+        <div class="flex items-center gap-4">
+            <div class="w-12 h-12 bg-orange-500 rounded-xl flex items-center justify-center text-white font-black text-2xl shadow-md">F</div>
             <div>
-                <h1 class="text-2xl font-black text-slate-800 tracking-tight">FPOLY ATTENDANCE <span class="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-rose-500">PRO</span></h1>
-                <div class="flex items-center gap-2 mt-1 bg-white px-3 py-1 rounded-full shadow-sm w-max border border-slate-100">
-                    <span id="era-status-dot" class="w-2.5 h-2.5 rounded-full bg-slate-300 animate-pulse transition-colors duration-300"></span>
-                    <span id="era-status-text" class="text-[10px] font-extrabold text-slate-500 uppercase tracking-widest transition-colors duration-300">ĐANG KHỞI TẠO</span>
+                <h1 class="text-xl font-black text-slate-800 tracking-tight">FPOLY ATTENDANCE <span class="text-orange-500">PRO</span></h1>
+                <div class="flex items-center gap-2 mt-1">
+                    <span id="era-status-dot" class="w-2.5 h-2.5 rounded-full bg-slate-300"></span>
+                    <span id="era-status-text" class="text-[10px] font-extrabold text-slate-500 uppercase tracking-widest">ĐANG KHỞI TẠO</span>
                 </div>
             </div>
         </div>
-        <div class="text-center md:text-right bg-white px-6 py-3 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow duration-300">
-            <div class="text-4xl font-black text-slate-800 tracking-tighter tabular-nums" id="clock">00:00:00</div>
-            <div class="text-[10px] font-extrabold text-orange-500 uppercase tracking-widest mt-1" id="date-now">...</div>
+        <div class="text-right bg-white px-5 py-2 rounded-xl shadow-sm border border-slate-200">
+            <div class="text-2xl font-black text-slate-800" id="clock">00:00:00</div>
+            <div class="text-[10px] font-extrabold text-orange-500 uppercase mt-0.5" id="date-now">...</div>
         </div>
     </div>
 
+    <!-- Main Content -->
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 max-w-7xl mx-auto">
         <div class="lg:col-span-8 space-y-6">
+            
             <!-- Scan Hero -->
-            <div class="card-dark p-10 flex flex-col items-center justify-center min-h-[380px]" id="main-display-card">
-                <div class="avatar-circle glow-idle" id="avatar-container"><i class="fa-solid fa-expand text-7xl text-slate-400/50 transition-colors duration-300" id="avatar-icon"></i></div>
-                <div class="text-center z-10 w-full">
-                    <h2 id="display-name" class="text-4xl md:text-5xl font-black text-white uppercase mb-4 tracking-tighter transition-all duration-300 drop-shadow-md">SẴN SÀNG</h2>
-                    <div id="display-details" class="flex flex-wrap items-center justify-center gap-3 mb-5 opacity-0 transition-opacity duration-300 hidden" style="opacity: 1;">
-                        <span id="display-mssv" class="px-5 py-2 rounded-xl text-sm font-black tracking-wider bg-slate-800 text-slate-100 border border-slate-600 shadow-inner"></span>
-                        <span id="display-uid" class="px-5 py-2 rounded-xl text-sm font-black font-mono bg-orange-500/20 text-orange-400 border border-orange-500/50"></span>
-                    </div>
-                    <div class="inline-flex items-center gap-2 bg-slate-800/80 backdrop-blur-md px-5 py-2 rounded-full border border-slate-600 shadow-xl transition-colors duration-300">
-                        <span class="w-2 h-2 rounded-full bg-orange-500 animate-pulse transition-colors duration-300" id="scan-status-dot"></span>
-                        <p id="display-sub" class="text-slate-200 text-[11px] font-bold uppercase tracking-widest transition-colors duration-300">HÃY ĐẶT THẺ VÀO ĐẦU ĐỌC</p>
-                    </div>
+            <div class="card-dark flex flex-col items-center justify-center min-h-[300px]">
+                <div class="avatar-circle" id="avatar-container">
+                    <i class="fa-solid fa-expand text-5xl text-slate-400" id="avatar-icon"></i>
                 </div>
-                <div class="absolute top-0 right-0 p-6 opacity-10 pointer-events-none transition-transform duration-500 hover:scale-110"><i class="fa-solid fa-fingerprint text-[150px] text-white"></i></div>
+                <div class="text-center w-full z-10">
+                    <h2 id="display-name" class="text-3xl md:text-4xl font-black text-white uppercase mb-3">SẴN SÀNG</h2>
+                    <div id="display-details" class="flex justify-center gap-3 mb-4 hidden">
+                        <span id="display-mssv" class="px-4 py-1.5 rounded-lg text-xs font-bold bg-slate-800 text-white border border-slate-600"></span>
+                        <span id="display-uid" class="px-4 py-1.5 rounded-lg text-xs font-mono font-bold bg-orange-500/20 text-orange-400 border border-orange-500"></span>
+                    </div>
+                    <p id="display-sub" class="text-slate-400 text-xs font-bold uppercase tracking-widest">HÃY ĐẶT THẺ VÀO ĐẦU ĐỌC</p>
+                </div>
             </div>
 
             <!-- TẠO MÃ NẠP ESP (OFFLINE MODE) -->
-            <div class="card p-6 md:p-8 border-t-4 border-orange-500 relative overflow-hidden">
-                <div class="absolute top-0 right-0 w-32 h-32 bg-orange-50 rounded-bl-full -z-10 opacity-50"></div>
-                <div class="flex flex-col sm:flex-row justify-between gap-3 mb-6">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center text-orange-500 text-lg"><i class="fa-solid fa-code"></i></div>
-                        <div><h3 class="font-black text-sm uppercase text-slate-800">Tạo Mã Nạp ESP32</h3><p class="text-[10px] font-bold text-slate-400">Tạo chuỗi để lưu thẻ cứng vào bộ nhớ ESP</p></div>
-                    </div>
-                    <span id="registered-count-badge" class="text-[11px] font-black text-orange-600 bg-orange-100 border border-orange-200 px-4 py-2 rounded-xl flex items-center gap-2 transition-all"><i class="fa-solid fa-database"></i> ĐÃ LƯU: 0</span>
+            <div class="card border-t-4 border-orange-500">
+                <div class="flex justify-between items-center mb-5">
+                    <h3 class="font-black text-sm uppercase text-slate-800"><i class="fa-solid fa-code text-orange-500 mr-2"></i> Tạo Mã Nạp ESP32</h3>
+                    <span id="registered-count-badge" class="text-[10px] font-black text-orange-600 bg-orange-50 px-3 py-1 rounded-md border border-orange-100">ĐÃ LƯU WEB: 0</span>
                 </div>
                 
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-5 mb-6">
-                    <div class="space-y-1.5"><label class="text-[10px] font-extrabold text-slate-500 uppercase">Mã thẻ</label><input type="text" id="reg-uid" placeholder="Chờ quẹt..." class="input-box font-mono text-orange-500 bg-orange-50/50 border-orange-100 text-center tracking-wider transition-colors" readonly></div>
-                    <div class="space-y-1.5"><label class="text-[10px] font-extrabold text-slate-500 uppercase">Họ Tên</label><input type="text" id="reg-name" placeholder="Nguyễn Văn A" class="input-box"></div>
-                    <div class="space-y-1.5"><label class="text-[10px] font-extrabold text-slate-500 uppercase">MSSV</label><input type="text" id="reg-mssv" placeholder="PS12345" class="input-box uppercase"></div>
-                    <div class="space-y-1.5"><label class="text-[10px] font-extrabold text-slate-500 uppercase">Ca Học</label>
-                        <select id="reg-shift" class="input-box font-bold text-orange-600"><option value="Ca 1">Ca 1</option><option value="Ca 2">Ca 2</option><option value="Ca 3">Ca 3</option><option value="Ca 4">Ca 4</option><option value="Ca 5">Ca 5</option></select>
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-5">
+                    <div><label class="text-[10px] font-bold text-slate-500 uppercase">Mã thẻ</label><input type="text" id="reg-uid" placeholder="Chờ quẹt..." class="input-box text-orange-500 font-mono" readonly></div>
+                    <div><label class="text-[10px] font-bold text-slate-500 uppercase">Họ Tên</label><input type="text" id="reg-name" placeholder="Nguyễn Văn A" class="input-box"></div>
+                    <div><label class="text-[10px] font-bold text-slate-500 uppercase">MSSV</label><input type="text" id="reg-mssv" placeholder="PS12345" class="input-box uppercase"></div>
+                    <div><label class="text-[10px] font-bold text-slate-500 uppercase">Ca Học</label>
+                        <select id="reg-shift" class="input-box text-orange-600 font-bold"><option value="Ca 1">Ca 1</option><option value="Ca 2">Ca 2</option><option value="Ca 3">Ca 3</option><option value="Ca 4">Ca 4</option><option value="Ca 5">Ca 5</option></select>
                     </div>
                 </div>
 
-                <div class="flex flex-col sm:flex-row gap-4">
-                    <button class="btn-primary flex-1 flex items-center justify-center gap-2" onclick="window.taoChuoi()"><i class="fa-solid fa-wand-magic-sparkles text-lg"></i> Lưu & Tạo Mã Nạp</button>
-                    <button class="btn-secondary flex items-center justify-center gap-2 px-6 text-slate-600 hover:text-slate-900" onclick="window.openManageMembersModal()"><i class="fa-solid fa-bars-staggered mr-2"></i> Quản lý Web</button>
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <button class="btn-primary flex-1" onclick="taoChuoi()"><i class="fa-solid fa-wand-magic-sparkles mr-2"></i> Lưu & Tạo Mã Nạp</button>
+                    <button class="btn-secondary" onclick="openModal()"><i class="fa-solid fa-list mr-2"></i> Quản lý Web</button>
                 </div>
 
                 <!-- Khu vực Copy Code -->
-                <div id="copy-section" class="mt-6 pt-6 border-t-2 border-dashed border-slate-200 hidden transition-all duration-300">
-                    <label class="text-[11px] font-black text-slate-500 uppercase flex items-center gap-2"><i class="fa-solid fa-paste text-orange-500"></i> Mã Nạp ESP32 (Dán vào Text Input V10 trên ERa)</label>
-                    <div class="flex gap-2 mt-2">
-                        <input type="text" id="ketQua" class="input-box flex-1 font-mono text-slate-700 bg-slate-100 font-bold" readonly>
-                        <button class="bg-emerald-500 hover:bg-emerald-600 text-white px-6 rounded-xl font-black text-[11px] uppercase transition-colors flex items-center gap-2 shadow-lg shadow-emerald-500/30" onclick="window.copyChuoi()"><i class="fa-solid fa-copy"></i> Copy</button>
+                <div id="copy-section" class="mt-5 pt-5 border-t border-slate-200 hidden">
+                    <label class="text-[11px] font-bold text-slate-500 mb-2 block">CHUỖI MÃ NẠP (Dán vào V10 trên ERa)</label>
+                    <div class="flex gap-2">
+                        <input type="text" id="ketQua" class="input-box flex-1 font-mono text-slate-700 bg-slate-100" readonly>
+                        <button class="bg-emerald-500 hover:bg-emerald-600 text-white px-5 rounded-lg font-bold text-[11px] uppercase transition-colors" onclick="copyChuoi()">COPY MÃ</button>
                     </div>
                 </div>
             </div>
 
             <!-- Bảng nhật ký -->
-            <div class="card p-6 md:p-8 w-full overflow-hidden">
-                <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-500"><i class="fa-solid fa-clock-rotate-left"></i></div>
-                        <div>
-                            <h3 class="font-black text-sm text-slate-800 uppercase">Nhật ký điểm danh</h3>
-                            <div class="flex items-center gap-2 mt-1"><span id="current-shift-badge" class="bg-orange-500 text-white px-2.5 py-0.5 rounded-md text-[9px] font-black shadow-sm transition-all">CA --</span><span class="text-[10px] text-slate-400 font-bold">Bộ lọc ngày:</span></div>
+            <div class="card">
+                <div class="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4">
+                    <div>
+                        <h3 class="font-black text-sm text-slate-800 uppercase"><i class="fa-solid fa-clock-rotate-left text-blue-500 mr-2"></i> Nhật ký điểm danh</h3>
+                        <div class="mt-1 flex items-center gap-2">
+                            <span id="current-shift-badge" class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-[10px] font-bold">CA --</span>
+                            <span class="text-[10px] text-slate-500">Bộ lọc ngày:</span>
                         </div>
                     </div>
-                    <div class="flex gap-2 w-full sm:w-auto flex-wrap sm:flex-nowrap">
-                        <input type="date" id="filter-date" class="bg-white border border-emerald-100 text-slate-600 text-[10px] font-black px-3 py-2.5 rounded-xl flex-1 sm:flex-none transition-colors hover:border-emerald-300 focus:outline-none focus:border-emerald-500 cursor-pointer">
-                        <button onclick="window.exportExcel()" class="flex-1 sm:flex-none bg-emerald-50 text-emerald-600 border border-emerald-100 text-[10px] font-black px-4 py-2.5 rounded-xl hover:bg-emerald-500 hover:text-white transition-all shadow-sm"><i class="fa-solid fa-file-excel mr-1"></i> XUẤT EXCEL</button>
-                        <button onclick="window.clearLogs()" class="flex-1 sm:flex-none bg-rose-50 text-rose-600 border border-rose-100 text-[10px] font-black px-4 py-2.5 rounded-xl hover:bg-rose-500 hover:text-white transition-all shadow-sm"><i class="fa-solid fa-trash-can mr-1"></i> XÓA NGÀY NÀY</button>
+                    <div class="flex gap-2 w-full sm:w-auto">
+                        <input type="date" id="filter-date" class="input-box !py-2 !w-auto text-[11px]">
+                        <button onclick="exportExcel()" class="btn-secondary !text-emerald-600 !border-emerald-200 hover:!bg-emerald-50"><i class="fa-solid fa-file-excel"></i> Xuất File</button>
+                        <button onclick="clearLogs()" class="btn-secondary !text-rose-600 !border-rose-200 hover:!bg-rose-50"><i class="fa-solid fa-trash"></i> Xóa</button>
                     </div>
                 </div>
-                <div class="log-table-container custom-scrollbar rounded-xl border border-slate-100 bg-slate-50/50 p-1">
+                <div class="log-table-container custom-scrollbar">
                     <table class="log-table">
-                        <thead>
-                            <tr>
-                                <th class="rounded-tl-lg">THỜI GIAN</th>
-                                <th>THÀNH VIÊN</th>
-                                <th>MSSV & CA</th>
-                                <th class="rounded-tr-lg text-right">TRẠNG THÁI</th>
-                            </tr>
-                        </thead>
+                        <thead><tr><th>THỜI GIAN</th><th>THÀNH VIÊN</th><th>MSSV & CA</th><th class="text-right">TRẠNG THÁI</th></tr></thead>
                         <tbody id="log-body"></tbody>
                     </table>
                 </div>
             </div>
         </div>
 
+        <!-- Cột Phải -->
         <div class="lg:col-span-4 space-y-6">
-            <div class="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-1 gap-4">
-                <div class="stat-card stat-total"><div><p class="text-[10px] font-extrabold text-orange-600/70 uppercase mb-1">Tổng Sĩ Số (Ca này)</p><h4 class="text-4xl font-black text-orange-600 transition-all" id="total-count">0</h4></div><div class="stat-icon-wrapper bg-orange-100 text-orange-500"><i class="fa-solid fa-users"></i></div></div>
-                <div class="stat-card stat-present"><div><p class="text-[10px] font-extrabold text-emerald-600/70 uppercase mb-1">Đã có mặt</p><h4 class="text-4xl font-black text-emerald-600 transition-all" id="present-count">0</h4></div><div class="stat-icon-wrapper bg-emerald-100 text-emerald-500"><i class="fa-solid fa-user-check"></i></div></div>
-                <div class="stat-card stat-absent"><div><p class="text-[10px] font-extrabold text-rose-600/70 uppercase mb-1">Vắng mặt</p><h4 class="text-4xl font-black text-rose-600 transition-all" id="absent-count">0</h4></div><div class="stat-icon-wrapper bg-rose-100 text-rose-500"><i class="fa-solid fa-user-xmark"></i></div></div>
+            <div class="grid grid-cols-1 gap-4">
+                <div class="stat-card">
+                    <div><p class="text-[10px] font-bold text-slate-500 uppercase mb-1">Sĩ Số (Ca này)</p><h4 class="text-3xl font-black text-slate-800" id="total-count">0</h4></div>
+                    <div class="stat-icon bg-slate-100 text-slate-500"><i class="fa-solid fa-users"></i></div>
+                </div>
+                <div class="stat-card">
+                    <div><p class="text-[10px] font-bold text-emerald-600 uppercase mb-1">Đã có mặt</p><h4 class="text-3xl font-black text-emerald-600" id="present-count">0</h4></div>
+                    <div class="stat-icon bg-emerald-50 text-emerald-500"><i class="fa-solid fa-user-check"></i></div>
+                </div>
+                <div class="stat-card">
+                    <div><p class="text-[10px] font-bold text-rose-600 uppercase mb-1">Vắng mặt</p><h4 class="text-3xl font-black text-rose-600" id="absent-count">0</h4></div>
+                    <div class="stat-icon bg-rose-50 text-rose-500"><i class="fa-solid fa-user-xmark"></i></div>
+                </div>
             </div>
 
-            <div class="card p-6">
-                <div class="flex items-center gap-2 mb-6"><i class="fa-solid fa-chart-simple text-orange-500"></i><h4 class="text-[11px] font-black text-slate-700 uppercase">Phân tích ca học</h4></div>
-                <div class="relative w-full h-[220px]"><canvas id="attendanceChart"></canvas></div>
+            <div class="card">
+                <h4 class="text-[11px] font-black text-slate-700 uppercase mb-4"><i class="fa-solid fa-chart-simple text-orange-500 mr-2"></i> Phân tích ca học</h4>
+                <div class="relative w-full h-[200px]"><canvas id="attendanceChart"></canvas></div>
             </div>
 
-            <div class="card p-6 bg-slate-800 text-slate-300 relative overflow-hidden">
-                <div class="absolute -right-4 -top-4 text-slate-700 opacity-20 text-6xl"><i class="fa-solid fa-microchip"></i></div>
-                <div class="flex items-center justify-between text-[11px] font-black uppercase mb-4 relative z-10"><span class="text-slate-100"><i class="fa-solid fa-server text-emerald-400 mr-2"></i>Web Mode</span><span id="device-dot" class="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.8)] animate-pulse transition-colors duration-300"></span></div>
-                <div class="bg-slate-900 p-4 rounded-xl border border-slate-700 text-[12px] font-mono mb-4 relative z-10"><p id="cloud-status" class="font-bold text-amber-400 transition-colors duration-300">OFFLINE (LOCAL STORAGE)</p></div>
-                <p class="text-[10px] text-slate-500 font-bold mb-4 relative z-10">Web chỉ đóng vai trò hiển thị và lưu Log. Logic kiểm soát ra vào chạy hoàn toàn độc lập trên bộ nhớ của ESP32.</p>
-                <button onclick="location.reload()" class="w-full py-3.5 bg-slate-700 hover:bg-slate-600 rounded-xl text-[11px] font-black text-white uppercase tracking-widest relative z-10 transition-all active:scale-95"><i class="fa-solid fa-rotate-right mr-2"></i>Tải lại Web</button>
+            <div class="card bg-slate-800 border-none text-white relative">
+                <div class="flex items-center justify-between text-[11px] font-bold uppercase mb-3">
+                    <span><i class="fa-solid fa-server text-emerald-400 mr-2"></i>Chế độ Web</span>
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                </div>
+                <div class="bg-slate-900 p-3 rounded-lg mb-4 border border-slate-700">
+                    <p class="text-amber-400 font-mono text-[11px] font-bold">OFFLINE MASTER (V1.3.2)</p>
+                </div>
+                <p class="text-[10px] text-slate-400 mb-4 leading-relaxed">ESP32 tự lưu thẻ & kiểm tra độc lập. Web chỉ ghi Log và cấp mã nạp thẻ.</p>
+                <button onclick="location.reload()" class="w-full py-2.5 bg-slate-700 hover:bg-slate-600 rounded-lg text-[10px] font-bold uppercase transition-colors"><i class="fa-solid fa-rotate-right mr-2"></i>Tải lại Giao diện</button>
             </div>
         </div>
     </div>
-    
-    <div class="mt-12 mb-6 border-t border-slate-200/60 pt-8 pb-4 text-center max-w-7xl mx-auto px-4">
-        <p class="text-sm font-black text-slate-400 uppercase tracking-widest mb-3 flex items-center justify-center gap-2"><i class="fa-solid fa-code-merge text-orange-500"></i> Hệ Thống Điểm Danh Fpoly <span class="bg-slate-200 text-slate-600 px-2 py-0.5 rounded text-[10px]">V1.3.0 (Offline Architecture)</span></p>
-    </div>
 
-    <!-- MODAL QUẢN LÝ -->
-    <div id="manage-members-modal" class="fixed inset-0 bg-slate-900/70 z-[100] hidden flex items-center justify-center p-4 backdrop-blur-sm transition-opacity duration-300 opacity-0">
-        <div class="bg-white rounded-[28px] w-full max-w-4xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh] border border-white transform scale-95 transition-transform duration-300">
-            <div class="px-8 py-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-                <h3 class="font-black text-slate-800 uppercase text-base flex items-center gap-3"><div class="w-8 h-8 rounded-lg bg-teal-100 text-teal-600 flex items-center justify-center"><i class="fa-solid fa-list-check"></i></div>Danh sách đã lưu (Web Log)</h3>
-                <button onclick="window.closeManageMembersModal()" class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 hover:bg-rose-100 hover:text-rose-500 transition-colors flex items-center justify-center"><i class="fa-solid fa-xmark text-lg"></i></button>
+    <!-- MODAL -->
+    <div id="manage-members-modal" class="fixed inset-0 bg-slate-900/60 z-[100] hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl w-full max-w-3xl shadow-xl overflow-hidden flex flex-col max-h-[80vh]">
+            <div class="px-6 py-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
+                <h3 class="font-black text-slate-800 uppercase text-sm"><i class="fa-solid fa-list-check text-blue-500 mr-2"></i> Danh sách thẻ lưu trên Web</h3>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-rose-500"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
-            <div class="p-6 overflow-y-auto custom-scrollbar flex-grow bg-white">
-                <table class="w-full text-left border-collapse min-w-[600px]">
-                    <thead><tr><th class="text-[10px] font-extrabold text-slate-400 uppercase pb-4 border-b-2 pl-4">UID</th><th class="text-[10px] font-extrabold text-slate-400 uppercase pb-4 border-b-2">Họ Tên</th><th class="text-[10px] font-extrabold text-slate-400 uppercase pb-4 border-b-2">MSSV</th><th class="text-[10px] font-extrabold text-slate-400 uppercase pb-4 border-b-2">Ca</th><th class="text-[10px] font-extrabold text-slate-400 uppercase pb-4 border-b-2 text-right pr-4">Thao tác</th></tr></thead>
+            <div class="p-4 overflow-y-auto custom-scrollbar flex-grow">
+                <table class="log-table">
+                    <thead><tr><th>UID</th><th>Họ Tên</th><th>MSSV</th><th>Ca</th><th class="text-right">Thao tác</th></tr></thead>
                     <tbody id="modal-members-list"></tbody>
                 </table>
             </div>
-            <div class="px-8 py-5 bg-slate-50 border-t border-slate-100 flex justify-end"><button onclick="window.closeManageMembersModal()" class="bg-slate-800 text-white text-xs font-bold uppercase tracking-wider px-8 py-3 rounded-xl hover:bg-slate-900 shadow-lg transition-colors">Hoàn tất</button></div>
         </div>
     </div>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
         const SHIFTS = [ 
-            { id: "ca1", name: "Ca 1", start: "07:00", end: "09:15" }, 
-            { id: "ca2", name: "Ca 2", start: "09:30", end: "11:45" }, 
-            { id: "ca3", name: "Ca 3", start: "13:00", end: "15:00" }, 
-            { id: "ca4", name: "Ca 4", start: "15:00", end: "17:00" }, 
-            { id: "ca5", name: "Ca 5", start: "17:15", end: "19:30" } 
+            { id: "ca1", name: "Ca 1", start: "07:00", end: "09:15", index: 0 }, 
+            { id: "ca2", name: "Ca 2", start: "09:30", end: "11:45", index: 1 }, 
+            { id: "ca3", name: "Ca 3", start: "13:00", end: "15:00", index: 2 }, 
+            { id: "ca4", name: "Ca 4", start: "15:00", end: "17:00", index: 3 }, 
+            { id: "ca5", name: "Ca 5", start: "17:15", end: "19:30", index: 4 } 
         ];
         
         const CHECKOUT_COOLDOWN_MINUTES = 15; 
         const ESP32_HARD_STUDENTS = { "96576E05": { name: "Nguyen Dinh Danh", mssv: "PS45028", shift: "Ca 2" } }; 
 
-        const UI = {
-            name: document.getElementById('display-name'),
-            target: document.getElementById('avatar-container'),
-            icon: document.getElementById('avatar-icon'),
-            sub: document.getElementById('display-sub'),
-            dot: document.getElementById('scan-status-dot'),
-            details: document.getElementById('display-details'),
-            mssv: document.getElementById('display-mssv'),
-            uid: document.getElementById('display-uid'),
-            logBody: document.getElementById('log-body')
-        };
-
-        let db, appId, currentUser;
         let isProcessing = false;
         let lastUid = "";
         let currentShift = null;
@@ -244,9 +226,10 @@
                 const [y, m, d] = filterDateInput.value.split('-');
                 selectedDateStr = new Date(y, m-1, d).toDateString();
             } else { selectedDateStr = new Date().toDateString(); }
-            requestAnimationFrame(renderAll);
+            renderAll();
         });
 
+        // LƯU TRỮ OFFLINE TRÊN TRÌNH DUYỆT (KHÔNG CẦN FIREBASE)
         let membersDb = JSON.parse(localStorage.getItem('era_members')) || {};
         let logsDb = JSON.parse(localStorage.getItem('era_logs')) || [];
 
@@ -255,11 +238,30 @@
             localStorage.setItem('era_logs', JSON.stringify(logsDb));
         }
 
+        // BIỂU ĐỒ
         let ctx = document.getElementById('attendanceChart').getContext('2d');
-        let gradient = ctx.createLinearGradient(0,0,0,200); gradient.addColorStop(0, '#10b981'); gradient.addColorStop(1, '#6ee7b7');
-        let attendanceChart = new Chart(ctx, { type: 'bar', data: { labels: ['Ca 1', 'Ca 2', 'Ca 3', 'Ca 4', 'Ca 5'], datasets: [{ label: 'Hiện diện', data: [0,0,0,0,0], backgroundColor: gradient, borderRadius: 6, barThickness: 24 }] }, options: { responsive: true, maintainAspectRatio: false, animation: { duration: 500 }, plugins: { legend: { display: false } }, scales: { y: { display: true, grid: { color: '#f1f5f9' }, ticks: { stepSize: 1 } }, x: { grid: { display: false } } } } });
+        let attendanceChart = new Chart(ctx, { 
+            type: 'bar', 
+            data: { labels: ['Ca 1', 'Ca 2', 'Ca 3', 'Ca 4', 'Ca 5'], datasets: [{ label: 'Hiện diện', data: [0,0,0,0,0], backgroundColor: '#10b981', borderRadius: 4, barThickness: 20 }] }, 
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { display: true, ticks: { stepSize: 1 } }, x: { grid: { display: false } } } } 
+        });
 
-        // TÍNH NĂNG TẠO CHUỖI NẠP ESP32
+        // TOAST MỚI (Tránh lỗi DOM)
+        window.showToast = (msg, type='success') => {
+            const c = document.getElementById('toast-container');
+            const t = document.createElement('div');
+            let color = type === 'success' ? '#10b981' : (type === 'warning' ? '#f59e0b' : '#f43f5e');
+            let icon = type === 'success' ? 'fa-check-circle' : 'fa-triangle-exclamation';
+            t.className = `toast`;
+            t.style.borderLeftColor = color;
+            t.innerHTML = `<i class="fa-solid ${icon}" style="color: ${color}; font-size: 18px;"></i> <span>${msg}</span>`;
+            c.appendChild(t);
+            setTimeout(() => t.remove(), 3500);
+        };
+
+        // ==========================================
+        // CẤP THẺ BẰNG MÃ CHUỖI ĐỂ DÁN VÀO V10
+        // ==========================================
         window.taoChuoi = () => {
             const u = document.getElementById('reg-uid').value.trim();
             const n = document.getElementById('reg-name').value.trim();
@@ -267,35 +269,31 @@
             const s = document.getElementById('reg-shift').value.trim();
 
             if (!u || !n) {
-                window.showToast("Vui lòng quét thẻ và nhập tên!", "warning");
+                showToast("Vui lòng quét thẻ lạ để lấy UID và nhập tên!", "warning");
                 return;
             }
 
-            // Ghi vào Web DB để làm Modal Quản lý
-            if (db && appId) setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'members', u), { name: n, mssv: m, shift: s, timestamp: Date.now() }).catch(e => {}); 
-            else { membersDb[u] = { name: n, mssv: m, shift: s, timestamp: Date.now() }; syncLocal(); requestAnimationFrame(renderAll); }
+            membersDb[u] = { name: n, mssv: m, shift: s, timestamp: Date.now() }; 
+            syncLocal(); 
+            renderAll();
             
-            // Tạo chuỗi
             const chuoi = `${u}|${n}|${m}|${s}`;
             document.getElementById('ketQua').value = chuoi;
             document.getElementById('copy-section').classList.remove('hidden');
-            window.showToast("Lưu Web OK! Bấm Copy để đưa xuống mạch nhé.");
+            showToast("Lưu Web OK! Bấm Copy mã để đưa xuống mạch ESP32.");
         };
 
         window.copyChuoi = () => {
             const copyText = document.getElementById("ketQua");
             if(!copyText.value) return;
-            
-            try {
-                document.execCommand('copy');
-                copyText.select();
-                document.execCommand("copy");
-                window.showToast("Đã Copy! Hãy dán vào V10 trên ERa Dashboard.");
-            } catch(err) {
-                window.showToast("Lỗi trình duyệt! Bôi đen copy thủ công nhé.", "warning");
-            }
+            copyText.select();
+            document.execCommand("copy");
+            showToast("Đã Copy mã! Hãy dán vào ô Input V10 trên ERa Dashboard.");
         };
 
+        // ==========================================
+        // ERA WIDGET GIAO TIẾP VỚI ESP32
+        // ==========================================
         const eraWidget = new EraWidget();
         let eCfg = { uid: null, name: null, mssv: null, shift: null };
         let tempCache = { name: null, mssv: null, shift: null };
@@ -305,46 +303,48 @@
             onConfiguration: (c) => {
                 c.realtime_configs.forEach(cfg => {
                     const n = cfg.name.toLowerCase().trim();
-                    if(n.includes("uid") || n.includes("v0") || n === "đọc thẻ") eCfg.uid = cfg;
-                    if(n.includes("name") || n.includes("v1") || n === "trạng thái truy cập") eCfg.name = cfg;
+                    if(n.includes("uid") || n.includes("v0")) eCfg.uid = cfg;
+                    if(n.includes("name") || n.includes("v1")) eCfg.name = cfg;
                     if(n.includes("mssv") || n.includes("v2")) eCfg.mssv = cfg;
                     if(n.includes("ca") || n.includes("v9")) eCfg.shift = cfg;
                 });
-                document.getElementById('era-status-text').innerText = "SYSTEM LIVE"; document.getElementById('era-status-dot').className = "w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse";
+                document.getElementById('era-status-text').innerText = "ĐÃ KẾT NỐI ESP32"; 
+                document.getElementById('era-status-dot').classList.replace('bg-slate-300', 'bg-emerald-500');
             },
             onValues: (v) => {
+                // ESP32 bắn Data lên V1, V2, V9, và chốt bằng V0
                 if (eCfg.name && v[eCfg.name.id]) tempCache.name = v[eCfg.name.id].value;
                 if (eCfg.mssv && v[eCfg.mssv.id]) tempCache.mssv = v[eCfg.mssv.id].value;
                 if (eCfg.shift && v[eCfg.shift.id]) tempCache.shift = v[eCfg.shift.id].value;
                 
-                if (!eCfg.uid) return; const u = v[eCfg.uid.id]?.value;
+                if (!eCfg.uid) return; 
+                const u = v[eCfg.uid.id]?.value;
                 
                 if (u && u !== "0" && u !== "" && u !== "None" && u !== lastUid && !isProcessing) {
                     lastUid = u; isProcessing = true;
-                    setTimeout(() => { 
-                        try { handleScan(u, tempCache); } catch (error) {} finally { isProcessing = false; }
-                    }, 50);
+                    // Bỏ setTimeout/requestAnimationFrame phức tạp
+                    handleScan(u, tempCache); 
+                    setTimeout(() => { isProcessing = false; }, 500); // 0.5s chống lặp
                 }
             }
         });
 
-        // HÀM XỬ LÝ GIAO DIỆN WEB (NHẬN TỪ MẠCH)
+        // XỬ LÝ LOGIC ĐIỂM DANH & HIỂN THỊ
+        let resetTimer = null;
         function handleScan(uid, data) {
-            // Lấy data do ESP32 truyền lên
             const espValid = data.name && data.name !== "None" && data.name !== "0" && data.name.toUpperCase() !== "NGUOI LA";
+            
             let fName = espValid ? data.name : null;
             let fMssv = espValid ? data.mssv : "---";
             let fShift = espValid ? data.shift : "---";
             
-            const now = new Date(); currentShift = getShiftByTime(now);
+            const now = new Date(); 
+            currentShift = getShiftByTime(now);
             document.getElementById('reg-uid').value = uid;
 
             let status = fName ? 1 : 0;
             let actionStr = "VÀO LỚP";
-            let lateMins = 0; 
-            let isCheckOut = false;
 
-            // KIỂM TRA ĐIỀU KIỆN TRÊN WEB
             if (fName && currentShift && fShift !== "---" && fShift !== currentShift.name) {
                 status = 2; // Sai Ca
             } else if (fName && currentShift && fShift === currentShift.name) {
@@ -352,119 +352,101 @@
                 const hasCheckedIn = logsDb.some(l => l.date === todayStr && l.uid === uid && l.shiftId === currentShift.id && (l.status.includes("VÀO LỚP") || l.status.includes("TRỄ")));
                 
                 if (hasCheckedIn) {
-                    isCheckOut = true;
                     const [endH, endM] = currentShift.end.split(':').map(Number);
-                    const endMins = endH * 60 + endM;
-                    const currMins = now.getHours() * 60 + now.getMinutes();
-                    let remainingMins = endMins - currMins;
+                    const remMins = (endH * 60 + endM) - (now.getHours() * 60 + now.getMinutes());
                     
-                    if (remainingMins <= CHECKOUT_COOLDOWN_MINUTES) { 
-                        status = 5; 
-                        actionStr = "RA LỚP";
-                    } else {
-                        status = 3; 
-                        actionStr = "CHƯA ĐẾN GIỜ RA";
+                    if (remMins <= CHECKOUT_COOLDOWN_MINUTES) { 
+                        status = 5; actionStr = "RA LỚP"; 
+                    } else { 
+                        status = 3; actionStr = "CHƯA ĐẾN GIỜ RA"; 
                     }
                 } else {
                     const [sh, sm] = currentShift.start.split(':').map(Number);
-                    const startMins = sh * 60 + sm;
-                    const currMins = now.getHours() * 60 + now.getMinutes();
-                    lateMins = currMins - startMins;
-
-                    if (lateMins > 0) {
-                        status = 4; 
-                        actionStr = `VÀO TRỄ (${lateMins}p)`;
-                    } else {
-                        status = 1; 
-                        actionStr = "VÀO LỚP";
-                    }
+                    const lateMins = (now.getHours() * 60 + now.getMinutes()) - (sh * 60 + sm);
+                    if (lateMins > 0) { status = 4; actionStr = `VÀO TRỄ (${lateMins}p)`; } 
+                    else { status = 1; actionStr = "VÀO LỚP"; }
                 }
             }
 
-            // GIAO DIỆN WEB
-            requestAnimationFrame(() => {
-                UI.details.classList.remove('hidden');
-                UI.details.classList.remove('opacity-0', 'translate-y-4');
-                UI.mssv.innerText = fMssv;
-                UI.uid.innerText = uid;
+            // GIAO DIỆN CẬP NHẬT CƠ BẢN (KHÔNG HIỆU ỨNG NẶNG)
+            const UI = {
+                name: document.getElementById('display-name'),
+                sub: document.getElementById('display-sub'),
+                avatar: document.getElementById('avatar-container'),
+                icon: document.getElementById('avatar-icon'),
+                details: document.getElementById('display-details'),
+                mssvUi: document.getElementById('display-mssv'),
+                uidUi: document.getElementById('display-uid')
+            };
 
-                if (!fName) {
-                    UI.name.innerText = "THẺ CHƯA ĐĂNG KÝ";
-                    UI.name.className = "text-4xl md:text-5xl font-black text-orange-500 uppercase mb-4 tracking-tighter transition-all duration-300 drop-shadow-md scale-105";
-                    UI.target.className = "avatar-circle glow-unknown";
-                    if(UI.icon) UI.icon.className = "fa-solid fa-fingerprint text-7xl text-orange-500 transition-colors";
-                    if(UI.sub) UI.sub.innerText = "VUI LÒNG ĐĂNG KÝ THẺ DƯỚI ĐÂY";
-                    if(UI.dot) UI.dot.className = "w-2.5 h-2.5 rounded-full bg-orange-500 animate-pulse transition-colors";
-                } else if (status === 2) {
-                    UI.name.innerText = fName;
-                    UI.name.className = "text-4xl md:text-5xl font-black text-amber-500 uppercase mb-4 tracking-tighter transition-all duration-300 drop-shadow-md scale-105";
-                    UI.target.className = "avatar-circle glow-wrong";
-                    if(UI.icon) UI.icon.className = "fa-solid fa-triangle-exclamation text-7xl text-amber-500 transition-colors";
-                    if(UI.sub) UI.sub.innerText = `QUÉT SAI CA (${fShift})`;
-                    if(UI.dot) UI.dot.className = "w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse transition-colors";
-                } else if (status === 3) {
-                    const [endH, endM] = currentShift.end.split(':').map(Number);
-                    let rem = (endH * 60 + endM) - (now.getHours() * 60 + now.getMinutes());
-                    UI.name.innerText = "CHƯA ĐẾN GIỜ RA";
-                    UI.name.className = "text-4xl md:text-5xl font-black text-orange-500 uppercase mb-4 tracking-tighter transition-all duration-300 drop-shadow-md scale-105";
-                    UI.target.className = "avatar-circle glow-wrong";
-                    if(UI.icon) UI.icon.className = "fa-solid fa-clock text-7xl text-orange-500 transition-colors";
-                    if(UI.sub) UI.sub.innerText = `ĐỢI THÊM ${rem} PHÚT ĐỂ RA LỚP`;
-                    if(UI.dot) UI.dot.className = "w-2.5 h-2.5 rounded-full bg-orange-500 animate-pulse transition-colors";
-                } else if (status === 4) {
-                    UI.name.innerText = fName;
-                    UI.name.className = "text-4xl md:text-5xl font-black text-yellow-500 uppercase mb-4 tracking-tighter transition-all duration-300 drop-shadow-md scale-105";
-                    UI.target.className = "avatar-circle glow-late";
-                    if(UI.icon) UI.icon.className = "fa-solid fa-clock-rotate-left text-7xl text-yellow-500 transition-colors";
-                    if(UI.sub) UI.sub.innerText = `BẠN ĐÃ ĐI TRỄ ${lateMins} PHÚT!`;
-                    if(UI.dot) UI.dot.className = "w-2.5 h-2.5 rounded-full bg-yellow-500 animate-pulse transition-colors";
-                } else if (status === 5) {
-                    UI.name.innerText = fName;
-                    UI.name.className = "text-4xl md:text-5xl font-black text-rose-400 uppercase mb-4 tracking-tighter transition-all duration-300 drop-shadow-md scale-105";
-                    UI.target.className = "avatar-circle glow-out";
-                    if(UI.icon) UI.icon.className = "fa-solid fa-person-walking-arrow-right text-7xl text-rose-500 transition-colors";
-                    if(UI.sub) UI.sub.innerText = "ĐÃ ĐIỂM DANH RA LỚP";
-                    if(UI.dot) UI.dot.className = "w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse transition-colors";
-                } else {
-                    UI.name.innerText = fName;
-                    UI.name.className = "text-4xl md:text-5xl font-black text-emerald-400 uppercase mb-4 tracking-tighter transition-all duration-300 drop-shadow-md scale-105";
-                    UI.target.className = "avatar-circle glow-in";
-                    if(UI.icon) UI.icon.className = "fa-solid fa-check text-7xl text-emerald-400 transition-colors";
-                    if(UI.sub) UI.sub.innerText = "ĐIỂM DANH VÀO LỚP THÀNH CÔNG";
-                    if(UI.dot) UI.dot.className = "w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse transition-colors";
-                }
-            });
+            UI.details.classList.remove('hidden');
+            UI.mssvUi.innerText = fMssv;
+            UI.uidUi.innerText = uid;
+            UI.avatar.className = "avatar-circle"; // Reset class
 
-            // GHI NHẬT KÝ DATABASE
+            if (!fName) {
+                UI.name.innerText = "THẺ CHƯA ĐĂNG KÝ"; UI.name.className = "text-3xl font-black text-orange-500 mb-3";
+                UI.avatar.style.borderColor = "#f97316"; UI.avatar.style.background = "#fff7ed";
+                UI.icon.className = "fa-solid fa-fingerprint text-5xl text-orange-500";
+                UI.sub.innerText = "VUI LÒNG TẠO MÃ NẠP ESP BÊN DƯỚI";
+                showToast(`Phát hiện thẻ lạ: ${uid}`, "warning");
+            } else if (status === 2) {
+                UI.name.innerText = fName; UI.name.className = "text-3xl font-black text-amber-500 mb-3";
+                UI.avatar.style.borderColor = "#f59e0b"; UI.avatar.style.background = "#fffbeb";
+                UI.icon.className = "fa-solid fa-triangle-exclamation text-5xl text-amber-500";
+                UI.sub.innerText = `QUÉT SAI CA (${fShift})`;
+                showToast(`Cảnh báo: Sinh viên ${fName} đi sai ca.`, "warning");
+            } else if (status === 3) {
+                UI.name.innerText = "CHƯA ĐẾN GIỜ RA"; UI.name.className = "text-3xl font-black text-orange-500 mb-3";
+                UI.avatar.style.borderColor = "#f97316"; UI.avatar.style.background = "#fff7ed";
+                UI.icon.className = "fa-solid fa-clock text-5xl text-orange-500";
+                UI.sub.innerText = "VUI LÒNG ĐỢI ĐẾN CUỐI CA HỌC";
+                showToast(`Chưa đến giờ ra!`, "warning");
+            } else if (status === 4) {
+                UI.name.innerText = fName; UI.name.className = "text-3xl font-black text-yellow-600 mb-3";
+                UI.avatar.style.borderColor = "#eab308"; UI.avatar.style.background = "#fefce8";
+                UI.icon.className = "fa-solid fa-clock-rotate-left text-5xl text-yellow-600";
+                UI.sub.innerText = "VÀO LỚP TRỄ";
+                showToast(`${fName} đi trễ!`, "warning");
+            } else if (status === 5) {
+                UI.name.innerText = fName; UI.name.className = "text-3xl font-black text-rose-500 mb-3";
+                UI.avatar.style.borderColor = "#f43f5e"; UI.avatar.style.background = "#fff1f2";
+                UI.icon.className = "fa-solid fa-person-walking-arrow-right text-5xl text-rose-500";
+                UI.sub.innerText = "ĐÃ ĐIỂM DANH RA LỚP";
+                showToast(`Tạm biệt ${fName}!`);
+            } else {
+                UI.name.innerText = fName; UI.name.className = "text-3xl font-black text-emerald-500 mb-3";
+                UI.avatar.style.borderColor = "#10b981"; UI.avatar.style.background = "#ecfdf5";
+                UI.icon.className = "fa-solid fa-check text-5xl text-emerald-500";
+                UI.sub.innerText = "ĐIỂM DANH VÀO LỚP THÀNH CÔNG";
+                showToast(`Xin chào ${fName}!`);
+            }
+
+            // GHI LOG
             if (fName && status !== 3) {
                 let sIdx = SHIFTS.findIndex(s => s.name === fShift);
-                const entry = { uid, name: fName, mssv: fMssv, shiftReg: fShift, time: now.toLocaleTimeString('vi-VN', {hour12: false}), timestamp: now.getTime(), date: now.toDateString(), status: actionStr, shiftId: currentShift?.id || "none", shiftIndex: sIdx };
-                
-                if (db && appId) {
-                    setDoc(doc(collection(db, 'artifacts', appId, 'public', 'data', 'attendance_logs')), entry).catch(e => {});
-                } else {
-                    entry.id = Date.now().toString();
-                    logsDb.unshift(entry);
-                    syncLocal(); 
-                    requestAnimationFrame(renderAll);
-                }
+                const entry = { id: Date.now().toString(), uid, name: fName, mssv: fMssv, shiftReg: fShift, time: now.toLocaleTimeString('vi-VN', {hour12: false}), timestamp: now.getTime(), date: now.toDateString(), status: actionStr, shiftId: currentShift?.id || "none", shiftIndex: sIdx };
+                logsDb.unshift(entry);
+                syncLocal(); 
+                renderAll();
             }
 
-            setTimeout(() => { 
+            // Tự reset giao diện
+            if(resetTimer) clearTimeout(resetTimer);
+            resetTimer = setTimeout(() => { 
                 if(lastUid === uid) { 
-                    requestAnimationFrame(() => {
-                        UI.name.innerText = "SẴN SÀNG";
-                        UI.name.className = "text-4xl md:text-5xl font-black text-white uppercase mb-4 tracking-tighter transition-all duration-300 drop-shadow-md";
-                        UI.details.classList.add('hidden');
-                        UI.target.className = "avatar-circle glow-idle";
-                        if(UI.icon) UI.icon.className = "fa-solid fa-expand text-7xl text-slate-400/50 transition-colors";
-                        if(UI.sub) UI.sub.innerText = "HÃY ĐẶT THẺ VÀO ĐẦU ĐỌC";
-                        if(UI.dot) UI.dot.className = "w-2.5 h-2.5 rounded-full bg-orange-500 animate-pulse transition-colors";
-                        lastUid = ""; 
-                    });
+                    UI.name.innerText = "SẴN SÀNG"; UI.name.className = "text-4xl font-black text-white mb-3";
+                    UI.details.classList.add('hidden');
+                    UI.avatar.style = ""; UI.avatar.className = "avatar-circle";
+                    UI.icon.className = "fa-solid fa-expand text-5xl text-slate-400";
+                    UI.sub.innerText = "HÃY ĐẶT THẺ VÀO ĐẦU ĐỌC";
+                    lastUid = ""; 
                 } 
             }, 6000);
         }
+
+        // CÁC HÀM TIỆN ÍCH TRUYỀN THỐNG (KHÔNG LỖI)
+        function getShiftByTime(n) { const t = n.getHours()*60 + n.getMinutes(); return SHIFTS.find(s => { const [h, m] = s.start.split(':').map(Number); const [eh, em] = s.end.split(':').map(Number); return t >= (h*60+m) && t <= (eh*60+em); }); }
 
         function renderAll() {
             const logsToRender = logsDb.filter(l => l.date === selectedDateStr);
@@ -483,17 +465,17 @@
                 if (isViewingToday && currentShift && l.shiftId === currentShift.id && (l.status.includes("VÀO LỚP") || l.status.includes("TRỄ") || l.status === "RA LỚP")) presentUIDs.add(l.uid);
                 if(l.shiftIndex !== undefined && l.shiftIndex >= 0 && l.shiftIndex < 5 && (l.status.includes("VÀO LỚP") || l.status.includes("TRỄ") || l.status === "RA LỚP")) chartSets[l.shiftIndex].add(l.uid);
 
-                let badge = l.status.includes("VÀO LỚP") ? "bg-emerald-50 text-emerald-600 border-emerald-200" : (l.status === "RA LỚP" ? "badge-out" : (l.status.includes("TRỄ") ? "badge-late" : (l.status === "SAI CA" ? "bg-amber-50 text-amber-600 border-amber-200" : "bg-orange-50 text-orange-600 border-orange-200")));
+                let badgeClass = l.status.includes("VÀO LỚP") ? "badge-in" : (l.status === "RA LỚP" ? "badge-out" : (l.status.includes("TRỄ") ? "badge-late" : (l.status === "SAI CA" ? "badge-wrong" : "badge-unknown")));
                 
-                return `<tr class="hover:bg-slate-50 transition-colors animate-fade-in">
-                    <td>${l.time}</td>
-                    <td class="font-bold uppercase">${l.name}</td>
-                    <td>${l.mssv} <span class="bg-slate-100 text-[9px] px-1 rounded border border-slate-200 ml-1">${l.shiftReg}</span></td>
-                    <td class="text-right"><span class="px-4 py-1.5 rounded-lg text-[10px] font-black border ${badge}">${l.status}</span></td>
+                return `<tr>
+                    <td class="font-mono text-[11px] text-slate-500">${l.time}</td>
+                    <td class="font-black text-slate-800 uppercase">${l.name}</td>
+                    <td>${l.mssv} <span class="bg-slate-200 text-slate-600 text-[9px] px-2 py-0.5 rounded-md ml-1 font-bold">${l.shiftReg}</span></td>
+                    <td class="text-right"><span class="badge ${badgeClass}">${l.status}</span></td>
                 </tr>`;
             }).join('');
             
-            if(!logsToRender.length) tbody.innerHTML = `<tr><td colspan="4" class="py-12 text-center text-slate-300 font-bold uppercase text-xs">Không có dữ liệu cho ngày này</td></tr>`;
+            if(!logsToRender.length) tbody.innerHTML = `<tr><td colspan="4" class="py-10 text-center text-slate-400 font-bold uppercase text-xs">TRỐNG DỮ LIỆU</td></tr>`;
             
             if(isViewingToday && currentShift) {
                 document.getElementById('total-count').innerText = totalInShift;
@@ -504,33 +486,36 @@
             }
             
             attendanceChart.data.datasets[0].data = chartSets.map(s => s.size); attendanceChart.update();
-            document.getElementById('registered-count-badge').innerText = `ĐÃ LƯU: ${Object.keys(membersDb).length}`;
+            document.getElementById('registered-count-badge').innerText = `ĐÃ LƯU WEB: ${Object.keys(membersDb).length}`;
         }
 
+        // QUẢN LÝ MODAL TRUYỀN THỐNG
         const modalEl = document.getElementById('manage-members-modal');
-        const modalBox = modalEl.querySelector('.bg-white');
-        window.openManageMembersModal = () => { 
-            document.getElementById('modal-members-list').innerHTML = Object.keys(membersDb).map(u => `<tr class="border-b border-slate-50 transition-colors hover:bg-slate-50"><td class="pl-4 py-4 font-mono text-orange-500">${u}</td><td class="font-bold">${membersDb[u].name}</td><td>${membersDb[u].mssv}</td><td>${membersDb[u].shift}</td><td class="text-right pr-4"><button onclick="window.del('${u}')" class="text-rose-500 font-black px-3 py-1 hover:bg-rose-50 rounded-lg transition-colors">XÓA</button></td></tr>`).join(''); 
-            modalEl.classList.remove('hidden'); setTimeout(() => { modalEl.classList.remove('opacity-0'); modalBox.classList.remove('scale-95'); modalBox.classList.add('scale-100'); }, 10);
+        window.openModal = () => { 
+            document.getElementById('modal-members-list').innerHTML = Object.keys(membersDb).map(u => `<tr><td class="font-mono text-orange-500 font-bold">${u}</td><td class="font-black uppercase">${membersDb[u].name}</td><td>${membersDb[u].mssv}</td><td><span class="bg-slate-200 text-[9px] font-bold px-2 py-1 rounded">${membersDb[u].shift}</span></td><td class="text-right"><button onclick="delMember('${u}')" class="text-rose-500 font-bold uppercase text-[10px] hover:underline">Xóa</button></td></tr>`).join(''); 
+            modalEl.classList.remove('hidden'); 
         };
-        window.closeManageMembersModal = () => { modalEl.classList.add('opacity-0'); modalBox.classList.remove('scale-100'); modalBox.classList.add('scale-95'); setTimeout(() => { modalEl.classList.add('hidden'); }, 300); };
-        window.del = async (u) => { if(confirm("Xóa thẻ?")) { if (db && appId) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'members', u)); else { delete membersDb[u]; syncLocal(); renderAll(); } window.openManageMembersModal(); } };
-        window.clearLogs = async () => { const displayDate = document.getElementById('filter-date').value.split('-').reverse().join('/'); if(confirm(`Xóa toàn bộ nhật ký của ngày ${displayDate}?`)) { if (db && appId) { const logsToDelete = logsDb.filter(l => l.date === selectedDateStr); for (let l of logsToDelete) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'attendance_logs', l.id)); } else { logsDb = logsDb.filter(l => l.date !== selectedDateStr); syncLocal(); renderAll(); } window.showToast("Đã xóa nhật ký ngày đang chọn!"); } };
-        window.exportExcel = () => { const logsToExport = logsDb.filter(l => l.date === selectedDateStr); if(logsToExport.length===0) return window.showToast("Trống!","warning"); const ws = XLSX.utils.json_to_sheet(logsToExport.map(l => ({ "Giờ": l.time, "Tên": l.name, "MSSV": l.mssv, "Trạng thái": l.status }))); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Attendance"); XLSX.writeFile(wb, `FPOLY_${selectedDateStr.replace(/ /g,'_')}.xlsx`); };
-        window.showToast = (m, t='success') => { const c = document.getElementById('toast-container'), i = document.createElement('div'); let icon = t === 'success' ? 'fa-check-circle text-emerald-500' : 'fa-triangle-exclamation text-amber-500'; i.className = "toast"; i.innerHTML = `<i class="fa-solid ${icon} text-lg"></i> <span class="tracking-wide">${m}</span>`; c.appendChild(i); setTimeout(() => i.remove(), 3500); };
+        window.closeModal = () => { modalEl.classList.add('hidden'); };
+        window.delMember = (u) => { if(confirm("Xóa thẻ này?")) { delete membersDb[u]; syncLocal(); renderAll(); window.openModal(); } };
+        
+        window.clearLogs = () => { const displayDate = document.getElementById('filter-date').value.split('-').reverse().join('/'); if(confirm(`Xóa toàn bộ nhật ký của ngày ${displayDate}?`)) { logsDb = logsDb.filter(l => l.date !== selectedDateStr); syncLocal(); renderAll(); showToast("Đã xóa nhật ký ngày đang chọn!"); } };
+        window.exportExcel = () => { const logsToExport = logsDb.filter(l => l.date === selectedDateStr); if(logsToExport.length===0) return showToast("Trống!","warning"); const ws = XLSX.utils.json_to_sheet(logsToExport.map(l => ({ "Giờ": l.time, "Tên": l.name, "MSSV": l.mssv, "Trạng thái": l.status }))); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Attendance"); XLSX.writeFile(wb, `FPOLY_${selectedDateStr.replace(/ /g,'_')}.xlsx`); };
 
-        function updateClock() {
+        // ĐỒNG HỒ TRUYỀN THỐNG (CHỐNG TREO)
+        setInterval(() => {
             const now = new Date();
             document.getElementById('clock').innerText = now.toLocaleTimeString('vi-VN', {hour12: false});
             document.getElementById('date-now').innerText = now.toLocaleDateString('vi-VN', {weekday: 'long', day: 'numeric', month: 'numeric'});
             
             const newShift = getShiftByTime(now);
             if (newShift && (!currentShift || currentShift.id !== newShift.id)) {
-                currentShift = newShift; document.getElementById('current-shift-badge').innerText = currentShift.name.toUpperCase(); requestAnimationFrame(renderAll);
+                currentShift = newShift; document.getElementById('current-shift-badge').innerText = currentShift.name.toUpperCase(); renderAll();
             } else if (!newShift) { document.getElementById('current-shift-badge').innerText = "NGOÀI CA"; }
-            requestAnimationFrame(updateClock);
-        }
-        requestAnimationFrame(updateClock);
+        }, 1000);
+        
+        // Khởi động
+        currentShift = getShiftByTime(new Date());
+        renderAll();
     </script>
 </body>
 </html>
