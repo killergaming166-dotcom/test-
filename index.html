@@ -259,6 +259,27 @@
             setTimeout(() => t.remove(), 3500);
         };
 
+        // Hàm khử dấu tiếng Việt để ESP32 không bị lỗi font khi xuất lên LCD
+        function removeVietnameseTones(str) {
+            str = str.replace(/à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ/g, "a");
+            str = str.replace(/è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ/g, "e");
+            str = str.replace(/ì|í|ị|ỉ|ĩ/g, "i");
+            str = str.replace(/ò|ó|ọ|ỏ|õ|ô|ồ|ố|ộ|ổ|ỗ|ơ|ờ|ớ|ợ|ở|ỡ/g, "o");
+            str = str.replace(/ù|ú|ụ|ủ|ũ|ư|ừ|ứ|ự|ử|ữ/g, "u");
+            str = str.replace(/ỳ|ý|ỵ|ỷ|ỹ/g, "y");
+            str = str.replace(/đ/g, "d");
+            str = str.replace(/À|Á|Ạ|Ả|Ã|Â|Ầ|Ấ|Ậ|Ẩ|Ẫ|Ă|Ằ|Ắ|Ặ|Ẳ|Ẵ/g, "A");
+            str = str.replace(/È|É|Ẹ|Ẻ|Ẽ|Ê|Ề|Ế|Ệ|Ể|Ễ/g, "E");
+            str = str.replace(/Ì|Í|Ị|Ỉ|Ĩ/g, "I");
+            str = str.replace(/Ò|Ó|Ọ|Ỏ|Õ|Ô|Ồ|Ố|Ộ|Ổ|Ỗ|Ơ|Ờ|Ớ|Ợ|Ở|Ỡ/g, "O");
+            str = str.replace(/Ù|Ú|Ụ|Ủ|Ũ|Ư|Ừ|Ứ|Ự|Ử|Ữ/g, "U");
+            str = str.replace(/Ỳ|Ý|Ỵ|Ỷ|Ỹ/g, "Y");
+            str = str.replace(/Đ/g, "D");
+            str = str.replace(/\u0300|\u0301|\u0303|\u0309|\u0323/g, ""); // Huyền, sắc, hỏi, ngã, nặng 
+            str = str.replace(/\u02C6|\u0306|\u031B/g, ""); // Â, Ê, Ă, Ơ, Ư
+            return str;
+        }
+
         // ==========================================
         // CẤP THẺ BẰNG MÃ CHUỖI ĐỂ DÁN VÀO V10
         // ==========================================
@@ -273,11 +294,17 @@
                 return;
             }
 
+            // Lưu tên Có Dấu vào Database Web để hiển thị cho đẹp
             membersDb[u] = { name: n, mssv: m, shift: s, timestamp: Date.now() }; 
             syncLocal(); 
             renderAll();
             
-            const chuoi = `${u}|${n}|${m}|${s}`;
+            // Ép chuỗi gửi xuống mạch ESP32 thành Không Dấu để LCD không bị lỗi ô vuông
+            const n_noAccent = removeVietnameseTones(n);
+            const m_noAccent = removeVietnameseTones(m);
+            const s_noAccent = removeVietnameseTones(s);
+
+            const chuoi = `${u}|${n_noAccent}|${m_noAccent}|${s_noAccent}`;
             document.getElementById('ketQua').value = chuoi;
             document.getElementById('copy-section').classList.remove('hidden');
             showToast("Lưu Web OK! Bấm Copy mã để đưa xuống mạch ESP32.");
@@ -332,11 +359,14 @@
         // XỬ LÝ LOGIC ĐIỂM DANH & HIỂN THỊ
         let resetTimer = null;
         function handleScan(uid, data) {
-            const espValid = data.name && data.name !== "None" && data.name !== "0" && data.name.toUpperCase() !== "NGUOI LA";
+            // XÁC ĐỊNH NGƯỜI DÙNG: Kiểm tra tính hợp lệ từ ESP32 trước, nếu không hợp lệ thì kiểm tra tiếp trong danh sách Web đã lưu
+            const espValid = data.name && data.name !== "None" && data.name !== "0" && String(data.name).toUpperCase() !== "NGUOI LA" && String(data.name).toUpperCase() !== "NGƯỜI LẠ";
+            const localMember = membersDb[uid]; // Kiểm tra trong Web DB (phòng trường hợp ESP chưa nhận)
             
-            let fName = espValid ? data.name : null;
-            let fMssv = espValid ? data.mssv : "---";
-            let fShift = espValid ? data.shift : "---";
+            // Ưu tiên dữ liệu từ ESP, nếu ESP không có thì lấy dữ liệu đã lưu trên Web
+            let fName = espValid ? data.name : (localMember ? localMember.name : null);
+            let fMssv = (espValid && data.mssv && data.mssv !== "---") ? data.mssv : (localMember ? localMember.mssv : "---");
+            let fShift = (espValid && data.shift && data.shift !== "None" && data.shift !== "---") ? data.shift : (localMember ? localMember.shift : "---");
             
             const now = new Date(); 
             currentShift = getShiftByTime(now);
