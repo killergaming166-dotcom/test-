@@ -80,7 +80,7 @@
         <div class="lg:col-span-8 space-y-6">
             
             <!-- Scan Hero -->
-            <div class="card-dark flex flex-col items-center justify-center min-h-[300px]">
+            <div class="card-dark flex flex-col items-center justify-center min-h-[300px]" id="main-display-card">
                 <div class="avatar-circle" id="avatar-container">
                     <i class="fa-solid fa-expand text-5xl text-slate-400" id="avatar-icon"></i>
                 </div>
@@ -112,12 +112,12 @@
 
                 <div class="flex flex-col sm:flex-row gap-3">
                     <button class="btn-primary flex-1" onclick="taoChuoi()"><i class="fa-solid fa-wand-magic-sparkles mr-2"></i> Lưu & Tạo Mã Nạp</button>
-                    <button class="btn-secondary" onclick="openModal()"><i class="fa-solid fa-list mr-2"></i> Quản lý Web</button>
+                    <button class="btn-secondary" onclick="openModal()"><i class="fa-solid fa-list mr-2"></i> Quản lý Web & Thẻ</button>
                 </div>
 
                 <!-- Khu vực Copy Code -->
                 <div id="copy-section" class="mt-5 pt-5 border-t border-slate-200 hidden">
-                    <label class="text-[11px] font-bold text-slate-500 mb-2 block">CHUỖI MÃ NẠP (Dán vào V10 trên ERa)</label>
+                    <label class="text-[11px] font-bold text-slate-500 mb-2 block">CHUỖI MÃ LỆNH (Dán vào V10 trên ERa)</label>
                     <div class="flex gap-2">
                         <input type="text" id="ketQua" class="input-box flex-1 font-mono text-slate-700 bg-slate-100" readonly>
                         <button class="bg-emerald-500 hover:bg-emerald-600 text-white px-5 rounded-lg font-bold text-[11px] uppercase transition-colors" onclick="copyChuoi()">COPY MÃ</button>
@@ -526,7 +526,26 @@
             modalEl.classList.remove('hidden'); 
         };
         window.closeModal = () => { modalEl.classList.add('hidden'); };
-        window.delMember = (u) => { if(confirm("Xóa thẻ này?")) { delete membersDb[u]; syncLocal(); renderAll(); window.openModal(); } };
+        
+        // HÀM XÓA THẺ: Xóa trên Web và tạo mã yêu cầu ESP32 xóa
+        window.delMember = (u) => { 
+            if(confirm("Xóa thẻ này trên Web?\n\nĐồng thời hệ thống sẽ tạo MÃ XÓA để bạn dán vào V10 giúp mạch ESP32 quên thẻ này!")) { 
+                delete membersDb[u]; 
+                syncLocal(); 
+                renderAll(); 
+                window.closeModal(); 
+                
+                const chuoiXoa = `${u}|DELETE|---|---`;
+                document.getElementById('ketQua').value = chuoiXoa;
+                document.getElementById('copy-section').classList.remove('hidden');
+                
+                const copyText = document.getElementById("ketQua");
+                copyText.select();
+                document.execCommand("copy");
+                
+                window.showToast("Đã tạo và Copy MÃ XÓA! Hãy dán vào V10 trên ERa.", "warning");
+            } 
+        };
         
         window.clearLogs = () => { const displayDate = document.getElementById('filter-date').value.split('-').reverse().join('/'); if(confirm(`Xóa toàn bộ nhật ký của ngày ${displayDate}?`)) { logsDb = logsDb.filter(l => l.date !== selectedDateStr); syncLocal(); renderAll(); showToast("Đã xóa nhật ký ngày đang chọn!"); } };
         window.exportExcel = () => { const logsToExport = logsDb.filter(l => l.date === selectedDateStr); if(logsToExport.length===0) return showToast("Trống!","warning"); const ws = XLSX.utils.json_to_sheet(logsToExport.map(l => ({ "Giờ": l.time, "Tên": l.name, "MSSV": l.mssv, "Trạng thái": l.status }))); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Attendance"); XLSX.writeFile(wb, `FPOLY_${selectedDateStr.replace(/ /g,'_')}.xlsx`); };
