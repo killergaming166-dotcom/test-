@@ -40,7 +40,6 @@
         .btn-primary { background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); color: white; border-radius: 16px; font-weight: 800; padding: 14px 20px; transition: all 0.3s ease; cursor: pointer; text-transform: uppercase; font-size: 12px; letter-spacing: 0.5px; box-shadow: 0 10px 20px -5px rgba(249, 115, 22, 0.4); border: 1px solid rgba(255,255,255,0.2); }
         .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 15px 25px -5px rgba(249, 115, 22, 0.5); }
 
-        /* Nút TẠO MÃ HỦY màu đỏ */
         .btn-danger { background: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%); color: white; border-radius: 16px; font-weight: 800; padding: 14px 20px; transition: all 0.3s ease; cursor: pointer; text-transform: uppercase; font-size: 12px; letter-spacing: 0.5px; box-shadow: 0 10px 20px -5px rgba(244, 63, 94, 0.4); border: 1px solid rgba(255,255,255,0.2); }
         .btn-danger:hover { transform: translateY(-3px); box-shadow: 0 15px 25px -5px rgba(244, 63, 94, 0.5); }
         
@@ -107,7 +106,7 @@
                 </div>
             </div>
 
-            <!-- BẢNG ĐĂNG KÝ THỦ CÔNG (ĐÃ THÊM NÚT MÃ HỦY) -->
+            <!-- BẢNG ĐĂNG KÝ THỦ CÔNG -->
             <div class="card p-6 md:p-8 relative overflow-hidden">
                 <div class="flex justify-between items-center mb-6">
                     <h3 class="font-black text-sm uppercase text-slate-800 flex items-center"><div class="w-10 h-10 rounded-xl bg-orange-50 text-orange-500 flex items-center justify-center mr-3"><i class="fa-solid fa-keyboard"></i></div> Đăng Ký Thủ Công</h3>
@@ -125,9 +124,8 @@
 
                 <div class="flex flex-col sm:flex-row gap-3 mb-2">
                     <button class="btn-primary flex-1 flex items-center justify-center" onclick="createAndCopy('main')"><i class="fa-solid fa-wand-magic-sparkles mr-2"></i> MÃ NẠP THẺ</button>
-                    <!-- NÚT TẠO MÃ HỦY MỚI -->
                     <button class="btn-danger flex-1 flex items-center justify-center" onclick="createDeleteCode('main')"><i class="fa-solid fa-trash-can mr-2"></i> MÃ HỦY THẺ</button>
-                    <button class="btn-secondary whitespace-nowrap !bg-slate-800 !text-white !border-slate-700 hover:!bg-slate-700" onclick="openMembersModal()"><i class="fa-solid fa-address-card mr-2"></i> DB</button>
+                    <button class="btn-secondary flex-1 flex items-center justify-center whitespace-nowrap !bg-slate-800 !text-white !border-slate-700 hover:!bg-slate-700" onclick="openMembersModal()"><i class="fa-solid fa-address-card mr-2"></i> QUẢN LÝ THẺ</button>
                 </div>
 
                 <div id="copy-section-main" class="hidden mt-5 pt-5 border-t-2 border-dashed border-slate-200 transition-all duration-300 rounded-xl p-4">
@@ -212,8 +210,16 @@
                     </div>
                 </div>
             </div>
+            
+            <!-- BIỂU ĐỒ THỐNG KÊ (Đã khôi phục chống lỗi) -->
+            <div class="card p-6 border-t-4 border-orange-500">
+                <h4 class="text-[12px] font-bold text-slate-700 uppercase mb-4 flex items-center"><i class="fa-solid fa-chart-simple text-orange-500 mr-2 text-lg"></i> Thống kê các ca</h4>
+                <div class="relative w-full h-[200px]">
+                    <canvas id="attendanceChart"></canvas>
+                </div>
+            </div>
 
-            <div class="card p-6 bg-slate-800 text-slate-300 relative overflow-hidden">
+            <div class="card bg-slate-800 text-slate-300 relative overflow-hidden">
                 <div class="absolute -right-4 -top-4 text-slate-700 opacity-20 text-6xl">
                     <i class="fa-solid fa-microchip"></i>
                 </div>
@@ -222,10 +228,10 @@
                     <span id="cloud-status-dot" class="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.8)]"></span>
                 </div>
                 <div class="bg-slate-900 p-4 rounded-xl border border-slate-700 text-[12px] font-mono mb-4 relative z-10">
-                    <p class="text-slate-500 uppercase text-[9px] font-sans font-bold mb-1">PRO CHD V1.8.1</p>
-                    <p id="cloud-status" class="font-bold text-emerald-400">Smart Bug Fixes</p>
+                    <p class="text-slate-500 uppercase text-[9px] font-sans font-bold mb-1">PRO CHD V1.8.2</p>
+                    <p id="cloud-status" class="font-bold text-emerald-400">Stable Build</p>
                 </div>
-                <p class="text-[11px] text-slate-400 mb-5 leading-relaxed relative z-10">Đã cập nhật lỗi đơ trang web khi nằm ngoài khung giờ. Trình duyệt nhẹ và mượt mà hơn.</p>
+                <p class="text-[11px] text-slate-400 mb-5 leading-relaxed relative z-10">Hệ thống đã sửa lỗi giật lag và chống tràn biến cục bộ. Giao diện trực quan, dễ quản lý.</p>
                 <button onclick="location.reload()" class="w-full py-3.5 bg-slate-700 hover:bg-slate-600 rounded-xl text-[11px] font-black text-white transition-all uppercase tracking-widest relative z-10">
                     <i class="fa-solid fa-rotate-right mr-2"></i>Làm mới kết nối
                 </button>
@@ -291,14 +297,15 @@
 
                 <div class="pt-4 flex flex-col sm:flex-row gap-3 border-t border-slate-200 mt-2">
                     <button onclick="createAndCopy('modal')" class="flex-1 py-4 bg-gradient-to-r from-orange-500 to-rose-500 hover:from-orange-600 hover:to-rose-600 text-white font-black uppercase text-sm rounded-xl shadow-lg shadow-orange-500/30 transition-all transform hover:-translate-y-1">
-                        <i class="fa-solid fa-wand-magic-sparkles mr-2"></i> TẠO MÃ NẠP & LƯU CSDL
+                        <i class="fa-solid fa-wand-magic-sparkles mr-2"></i> TẠO MÃ NẠP
                     </button>
                 </div>
 
                 <div id="copy-section-modal" class="hidden flex flex-col gap-3 p-4 rounded-xl border mt-2 transition-all duration-300">
-                    <label id="copy-label-modal" class="text-[11px] font-black flex items-center gap-2"><i class="fa-solid fa-circle-check text-lg"></i> ĐÃ COPY! HÃY DÁN VÀO Ô NHẬP LIỆU CỦA HỆ THỐNG</label>
+                    <label id="copy-label-modal" class="text-[11px] font-black flex items-center gap-2"><i class="fa-solid fa-circle-check text-lg"></i> ĐÃ COPY MÃ NẠP! DÁN VÀO Ô NHẬP LIỆU CỦA HỆ THỐNG</label>
                     <div class="flex gap-2">
                         <input type="text" id="ketQua-modal" class="input-box flex-1 font-mono shadow-inner !py-2" readonly>
+                        <button class="bg-slate-800 hover:bg-slate-700 text-white px-5 rounded-xl font-black text-[10px] uppercase transition-all" onclick="copyChuoi('modal')">Copy Lại</button>
                     </div>
                 </div>
             </div>
@@ -309,7 +316,7 @@
     <div id="manage-members-modal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-[24px] w-full max-w-4xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh] border border-slate-200">
             <div class="px-8 py-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/80">
-                <h3 class="font-black text-slate-800 uppercase text-sm flex items-center"><div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-500 flex items-center justify-center mr-3"><i class="fa-solid fa-database"></i></div> Cơ Sở Dữ Liệu Thẻ</h3>
+                <h3 class="font-black text-slate-800 uppercase text-sm flex items-center"><div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-500 flex items-center justify-center mr-3"><i class="fa-solid fa-address-card"></i></div> Quản Lý Thẻ Sinh Viên</h3>
                 <button onclick="closeMembersModal()" class="w-8 h-8 rounded-full bg-slate-200 text-slate-500 hover:bg-rose-500 hover:text-white flex items-center justify-center transition-colors"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <div class="p-4 sm:p-6 overflow-y-auto custom-scrollbar flex-grow bg-white">
@@ -358,22 +365,29 @@
             localStorage.setItem('era_logs', JSON.stringify(logsDb));
         }
 
-        let ctx = document.getElementById('attendanceChart').getContext('2d');
-        let gradientChart = ctx.createLinearGradient(0,0,0,200); 
-        gradientChart.addColorStop(0, '#f97316'); 
-        gradientChart.addColorStop(1, '#ea580c'); 
+        // BẢO VỆ CHỐNG LỖI KHI KHỞI TẠO BIỂU ĐỒ (SAFE-CHECK)
+        let attendanceChart = null;
+        const chartCanvas = document.getElementById('attendanceChart');
         
-        let attendanceChart = new Chart(ctx, { 
-            type: 'bar', 
-            data: { 
-                labels: ['Ca 1', 'Ca 2', 'Ca 3', 'Ca 4', 'Ca 5'],
-                datasets: [{ label: 'Hiện diện', data: [0,0,0,0,0], backgroundColor: gradientChart, borderRadius: 8, barThickness: 24 }] 
-            }, 
-            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { display: true, ticks: { stepSize: 1, color: '#94a3b8', font:{size:10, weight:'bold'} }, border:{display:false}, grid:{color:'#f1f5f9'} }, x: { grid: { display: false }, ticks:{color: '#64748b', font:{size:11, weight:'bold'}} } } } 
-        });
+        if (chartCanvas) {
+            let ctx = chartCanvas.getContext('2d');
+            let gradientChart = ctx.createLinearGradient(0,0,0,200); 
+            gradientChart.addColorStop(0, '#f97316'); 
+            gradientChart.addColorStop(1, '#ea580c'); 
+            
+            attendanceChart = new Chart(ctx, { 
+                type: 'bar', 
+                data: { 
+                    labels: ['Ca 1', 'Ca 2', 'Ca 3', 'Ca 4', 'Ca 5'],
+                    datasets: [{ label: 'Hiện diện', data: [0,0,0,0,0], backgroundColor: gradientChart, borderRadius: 8, barThickness: 24 }] 
+                }, 
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { display: true, ticks: { stepSize: 1, color: '#94a3b8', font:{size:10, weight:'bold'} }, border:{display:false}, grid:{color:'#f1f5f9'} }, x: { grid: { display: false }, ticks:{color: '#64748b', font:{size:11, weight:'bold'}} } } } 
+            });
+        }
 
         window.showToast = (msg, type='success') => {
             const c = document.getElementById('toast-container');
+            if(!c) return;
             const t = document.createElement('div');
             let borderColor = type === 'success' ? '#10b981' : (type === 'warning' ? '#f59e0b' : '#e11d48');
             let icon = type === 'success' ? 'fa-check-circle' : (type === 'warning' ? 'fa-triangle-exclamation' : 'fa-circle-xmark');
@@ -397,7 +411,9 @@
             document.getElementById('request-modal').classList.add('hidden');
             document.getElementById('reg-uid-modal').value = pendingReqUid;
             document.getElementById('registration-modal').classList.remove('hidden');
-            document.getElementById('reg-name-modal').focus();
+            
+            const rName = document.getElementById('reg-name-modal');
+            if(rName) rName.focus();
         };
 
         window.rejectRequest = () => {
@@ -414,10 +430,17 @@
 
         // --- HÀM TẠO MÃ ---
         window.createAndCopy = (source) => {
-            const u = document.getElementById(`reg-uid-${source}`).value.trim();
-            const n = document.getElementById(`reg-name-${source}`).value.trim();
-            const m = document.getElementById(`reg-mssv-${source}`).value.trim();
-            const s = document.getElementById(`reg-shift-${source}`).value;
+            const uidEl = document.getElementById(`reg-uid-${source}`);
+            const nameEl = document.getElementById(`reg-name-${source}`);
+            const mssvEl = document.getElementById(`reg-mssv-${source}`);
+            const shiftEl = document.getElementById(`reg-shift-${source}`);
+            
+            if(!uidEl || !nameEl || !mssvEl || !shiftEl) return;
+
+            const u = uidEl.value.trim();
+            const n = nameEl.value.trim();
+            const m = mssvEl.value.trim();
+            const s = shiftEl.value;
 
             if (!u || !n) { showToast("Vui lòng nhập ít nhất Mã Thẻ và Họ Tên!", "warning"); return; }
 
@@ -430,46 +453,56 @@
             const chuoi = `${u}|${n_noAccent}|${m_noAccent}|${s_noAccent}`;
             
             const ketQuaInput = document.getElementById(`ketQua-${source}`);
-            ketQuaInput.value = chuoi;
+            if(ketQuaInput) ketQuaInput.value = chuoi;
             
             const copySection = document.getElementById(`copy-section-${source}`);
-            copySection.classList.remove('hidden', 'bg-rose-50', 'border-rose-200');
-            copySection.classList.add('bg-emerald-50', 'border-emerald-200');
-            
-            const label = document.getElementById(`copy-label-${source}`) || copySection.querySelector('label');
-            label.className = "text-[11px] font-black text-emerald-700 flex items-center gap-2 mb-2";
-            label.innerHTML = `<i class="fa-solid fa-circle-check text-lg"></i> ĐÃ COPY MÃ NẠP! DÁN VÀO Ô NHẬP LIỆU TRÊN HỆ THỐNG`;
-            
-            ketQuaInput.className = "input-box flex-1 font-mono text-emerald-700 bg-white border-emerald-200 shadow-inner !py-2";
+            if(copySection) {
+                copySection.classList.remove('hidden', 'bg-rose-50', 'border-rose-200');
+                copySection.classList.add('bg-emerald-50', 'border-emerald-200');
+                
+                const label = document.getElementById(`copy-label-${source}`) || copySection.querySelector('label');
+                if(label) {
+                    label.className = "text-[11px] font-black text-emerald-700 flex items-center gap-2 mb-2";
+                    label.innerHTML = `<i class="fa-solid fa-circle-check text-lg"></i> ĐÃ COPY MÃ NẠP! DÁN VÀO Ô NHẬP LIỆU TRÊN HỆ THỐNG`;
+                }
+                
+                ketQuaInput.className = "input-box flex-1 font-mono text-emerald-700 bg-white border-emerald-200 shadow-inner !py-2";
+            }
             
             copyChuoi(source, 'save');
         };
 
         window.createDeleteCode = (source) => {
-            const u = document.getElementById(`reg-uid-${source}`).value.trim();
+            const uidEl = document.getElementById(`reg-uid-${source}`);
+            if(!uidEl) return;
+            const u = uidEl.value.trim();
 
             if (!u) { showToast("Vui lòng nhập Mã Thẻ (UID) cần hủy!", "warning"); return; }
 
             const chuoiXoa = `${u}|DELETE|---|---`;
             const ketQuaInput = document.getElementById(`ketQua-${source}`);
-            ketQuaInput.value = chuoiXoa;
+            if(ketQuaInput) ketQuaInput.value = chuoiXoa;
             
             const copySection = document.getElementById(`copy-section-${source}`);
-            copySection.classList.remove('hidden', 'bg-emerald-50', 'border-emerald-200');
-            copySection.classList.add('bg-rose-50', 'border-rose-200');
-            
-            const label = document.getElementById(`copy-label-${source}`) || copySection.querySelector('label');
-            label.className = "text-[11px] font-black text-rose-700 flex items-center gap-2 mb-2";
-            label.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-lg"></i> ĐÃ COPY MÃ HỦY! DÁN VÀO Ô NHẬP LIỆU TRÊN HỆ THỐNG`;
-            
-            ketQuaInput.className = "input-box flex-1 font-mono text-rose-600 bg-white border-rose-200 shadow-inner !py-2";
+            if(copySection) {
+                copySection.classList.remove('hidden', 'bg-emerald-50', 'border-emerald-200');
+                copySection.classList.add('bg-rose-50', 'border-rose-200');
+                
+                const label = document.getElementById(`copy-label-${source}`) || copySection.querySelector('label');
+                if(label) {
+                    label.className = "text-[11px] font-black text-rose-700 flex items-center gap-2 mb-2";
+                    label.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-lg"></i> ĐÃ COPY MÃ HỦY! DÁN VÀO Ô NHẬP LIỆU TRÊN HỆ THỐNG`;
+                }
+                
+                ketQuaInput.className = "input-box flex-1 font-mono text-rose-600 bg-white border-rose-200 shadow-inner !py-2";
+            }
             
             copyChuoi(source, 'delete');
         };
 
         window.copyChuoi = (source, type = 'save') => {
             const copyText = document.getElementById(`ketQua-${source}`);
-            if(!copyText.value) return;
+            if(!copyText || !copyText.value) return;
             copyText.select(); document.execCommand("copy");
             
             if (type === 'delete') {
@@ -478,8 +511,10 @@
                 showToast("Đã Copy Mã NẠP! Hãy dán vào ô nhập liệu hệ thống.", "success");
             }
             
-            document.getElementById(`reg-name-${source}`).value = "";
-            document.getElementById(`reg-mssv-${source}`).value = "";
+            const nameEl = document.getElementById(`reg-name-${source}`);
+            const mssvEl = document.getElementById(`reg-mssv-${source}`);
+            if(nameEl) nameEl.value = "";
+            if(mssvEl) mssvEl.value = "";
         };
 
         eraWidget.init({
@@ -498,8 +533,11 @@
                     actionAccept = c.actions[0].action; 
                     actionReject = c.actions[1].action; 
                 }
-                document.getElementById('era-status-text').innerText = "SYSTEM LIVE"; 
-                document.getElementById('era-status-dot').classList.replace('bg-slate-300', 'bg-emerald-500');
+                
+                const txt = document.getElementById('era-status-text');
+                const dot = document.getElementById('era-status-dot');
+                if(txt) txt.innerText = "SYSTEM LIVE"; 
+                if(dot) dot.className = "w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.8)] animate-pulse";
             },
             onValues: (v) => {
                 if (configAlert && v[configAlert.id]) {
@@ -507,8 +545,10 @@
                     if (valAlert && valAlert !== "0" && valAlert !== "None" && !valAlert.includes("|")) {
                         if (valAlert !== handledReqUid) {
                             pendingReqUid = valAlert; handledReqUid = valAlert; 
-                            document.getElementById('req-uid-text').innerText = valAlert;
-                            document.getElementById('request-modal').classList.remove('hidden');
+                            const modalText = document.getElementById('req-uid-text');
+                            const modal = document.getElementById('request-modal');
+                            if(modalText) modalText.innerText = valAlert;
+                            if(modal) modal.classList.remove('hidden');
                         }
                     } else if (!valAlert || valAlert === "" || valAlert === "0") { handledReqUid = ""; }
                 }
@@ -563,51 +603,53 @@
             }
 
             const UI = { name: document.getElementById('display-name'), sub: document.getElementById('display-sub'), avatar: document.getElementById('avatar-container'), icon: document.getElementById('avatar-icon'), details: document.getElementById('display-details'), mssvUi: document.getElementById('display-mssv'), uidUi: document.getElementById('display-uid') };
-            UI.details.classList.remove('hidden'); UI.mssvUi.innerText = fMssv; UI.uidUi.innerText = uid; 
             
-            UI.avatar.className = "avatar-circle"; 
+            if(UI.details) UI.details.classList.remove('hidden'); 
+            if(UI.mssvUi) UI.mssvUi.innerText = fMssv; 
+            if(UI.uidUi) UI.uidUi.innerText = uid; 
+            if(UI.avatar) UI.avatar.className = "avatar-circle"; 
 
             if (!fName) { 
-                UI.name.innerText = "THẺ CHƯA ĐĂNG KÝ"; UI.name.className = "text-4xl md:text-5xl font-black text-orange-500 mb-4 tracking-tighter drop-shadow-sm"; 
-                UI.avatar.classList.add('glow-unknown'); 
-                UI.icon.className = "fa-solid fa-fingerprint text-6xl text-orange-500 transition-transform transform scale-110"; 
-                UI.sub.innerText = "ĐANG CHỜ XIN QUYỀN ĐĂNG KÝ..."; 
+                if(UI.name) { UI.name.innerText = "THẺ CHƯA ĐĂNG KÝ"; UI.name.className = "text-4xl md:text-5xl font-black text-orange-500 mb-4 tracking-tighter drop-shadow-sm"; }
+                if(UI.avatar) UI.avatar.classList.add('glow-unknown'); 
+                if(UI.icon) UI.icon.className = "fa-solid fa-fingerprint text-6xl text-orange-500 transition-transform transform scale-110"; 
+                if(UI.sub) { UI.sub.innerText = "ĐANG CHỜ XIN QUYỀN ĐĂNG KÝ..."; UI.sub.className = "text-[11px] font-black uppercase tracking-widest text-orange-300"; }
             }
             else if (status === 6) { 
-                UI.name.innerText = "NGOÀI CA HỌC"; UI.name.className = "text-4xl md:text-5xl font-black text-slate-500 mb-4 tracking-tighter"; 
-                UI.avatar.classList.add('glow-wait'); 
-                UI.icon.className = "fa-solid fa-clock text-6xl text-slate-500 transition-transform transform scale-110"; 
-                UI.sub.innerText = "HIỆN KHÔNG CÓ CA HỌC NÀO"; 
+                if(UI.name) { UI.name.innerText = "NGOÀI CA HỌC"; UI.name.className = "text-4xl md:text-5xl font-black text-slate-500 mb-4 tracking-tighter"; }
+                if(UI.avatar) UI.avatar.classList.add('glow-wait'); 
+                if(UI.icon) UI.icon.className = "fa-solid fa-clock text-6xl text-slate-500 transition-transform transform scale-110"; 
+                if(UI.sub) { UI.sub.innerText = "HIỆN KHÔNG CÓ CA HỌC NÀO"; UI.sub.className = "text-[11px] font-black uppercase tracking-widest text-slate-400"; }
             }
             else if (status === 2) { 
-                UI.name.innerText = fName; UI.name.className = "text-4xl md:text-5xl font-black text-rose-500 mb-4 tracking-tighter drop-shadow-sm"; 
-                UI.avatar.classList.add('glow-wrong'); 
-                UI.icon.className = "fa-solid fa-triangle-exclamation text-6xl text-rose-500 transition-transform transform scale-110"; 
-                UI.sub.innerText = `QUÉT SAI CA (${fShift})`; 
+                if(UI.name) { UI.name.innerText = fName; UI.name.className = "text-4xl md:text-5xl font-black text-rose-500 mb-4 tracking-tighter drop-shadow-sm"; }
+                if(UI.avatar) UI.avatar.classList.add('glow-wrong'); 
+                if(UI.icon) UI.icon.className = "fa-solid fa-triangle-exclamation text-6xl text-rose-500 transition-transform transform scale-110"; 
+                if(UI.sub) { UI.sub.innerText = `QUÉT SAI CA (${fShift})`; UI.sub.className = "text-[11px] font-black uppercase tracking-widest text-rose-300"; }
             }
             else if (status === 3) { 
-                UI.name.innerText = "CHƯA ĐẾN GIỜ RA"; UI.name.className = "text-4xl md:text-5xl font-black text-amber-500 mb-4 tracking-tighter"; 
-                UI.avatar.classList.add('glow-late'); 
-                UI.icon.className = "fa-solid fa-clock text-6xl text-amber-500 transition-transform transform scale-110"; 
-                UI.sub.innerText = "VUI LÒNG ĐỢI ĐẾN CUỐI CA HỌC"; 
+                if(UI.name) { UI.name.innerText = "CHƯA ĐẾN GIỜ RA"; UI.name.className = "text-4xl md:text-5xl font-black text-amber-500 mb-4 tracking-tighter"; }
+                if(UI.avatar) UI.avatar.classList.add('glow-late'); 
+                if(UI.icon) UI.icon.className = "fa-solid fa-clock text-6xl text-amber-500 transition-transform transform scale-110"; 
+                if(UI.sub) { UI.sub.innerText = "VUI LÒNG ĐỢI ĐẾN CUỐI CA HỌC"; UI.sub.className = "text-[11px] font-black uppercase tracking-widest text-amber-400"; }
             }
             else if (status === 4) { 
-                UI.name.innerText = fName; UI.name.className = "text-4xl md:text-5xl font-black text-amber-500 mb-4 tracking-tighter drop-shadow-sm"; 
-                UI.avatar.classList.add('glow-late'); 
-                UI.icon.className = "fa-solid fa-clock-rotate-left text-6xl text-amber-500 transition-transform transform scale-110"; 
-                UI.sub.innerText = actionStr; 
+                if(UI.name) { UI.name.innerText = fName; UI.name.className = "text-4xl md:text-5xl font-black text-amber-500 mb-4 tracking-tighter drop-shadow-sm"; }
+                if(UI.avatar) UI.avatar.classList.add('glow-late'); 
+                if(UI.icon) UI.icon.className = "fa-solid fa-clock-rotate-left text-6xl text-amber-500 transition-transform transform scale-110"; 
+                if(UI.sub) { UI.sub.innerText = actionStr; UI.sub.className = "text-[11px] font-black uppercase tracking-widest text-amber-400"; }
             }
             else if (status === 5) { 
-                UI.name.innerText = fName; UI.name.className = "text-4xl md:text-5xl font-black text-blue-400 mb-4 tracking-tighter drop-shadow-sm"; 
-                UI.avatar.classList.add('glow-out'); 
-                UI.icon.className = "fa-solid fa-person-walking-arrow-right text-6xl text-blue-400 transition-transform transform scale-110"; 
-                UI.sub.innerText = "ĐÃ ĐIỂM DANH RA LỚP"; 
+                if(UI.name) { UI.name.innerText = fName; UI.name.className = "text-4xl md:text-5xl font-black text-blue-400 mb-4 tracking-tighter drop-shadow-sm"; }
+                if(UI.avatar) UI.avatar.classList.add('glow-out'); 
+                if(UI.icon) UI.icon.className = "fa-solid fa-person-walking-arrow-right text-6xl text-blue-400 transition-transform transform scale-110"; 
+                if(UI.sub) { UI.sub.innerText = "ĐÃ ĐIỂM DANH RA LỚP"; UI.sub.className = "text-[11px] font-black uppercase tracking-widest text-blue-300"; }
             }
             else { 
-                UI.name.innerText = fName; UI.name.className = "text-4xl md:text-5xl font-black text-emerald-400 mb-4 tracking-tighter drop-shadow-sm"; 
-                UI.avatar.classList.add('glow-in'); 
-                UI.icon.className = "fa-solid fa-check text-6xl text-emerald-500 transition-transform transform scale-110"; 
-                UI.sub.innerText = "ĐIỂM DANH VÀO LỚP THÀNH CÔNG"; 
+                if(UI.name) { UI.name.innerText = fName; UI.name.className = "text-4xl md:text-5xl font-black text-emerald-400 mb-4 tracking-tighter drop-shadow-sm"; }
+                if(UI.avatar) UI.avatar.classList.add('glow-in'); 
+                if(UI.icon) UI.icon.className = "fa-solid fa-check text-6xl text-emerald-500 transition-transform transform scale-110"; 
+                if(UI.sub) { UI.sub.innerText = "ĐIỂM DANH VÀO LỚP THÀNH CÔNG"; UI.sub.className = "text-[11px] font-black uppercase tracking-widest text-emerald-300"; }
             }
 
             if (fName && status !== 3 && status !== 6) {
@@ -619,7 +661,12 @@
             if(resetTimer) clearTimeout(resetTimer);
             resetTimer = setTimeout(() => { 
                 if(lastUid === uid) { 
-                    UI.name.innerText = "SẴN SÀNG"; UI.name.className = "text-4xl md:text-5xl font-black text-white uppercase mb-4 tracking-tighter transition-all duration-300"; UI.details.classList.add('hidden'); UI.avatar.className = "avatar-circle glow-idle"; UI.icon.className = "fa-solid fa-expand text-6xl text-slate-400/50 transition-colors"; UI.sub.innerText = "HÃY ĐẶT THẺ VÀO ĐẦU ĐỌC"; lastUid = ""; 
+                    if(UI.name) { UI.name.innerText = "SẴN SÀNG"; UI.name.className = "text-4xl md:text-5xl font-black text-white uppercase mb-4 tracking-tighter transition-all duration-300"; }
+                    if(UI.details) UI.details.classList.add('hidden'); 
+                    if(UI.avatar) UI.avatar.className = "avatar-circle glow-idle"; 
+                    if(UI.icon) UI.icon.className = "fa-solid fa-expand text-6xl text-slate-400/50 transition-colors"; 
+                    if(UI.sub) { UI.sub.innerText = "HÃY ĐẶT THẺ VÀO ĐẦU ĐỌC"; UI.sub.className = "text-slate-200 text-[11px] font-bold uppercase tracking-widest"; }
+                    lastUid = ""; 
                 } 
             }, 6000);
         }
@@ -641,32 +688,40 @@
             
             if(isViewingToday && currentShift) { totalInShift = Object.values(ESP32_HARD_STUDENTS).filter(s => s.shift === currentShift.name).length + Object.values(membersDb).filter(m => m.shift === currentShift.name).length; }
             
-            tbody.innerHTML = logsToRender.map(l => {
-                if (isViewingToday && currentShift && l.shiftId === currentShift.id && (l.status.includes("VÀO LỚP") || l.status.includes("TRỄ") || l.status === "RA LỚP")) presentUIDs.add(l.uid);
-                if(l.shiftIndex !== undefined && l.shiftIndex >= 0 && l.shiftIndex < 5 && (l.status.includes("VÀO LỚP") || l.status.includes("TRỄ") || l.status === "RA LỚP")) chartSets[l.shiftIndex].add(l.uid);
-                
-                let badgeClass = "badge-unknown";
-                if (l.status === "VÀO LỚP") badgeClass = "badge-in"; 
-                else if (l.status === "RA LỚP") badgeClass = "badge-out"; 
-                else if (l.status === "SAI CA") badgeClass = "badge-wrong"; 
-                else if (l.status === "CHƯA ĐẾN GIỜ RA" || l.status === "NGOÀI CA") badgeClass = "badge-wait"; 
-                else if (l.status.includes("TRỄ")) badgeClass = "badge-late"; 
-                
-                return `<tr class="hover:bg-slate-50 transition-colors">
-                    <td class="font-mono text-[11px] text-slate-500 font-bold pl-4">${l.time}</td>
-                    <td class="font-black text-slate-800 uppercase">${l.name}</td>
-                    <td>${l.mssv} <span class="bg-orange-100 text-orange-600 text-[9px] px-2.5 py-0.5 rounded-md ml-1 font-bold border border-orange-200">${l.shiftReg}</span></td>
-                    <td class="text-center"><span class="badge ${badgeClass}">${l.status}</span></td>
-                </tr>`;
-            }).join('');
-            if(!logsToRender.length) tbody.innerHTML = `<tr><td colspan="4" class="py-12 text-center text-slate-400 font-bold uppercase text-xs">Chưa có dữ liệu</td></tr>`;
+            if(tbody) {
+                tbody.innerHTML = logsToRender.map(l => {
+                    if (isViewingToday && currentShift && l.shiftId === currentShift.id && (l.status.includes("VÀO LỚP") || l.status.includes("TRỄ") || l.status === "RA LỚP")) presentUIDs.add(l.uid);
+                    if(l.shiftIndex !== undefined && l.shiftIndex >= 0 && l.shiftIndex < 5 && (l.status.includes("VÀO LỚP") || l.status.includes("TRỄ") || l.status === "RA LỚP")) chartSets[l.shiftIndex].add(l.uid);
+                    
+                    let badgeClass = "badge-unknown";
+                    if (l.status === "VÀO LỚP") badgeClass = "badge-in"; 
+                    else if (l.status === "RA LỚP") badgeClass = "badge-out"; 
+                    else if (l.status === "SAI CA") badgeClass = "badge-wrong"; 
+                    else if (l.status === "CHƯA ĐẾN GIỜ RA" || l.status === "NGOÀI CA") badgeClass = "badge-wait"; 
+                    else if (l.status.includes("TRỄ")) badgeClass = "badge-late"; 
+                    
+                    return `<tr class="hover:bg-slate-50 transition-colors">
+                        <td class="font-mono text-[11px] text-slate-500 font-bold pl-4">${l.time}</td>
+                        <td class="font-black text-slate-800 uppercase">${l.name}</td>
+                        <td>${l.mssv} <span class="bg-orange-100 text-orange-600 text-[9px] px-2.5 py-0.5 rounded-md ml-1 font-bold border border-orange-200">${l.shiftReg}</span></td>
+                        <td class="text-center"><span class="badge ${badgeClass}">${l.status}</span></td>
+                    </tr>`;
+                }).join('');
+                if(!logsToRender.length) tbody.innerHTML = `<tr><td colspan="4" class="py-12 text-center text-slate-400 font-bold uppercase text-xs">Chưa có dữ liệu</td></tr>`;
+            }
             
+            const elTotal = document.getElementById('total-count');
+            const elPresent = document.getElementById('present-count');
+            const elAbsent = document.getElementById('absent-count');
+
             if(isViewingToday && currentShift) { 
-                document.getElementById('total-count').innerText = totalInShift; 
-                document.getElementById('present-count').innerText = presentUIDs.size; 
-                document.getElementById('absent-count').innerText = Math.max(0, totalInShift - presentUIDs.size); 
+                if(elTotal) elTotal.innerText = totalInShift; 
+                if(elPresent) elPresent.innerText = presentUIDs.size; 
+                if(elAbsent) elAbsent.innerText = Math.max(0, totalInShift - presentUIDs.size); 
             } else {
-                document.getElementById('total-count').innerText = "--"; document.getElementById('present-count').innerText = "--"; document.getElementById('absent-count').innerText = "--";
+                if(elTotal) elTotal.innerText = "--"; 
+                if(elPresent) elPresent.innerText = "--"; 
+                if(elAbsent) elAbsent.innerText = "--";
             }
             
             const badgeCountEl = document.getElementById('registered-count-badge');
@@ -674,14 +729,25 @@
                 badgeCountEl.innerText = `ĐÃ LƯU: ${Object.keys(membersDb).length + 1}`;
             }
 
-            attendanceChart.data.datasets[0].data = chartSets.map(s => s.size); attendanceChart.update();
+            if (attendanceChart) {
+                attendanceChart.data.datasets[0].data = chartSets.map(s => s.size); 
+                attendanceChart.update();
+            }
         }
 
         window.openMembersModal = () => { 
-            document.getElementById('modal-members-list').innerHTML = Object.keys(membersDb).map(u => `<tr class="hover:bg-slate-50 border-b border-slate-100"><td class="font-mono text-slate-500 font-bold pl-4">${u}</td><td class="font-black uppercase text-slate-700">${membersDb[u].name}</td><td class="font-semibold text-slate-500">${membersDb[u].mssv}</td><td><span class="bg-orange-50 text-orange-600 border border-orange-100 text-[9px] font-bold px-2.5 py-1 rounded-md">${membersDb[u].shift}</span></td><td class="text-right pr-4"><button onclick="delMember('${u}')" class="text-rose-500 font-bold uppercase text-[10px] hover:text-rose-700 bg-rose-50 px-3 py-1.5 rounded-lg border border-rose-100 transition-colors shadow-sm">Xóa</button></td></tr>`).join(''); 
-            document.getElementById('manage-members-modal').classList.remove('hidden'); 
+            const list = document.getElementById('modal-members-list');
+            if(list) {
+                list.innerHTML = Object.keys(membersDb).map(u => `<tr class="hover:bg-slate-50 border-b border-slate-100"><td class="font-mono text-slate-500 font-bold pl-4">${u}</td><td class="font-black uppercase text-slate-700">${membersDb[u].name}</td><td class="font-semibold text-slate-500">${membersDb[u].mssv}</td><td><span class="bg-orange-50 text-orange-600 border border-orange-100 text-[9px] font-bold px-2.5 py-1 rounded-md">${membersDb[u].shift}</span></td><td class="text-right pr-4"><button onclick="delMember('${u}')" class="text-rose-500 font-bold uppercase text-[10px] hover:text-rose-700 bg-rose-50 px-3 py-1.5 rounded-lg border border-rose-100 transition-colors shadow-sm">Xóa</button></td></tr>`).join(''); 
+            }
+            const modal = document.getElementById('manage-members-modal');
+            if(modal) modal.classList.remove('hidden'); 
         };
-        window.closeMembersModal = () => { document.getElementById('manage-members-modal').classList.add('hidden'); };
+        
+        window.closeMembersModal = () => { 
+            const modal = document.getElementById('manage-members-modal');
+            if(modal) modal.classList.add('hidden'); 
+        };
         
         window.delMember = (u) => { 
             if(confirm("Xóa thẻ khỏi hệ thống?")) { 
@@ -698,20 +764,25 @@
         // FIX TẠI ĐÂY: KHÔNG CÒN GỌI renderAll() MỖI GIÂY KHI Ở NGOÀI CA NỮA
         setInterval(() => { 
             const now = new Date(); 
-            document.getElementById('clock').innerText = now.toLocaleTimeString('vi-VN', {hour12: false}); 
-            document.getElementById('date-now').innerText = now.toLocaleDateString('vi-VN', {weekday: 'long', day: 'numeric', month: 'numeric'}); 
+            const clockEl = document.getElementById('clock');
+            const dateEl = document.getElementById('date-now');
+            
+            if(clockEl) clockEl.innerText = now.toLocaleTimeString('vi-VN', {hour12: false}); 
+            if(dateEl) dateEl.innerText = now.toLocaleDateString('vi-VN', {weekday: 'long', day: 'numeric', month: 'numeric'}); 
             
             const newShift = getShiftByTime(now); 
+            const badge = document.getElementById('current-shift-badge');
+
             if (newShift) {
                 if (!currentShift || currentShift.id !== newShift.id) { 
                     currentShift = newShift; 
-                    document.getElementById('current-shift-badge').innerText = currentShift.name.toUpperCase(); 
+                    if(badge) badge.innerText = currentShift.name.toUpperCase(); 
                     renderAll(); 
                 }
             } else {
                 if (currentShift !== null) { 
                     currentShift = null; 
-                    document.getElementById('current-shift-badge').innerText = "NGOÀI CA / NGHỈ"; 
+                    if(badge) badge.innerText = "NGOÀI CA / NGHỈ"; 
                     renderAll(); 
                 }
             }
