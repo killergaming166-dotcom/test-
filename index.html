@@ -475,12 +475,20 @@
             
             if(!uidEl || !nameEl || !mssvEl || !shiftEl) return;
 
-            const u = uidEl.value.trim();
+            const u = uidEl.value.trim().toUpperCase();
             const n = nameEl.value.trim();
             const m = mssvEl.value.trim();
             const s = shiftEl.value;
 
             if (!u || !n) { showToast("Vui lòng nhập ít nhất Mã Thẻ và Họ Tên!", "warning"); return; }
+
+            // CHẶN ĐĂNG KÝ TRÙNG LẶP THẺ
+            if (membersDb[u] || ESP32_HARD_STUDENTS[u]) {
+                let existName = membersDb[u] ? membersDb[u].name : ESP32_HARD_STUDENTS[u].name;
+                let existShift = membersDb[u] ? membersDb[u].shift : ESP32_HARD_STUDENTS[u].shift;
+                showToast(`Mã thẻ ${u} đã cấp cho ${existName} (${existShift})! Không thể đăng ký đè.`, "error");
+                return;
+            }
 
             membersDb[u] = { name: n, mssv: m, shift: s, timestamp: Date.now() }; 
             syncLocal(); renderAll();
@@ -600,6 +608,14 @@
             const now = new Date(); currentShift = getShiftByTime(now);
             
             let status = fName ? 1 : 0; let actionStr = "VÀO LỚP";
+
+            // TỰ ĐỘNG ĐIỀN UID VÀO Ô ĐĂNG KÝ THỦ CÔNG KHI QUÉT THẺ
+            const regUidMain = document.getElementById('reg-uid-main');
+            if (regUidMain) {
+                regUidMain.value = uid;
+                regUidMain.classList.add('border-orange-500', 'bg-orange-50');
+                setTimeout(() => regUidMain.classList.remove('border-orange-500', 'bg-orange-50'), 1000);
+            }
             
             if (fName) {
                 if (!currentShift) {
