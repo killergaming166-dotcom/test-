@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FPOLY ATTENDANCE SYSTEM V1.6.1</title>
+    <title>FPOLY ATTENDANCE SYSTEM V1.7.0</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://www.unpkg.com/@eohjsc/era-widget@1.1.3/src/index.js"></script>
@@ -14,7 +14,6 @@
         
         body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; color: #334155; margin: 0; padding: 20px; min-height: 100vh; }
         
-        /* THEME XANH BLUE CHUYÊN NGHIỆP */
         .card { background: white; border-radius: 20px; box-shadow: 0 4px 20px -2px rgba(37, 99, 235, 0.05); border: 1px solid rgba(226, 232, 240, 0.8); padding: 24px; }
         .card-dark { background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%); border-radius: 20px; box-shadow: 0 15px 30px -10px rgba(37, 99, 235, 0.4); padding: 32px; position: relative; overflow: hidden; }
         .card-dark::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 60%); pointer-events: none; animation: pulse-slow 8s infinite alternate; }
@@ -24,7 +23,6 @@
         .stat-card { border-radius: 16px; padding: 20px; display: flex; align-items: center; justify-content: space-between; border: 1px solid #e2e8f0; background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.02); transition: transform 0.2s; }
         .stat-card:hover { transform: translateY(-3px); }
         
-        /* Màu sắc Thống kê */
         .stat-total { background: linear-gradient(135deg, #eff6ff, #dbeafe); border-color: #bfdbfe; }
         .stat-total .stat-icon { background: #bfdbfe; color: #2563eb; }
         .stat-present { background: linear-gradient(135deg, #ecfdf5, #d1fae5); border-color: #a7f3d0; }
@@ -33,7 +31,6 @@
         .stat-absent .stat-icon { background: #fecdd3; color: #e11d48; }
         .stat-icon { width: 54px; height: 54px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
         
-        /* Vòng tròn Avatar */
         .avatar-circle { width: 140px; height: 140px; border-radius: 50%; background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; border: 4px solid rgba(255,255,255,0.2); margin: 0 auto 24px; transition: all 0.4s; }
         
         .glow-unknown { border-color: #f97316; box-shadow: 0 0 40px rgba(249, 115, 22, 0.5); background: rgba(249, 115, 22, 0.15); }
@@ -42,7 +39,6 @@
         .glow-late { border-color: #eab308; box-shadow: 0 0 40px rgba(234, 179, 8, 0.5); background: rgba(234, 179, 8, 0.15); transform: scale(1.05); }
         .glow-wrong { border-color: #f59e0b; box-shadow: 0 0 40px rgba(245, 158, 11, 0.5); background: rgba(245, 158, 11, 0.15); }
 
-        /* Input & Form */
         .input-box { background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 10px; padding: 12px 16px; font-size: 14px; width: 100%; font-weight: 600; color: #1e293b; outline: none; transition: 0.2s; }
         .input-box:focus { border-color: #3b82f6; background: white; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15); }
         select.input-box { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%233b82f6'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; background-size: 16px; padding-right: 36px; }
@@ -56,8 +52,7 @@
         .btn-copy { background-color: #10b981; color: white; border-radius: 10px; font-weight: 700; padding: 12px 24px; cursor: pointer; font-size: 13px; transition: 0.2s; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3); border: none; }
         .btn-copy:hover { background-color: #059669; }
 
-        /* Bảng Nhật Ký */
-        .log-table-container { max-height: 380px; overflow-y: auto; border-radius: 12px; border: 1px solid #e2e8f0; background: white; }
+        .log-table-container { max-height: 450px; overflow-y: auto; border-radius: 12px; border: 1px solid #e2e8f0; background: white; }
         .log-table { width: 100%; border-collapse: collapse; min-width: 600px; }
         .log-table th { font-size: 11px; color: #64748b; text-transform: uppercase; padding: 14px 16px; border-bottom: 2px solid #e2e8f0; text-align: left; position: sticky; top: 0; background: #f8fafc; z-index: 10; font-weight: 700; letter-spacing: 0.5px;}
         .log-table td { padding: 14px 16px; font-size: 13px; border-bottom: 1px solid #f1f5f9; font-weight: 500; color: #334155; }
@@ -69,14 +64,22 @@
         .badge-late { border-color: #fde68a; color: #d97706; background: #fffbeb; }
         .badge-wrong { border-color: #fed7aa; color: #ea580c; background: #fff7ed; }
 
-        /* Custom Scrollbar */
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        #toast-container { position: fixed; top: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 12px; pointer-events: none; }
+        .toast { background: white; border-radius: 14px; padding: 16px 24px; box-shadow: 0 15px 35px -5px rgba(0,0,0,0.15); border-left: 5px solid; font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 12px; animation: slideIn 0.4s ease forwards; pointer-events: auto;}
+        
+        @keyframes ring { 0% { transform: rotate(0); } 15% { transform: rotate(15deg); } 30% { transform: rotate(-15deg); } 45% { transform: rotate(10deg); } 60% { transform: rotate(-10deg); } 75% { transform: rotate(5deg); } 85% { transform: rotate(-5deg); } 100% { transform: rotate(0); } }
+        .animate-ring { animation: ring 1s ease-in-out infinite; }
+        @keyframes slideIn { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
     </style>
 </head>
 <body>
+    <div id="toast-container"></div>
+    
     <!-- TOP BAR -->
     <div class="flex flex-col md:flex-row justify-between items-center mb-8 px-4 gap-6 max-w-7xl mx-auto">
         <div class="flex items-center gap-5">
@@ -119,33 +122,39 @@
                 </div>
             </div>
 
-            <!-- CÔNG CỤ TẠO MÃ NẠP ESP32 (GIAO TIẾP THẲNG) -->
+            <!-- BẢNG ĐĂNG KÝ THỦ CÔNG TRÊN MÀN HÌNH CHÍNH (SẾP CÓ THỂ TỰ NHẬP UID) -->
             <div class="card border-t-4 border-blue-600">
                 <div class="flex justify-between items-center mb-6">
-                    <h3 class="font-black text-sm uppercase text-slate-800 flex items-center"><div class="w-8 h-8 rounded-md bg-blue-50 text-blue-600 flex items-center justify-center mr-3"><i class="fa-solid fa-code"></i></div> Công Cụ Tạo Mã Điểm Danh ERa</h3>
+                    <h3 class="font-black text-sm uppercase text-slate-800 flex items-center"><div class="w-8 h-8 rounded-md bg-blue-50 text-blue-600 flex items-center justify-center mr-3"><i class="fa-solid fa-keyboard"></i></div> Đăng Ký Thẻ (Nhập Thủ Công)</h3>
                     <span id="registered-count-badge" class="text-[11px] font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-md border border-blue-100">ĐÃ LƯU: 0</span>
                 </div>
                 
                 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                    <div><label class="text-[11px] font-bold text-slate-600 mb-1.5 block">Mã thẻ RFID:</label><input type="text" id="reg-uid" placeholder="Quét thẻ..." class="input-box font-mono bg-slate-50 text-blue-700"></div>
-                    <div><label class="text-[11px] font-bold text-slate-600 mb-1.5 block">Họ tên Sinh viên:</label><input type="text" id="reg-name" placeholder="Vd: Nguyễn Đình Danh" class="input-box"></div>
-                    <div><label class="text-[11px] font-bold text-slate-600 mb-1.5 block">Mã Sinh viên (MSSV):</label><input type="text" id="reg-mssv" placeholder="Vd: PS12345" class="input-box uppercase"></div>
+                    <!-- Ô UID được mở khóa (Không có readonly) để Giảng viên tự gõ mã thẻ -->
+                    <div><label class="text-[11px] font-bold text-slate-600 mb-1.5 block">Mã thẻ (Quét hoặc Nhập):</label><input type="text" id="reg-uid-main" placeholder="Nhập mã UID..." class="input-box font-mono bg-white text-blue-700"></div>
+                    <div><label class="text-[11px] font-bold text-slate-600 mb-1.5 block">Họ tên Sinh viên:</label><input type="text" id="reg-name-main" placeholder="Vd: Nguyễn Đình Danh" class="input-box"></div>
+                    <div><label class="text-[11px] font-bold text-slate-600 mb-1.5 block">Mã Sinh viên (MSSV):</label><input type="text" id="reg-mssv-main" placeholder="Vd: PS12345" class="input-box uppercase"></div>
                     <div><label class="text-[11px] font-bold text-slate-600 mb-1.5 block">Ca học:</label>
-                        <select id="reg-shift" class="input-box text-slate-700 font-semibold"><option value="Ca 1">Ca 1</option><option value="Ca 2" selected>Ca 2</option><option value="Ca 3">Ca 3</option><option value="Ca 4">Ca 4</option><option value="Ca 5">Ca 5</option></select>
+                        <select id="reg-shift-main" class="input-box text-slate-700 font-semibold">
+                            <option value="Ca 1">Ca 1</option>
+                            <option value="Ca 2" selected>Ca 2</option>
+                            <option value="Ca 3">Ca 3</option>
+                            <option value="Ca 4">Ca 4</option>
+                            <option value="Ca 5">Ca 5</option>
+                        </select>
                     </div>
                 </div>
 
                 <div class="flex gap-3 mb-2">
-                    <button class="btn-primary flex-1 flex items-center justify-center" onclick="taoChuoi()"><i class="fa-solid fa-wand-magic-sparkles mr-2"></i> TẠO CHUỖI DỮ LIỆU</button>
-                    <button class="btn-secondary" onclick="openMembersModal()"><i class="fa-solid fa-database"></i> Quản lý (Web)</button>
+                    <button class="btn-primary flex-1 flex items-center justify-center" onclick="createAndCopy('main')"><i class="fa-solid fa-wand-magic-sparkles mr-2"></i> TẠO MÃ & COPY TỰ ĐỘNG</button>
                 </div>
 
-                <!-- Khu vực hiển thị kết quả -->
-                <div id="result-group" class="hidden mt-5 pt-5 border-t-2 border-dashed border-slate-200">
-                    <label class="text-[12px] font-bold text-emerald-600 mb-2 block"><i class="fa-solid fa-circle-check"></i> Chuỗi kết quả (Dán vào TEXT BOX V3 trên ERa):</label>
+                <!-- Khu vực hiển thị kết quả (Ẩn đi cho đến khi bấm Tạo Mã) -->
+                <div id="copy-section-main" class="hidden mt-5 pt-5 border-t-2 border-dashed border-slate-200">
+                    <label class="text-[12px] font-bold text-emerald-600 mb-2 block"><i class="fa-solid fa-circle-check"></i> Chuỗi kết quả (Dán vào ERa V3):</label>
                     <div class="flex gap-3">
-                        <input type="text" id="ketQua" class="input-box flex-1 font-mono text-slate-700 bg-emerald-50 border-emerald-200" readonly>
-                        <button class="btn-copy" onclick="copyChuoi()">COPY</button>
+                        <input type="text" id="ketQua-main" class="input-box flex-1 font-mono text-slate-700 bg-emerald-50 border-emerald-200" readonly>
+                        <button class="btn-copy" onclick="copyChuoi('main')">COPY</button>
                     </div>
                 </div>
             </div>
@@ -204,7 +213,7 @@
 
             <div class="card p-6 border-t-4 border-blue-500">
                 <h4 class="text-[12px] font-bold text-slate-700 uppercase mb-4 flex items-center"><i class="fa-solid fa-chart-simple text-blue-500 mr-2 text-lg"></i> Thống kê các ca</h4>
-                <div class="relative w-full h-[220px]"><canvas id="attendanceChart"></canvas></div>
+                <div class="relative w-full h-[200px]"><canvas id="attendanceChart"></canvas></div>
             </div>
 
             <div class="card bg-slate-900 border-none text-white relative overflow-hidden shadow-2xl">
@@ -214,16 +223,19 @@
                     <span class="w-3 h-3 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.8)]"></span>
                 </div>
                 <div class="bg-slate-800 p-4 rounded-lg mb-5 border border-slate-700 shadow-inner relative z-10">
-                    <p class="text-blue-400 font-mono text-[12px] font-bold tracking-wider mb-1">BLUE PRO V1.6.1</p>
-                    <p class="text-slate-400 text-[10px] uppercase">Direct API & Action Support</p>
+                    <p class="text-blue-400 font-mono text-[12px] font-bold tracking-wider mb-1">BLUE PRO V1.7.0</p>
+                    <p class="text-slate-400 text-[10px] uppercase">Manual Reg & 5 Shifts Only</p>
                 </div>
-                <p class="text-[12px] text-slate-400 mb-5 leading-relaxed relative z-10">Tự động bắt Action V7 (Đồng ý), V8 (Từ chối). Dữ liệu được Copy và dán thẳng xuống V3 (Text Box) để nạp thẻ.</p>
-                <button onclick="location.reload()" class="w-full py-3 bg-blue-600 hover:bg-blue-500 rounded-lg text-[12px] font-bold text-white uppercase transition-all shadow-md relative z-10"><i class="fa-solid fa-rotate-right mr-2"></i>Làm mới kết nối</button>
+                <p class="text-[12px] text-slate-400 mb-5 leading-relaxed relative z-10">Hỗ trợ Đăng ký Thủ Công. Không tính Thống kê biểu đồ cho Ca Nghỉ. Cấp quyền qua API V7/V8.</p>
+                <div class="flex gap-2 relative z-10">
+                    <button onclick="openMembersModal()" class="flex-1 py-3 bg-slate-800 hover:bg-slate-700 rounded-lg text-[11px] font-bold text-white uppercase transition-all border border-slate-600">DB Thẻ</button>
+                    <button onclick="location.reload()" class="flex-1 py-3 bg-blue-600 hover:bg-blue-500 rounded-lg text-[11px] font-bold text-white uppercase transition-all shadow-md"><i class="fa-solid fa-rotate-right"></i> Tải lại</button>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- MODAL POPUP: XIN ĐĂNG KÝ TỪ CẢM BIẾN -->
+    <!-- MODAL POPUP: BÁO ĐỘNG XIN ĐĂNG KÝ TỪ CẢM BIẾN -->
     <div id="request-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[200] hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-[20px] w-full max-w-sm shadow-2xl overflow-hidden flex flex-col p-8 text-center border border-slate-100">
             <div class="w-20 h-20 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-5 text-4xl shadow-inner">
@@ -232,13 +244,73 @@
             <h3 class="font-black text-slate-800 uppercase text-xl mb-2">Xin Phép Đăng Ký</h3>
             <p class="text-sm text-slate-500 mb-6 font-medium leading-relaxed">Có một thẻ lạ đang chạm cảm biến yêu cầu cấp quyền. <br><span class="text-[11px] uppercase tracking-widest font-bold text-slate-400">Mã thẻ (UID):</span> <br><span id="req-uid-text" class="font-mono font-black text-blue-700 bg-blue-50 px-3 py-1.5 rounded-md border border-blue-100 inline-block mt-2 text-lg"></span></p>
             <div class="flex gap-3">
+                <!-- SỬ DỤNG ACTION V8 ĐỂ TỪ CHỐI -->
                 <button onclick="rejectRequest()" class="flex-1 bg-slate-100 hover:bg-rose-500 text-slate-600 hover:text-white font-bold text-xs uppercase px-4 py-3.5 rounded-xl transition-colors border border-slate-200">Từ chối (V8)</button>
+                <!-- SỬ DỤNG ACTION V7 ĐỂ ĐỒNG Ý -->
                 <button onclick="acceptRequest()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs uppercase px-4 py-3.5 rounded-xl transition-colors shadow-lg shadow-blue-500/30">Đồng ý (V7)</button>
             </div>
         </div>
     </div>
 
-    <!-- MODAL QUẢN LÝ THẺ (XÓA / XEM DATABASE) -->
+    <!-- MODAL POPUP: BẢNG ĐIỀN THÔNG TIN KHI BẤM ĐỒNG Ý -->
+    <div id="registration-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-[300] hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-[28px] w-full max-w-2xl shadow-2xl overflow-hidden flex flex-col">
+            <div class="px-8 py-6 bg-gradient-to-r from-blue-600 to-indigo-700 text-white flex justify-between items-center shadow-md">
+                <div>
+                    <h3 class="font-black uppercase text-lg tracking-tight">Đăng Ký Thẻ Sinh Viên Mới</h3>
+                    <p class="text-[10px] font-bold text-blue-200 uppercase tracking-widest mt-1">Hệ thống sẽ tạo mã để bạn dán vào ERa V3</p>
+                </div>
+                <button onclick="closeRegModal()" class="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            
+            <div class="p-8 space-y-6 bg-slate-50/50">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="text-[10px] font-black text-slate-500 uppercase mb-2 block tracking-wide">Mã Thẻ (UID)</label>
+                        <!-- Ô Modal này bị Readonly vì UID đã được quét bằng máy -->
+                        <input type="text" id="reg-uid-modal" class="input-box bg-slate-100 border-slate-200 text-blue-600 font-mono text-lg !py-3.5 shadow-inner" readonly>
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-black text-slate-500 uppercase mb-2 block tracking-wide">Ca Học Mặc Định</label>
+                        <select id="reg-shift-modal" class="input-box text-blue-600 font-bold !py-3.5 shadow-sm">
+                            <option value="Ca 1">Ca 1</option>
+                            <option value="Ca 2" selected>Ca 2</option>
+                            <option value="Ca 3">Ca 3</option>
+                            <option value="Ca 4">Ca 4</option>
+                            <option value="Ca 5">Ca 5</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="text-[10px] font-black text-slate-500 uppercase mb-2 block tracking-wide">Họ và Tên Sinh Viên</label>
+                        <input type="text" id="reg-name-modal" placeholder="Vd: Nguyễn Văn An" class="input-box border-slate-200 !py-3.5 text-slate-800 placeholder:text-slate-300 shadow-sm focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-black text-slate-500 uppercase mb-2 block tracking-wide">Mã Số Sinh Viên (MSSV)</label>
+                        <input type="text" id="reg-mssv-modal" placeholder="Vd: PS12345" class="input-box border-slate-200 !py-3.5 text-slate-800 uppercase placeholder:text-slate-300 shadow-sm focus:border-blue-500">
+                    </div>
+                </div>
+
+                <div class="pt-4 flex flex-col gap-4 border-t border-slate-200 mt-2">
+                    <button onclick="createAndCopy('modal')" class="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white font-black uppercase text-sm rounded-xl shadow-lg shadow-blue-500/30 transition-all transform hover:-translate-y-1">
+                        <i class="fa-solid fa-copy mr-2"></i> Lưu CSDL & Tự Động Copy Mã
+                    </button>
+                    
+                    <div id="copy-section-modal" class="hidden flex flex-col gap-3 p-4 bg-emerald-50 rounded-xl border border-emerald-100 mt-2 transition-all">
+                        <label class="text-[11px] font-black text-emerald-700 flex items-center gap-2"><i class="fa-solid fa-circle-check text-lg"></i> ĐÃ COPY! HÃY DÁN VÀO TEXT BOX V3 TRÊN ERA</label>
+                        <div class="flex gap-2">
+                            <input type="text" id="ketQua-modal" class="input-box flex-1 font-mono text-slate-600 bg-white border-emerald-200 shadow-inner !py-2" readonly>
+                            <button class="bg-slate-800 hover:bg-slate-700 text-white px-5 rounded-xl font-black text-[10px] uppercase transition-all" onclick="copyChuoi('modal')">Copy Lại</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL QUẢN LÝ THẺ (XEM DATABASE NỘI BỘ) -->
     <div id="manage-members-modal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-[20px] w-full max-w-4xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
             <div class="px-8 py-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/80">
@@ -258,9 +330,11 @@
     </div>
 
     <script type="module">
+        // CHỈ CÓ 5 CA (LOẠI BỎ CA NGHỈ KHỎI SHIFTS VÀ CHART)
+        // Ca nghỉ (11:30 - 13:00) Web sẽ tự động trả về "NGOÀI CA" (do không khớp giờ nào trong đây)
         const SHIFTS = [ 
             { id: "ca1", name: "Ca 1", start: "07:00", end: "09:15", index: 0 }, 
-            { id: "ca2", name: "Ca 2", start: "09:30", end: "11:45", index: 1 }, 
+            { id: "ca2", name: "Ca 2", start: "09:30", end: "11:30", index: 1 }, 
             { id: "ca3", name: "Ca 3", start: "13:00", end: "15:00", index: 2 }, 
             { id: "ca4", name: "Ca 4", start: "15:00", end: "17:00", index: 3 }, 
             { id: "ca5", name: "Ca 5", start: "17:15", end: "19:30", index: 4 } 
@@ -289,9 +363,28 @@
             localStorage.setItem('era_logs', JSON.stringify(logsDb));
         }
 
+        // KHỞI TẠO BIỂU ĐỒ (5 CA)
         let ctx = document.getElementById('attendanceChart').getContext('2d');
         let gradientChart = ctx.createLinearGradient(0,0,0,200); gradientChart.addColorStop(0, '#3b82f6'); gradientChart.addColorStop(1, '#1e3a8a');
-        let attendanceChart = new Chart(ctx, { type: 'bar', data: { labels: ['Ca 1', 'Ca 2', 'Ca 3', 'Ca 4', 'Ca 5'], datasets: [{ label: 'Hiện diện', data: [0,0,0,0,0], backgroundColor: gradientChart, borderRadius: 6, barThickness: 24 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { display: true, ticks: { stepSize: 1 } }, x: { grid: { display: false } } } } });
+        let attendanceChart = new Chart(ctx, { 
+            type: 'bar', 
+            data: { 
+                labels: ['Ca 1', 'Ca 2', 'Ca 3', 'Ca 4', 'Ca 5'], // Đã bỏ "Ca Nghỉ"
+                datasets: [{ label: 'Hiện diện', data: [0,0,0,0,0], backgroundColor: gradientChart, borderRadius: 6, barThickness: 24 }] 
+            }, 
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { display: true, ticks: { stepSize: 1 } }, x: { grid: { display: false } } } } 
+        });
+
+        window.showToast = (msg, type='success') => {
+            const c = document.getElementById('toast-container');
+            const t = document.createElement('div');
+            let borderColor = type === 'success' ? '#3b82f6' : (type === 'warning' ? '#f59e0b' : '#f43f5e');
+            let icon = type === 'success' ? 'check-circle' : (type === 'warning' ? 'triangle-exclamation' : 'circle-xmark');
+            let iconColor = type === 'success' ? '#3b82f6' : (type === 'warning' ? '#f59e0b' : '#f43f5e');
+            t.className = `toast`; t.style.borderLeftColor = borderColor;
+            t.innerHTML = `<div class="w-8 h-8 rounded-full flex items-center justify-center" style="background: ${iconColor}15; color: ${iconColor}"><i class="fa-solid fa-${icon} text-lg"></i></div> <span class="tracking-wide">${msg}</span>`;
+            c.appendChild(t); setTimeout(() => t.remove(), 4000);
+        };
 
         // CÔNG CỤ BỎ DẤU TIẾNG VIỆT
         function removeVietnameseTones(str) {
@@ -299,98 +392,101 @@
         }
 
         // ==========================================
-        // KHỞI TẠO ERA WIDGET - ĐỌC ACTIONS THEO MẢNG
+        // KHỞI TẠO ERA WIDGET
         // ==========================================
         const eraWidget = new EraWidget();
         let configUid = null, configV6 = null;
-        let actionV7 = null; // Chứa Object Action 1
-        let actionV8 = null; // Chứa Object Action 2
+        let actionV7 = null; // Object Action Đồng ý
+        let actionV8 = null; // Object Action Từ chối
         let pendingReqUid = "", handledReqUid = "";
 
-        // ==========================================
-        // API TỪ NÚT ĐỒNG Ý / TỪ CHỐI
-        // ==========================================
+        // API BẤM ĐỒNG Ý
         window.acceptRequest = () => {
-            document.getElementById('request-modal').classList.add('hidden');
-            
-            // Đổ UID ra ô quét trên màn hình chính
-            document.getElementById('reg-uid').value = pendingReqUid;
-            document.getElementById('reg-name').focus();
-            
-            // BẤM NÚT ACTION 1 (Gửi số 1 xuống ESP32 báo Đồng ý qua V7)
+            // Gửi API Đồng ý (1) xuống V7 dạng Action Nút Nhấn
             if (actionV7) {
                 eraWidget.triggerAction(actionV7, { value: 1 });
-                alert("V7: Đã nhấn nút ĐỒNG Ý thành công!\nMạch đang chờ bạn dán mã thẻ vào V3.");
+                console.log("Đã kích hoạt Action V7: Đồng ý");
             } else {
-                alert("Lỗi: Chưa cấu hình Action thứ 1 (cho Đồng Ý) trên Web!");
+                alert("Cảnh báo: Không tìm thấy Action V7 (Đồng Ý) trên ERa Dashboard!");
             }
-        };
-
-        window.rejectRequest = () => {
+            
             document.getElementById('request-modal').classList.add('hidden');
             
-            // BẤM NÚT ACTION 2 (Gửi số 0 xuống ESP32 báo Từ chối qua V8)
-            if (actionV8) {
-                eraWidget.triggerAction(actionV8, { value: 0 });
-                alert("V8: Đã nhấn nút TỪ CHỐI thành công!");
-            } else {
-                alert("Lỗi: Chưa cấu hình Action thứ 2 (cho Từ Chối) trên Web!");
-            }
+            // Đổ UID ra ô trên Modal
+            document.getElementById('reg-uid-modal').value = pendingReqUid;
+            document.getElementById('registration-modal').classList.remove('hidden');
+            document.getElementById('reg-name-modal').focus();
         };
 
-        // ==========================================
-        // TẠO MÃ DỮ LIỆU ĐỂ COPY VÀO V3
-        // ==========================================
-        window.taoChuoi = () => {
-            const u = document.getElementById('reg-uid').value.trim();
-            const n = document.getElementById('reg-name').value.trim();
-            const m = document.getElementById('reg-mssv').value.trim();
-            const s = document.getElementById('reg-shift').value.trim();
+        // API BẤM TỪ CHỐI
+        window.rejectRequest = () => {
+            // Gửi API Từ chối (0) xuống V8 dạng Action Nút Nhấn
+            if (actionV8) {
+                eraWidget.triggerAction(actionV8, { value: 0 });
+                console.log("Đã kích hoạt Action V8: Từ chối");
+            } else {
+                alert("Cảnh báo: Không tìm thấy Action V8 (Từ chối) trên ERa Dashboard!");
+            }
+
+            document.getElementById('request-modal').classList.add('hidden');
+            handledReqUid = ""; // Reset
+        };
+
+        window.closeRegModal = () => { 
+            document.getElementById('registration-modal').classList.add('hidden'); 
+            document.getElementById('copy-section-modal').classList.add('hidden');
+            document.getElementById('copy-section-main').classList.add('hidden');
+        };
+
+        // GIAO TIẾP TẠO CHUỖI ĐỂ PASTE XUỐNG V3
+        // Hàm này xài chung cho cả Nút bấm ở Main Form và Modal Form
+        window.createAndCopy = (source) => {
+            const u = document.getElementById(`reg-uid-${source}`).value.trim();
+            const n = document.getElementById(`reg-name-${source}`).value.trim();
+            const m = document.getElementById(`reg-mssv-${source}`).value.trim();
+            const s = document.getElementById(`reg-shift-${source}`).value;
 
             if (!u || !n) { 
-                alert("Vui lòng nhập ít nhất Mã thẻ và Họ tên sinh viên!"); 
+                alert("Vui lòng nhập ít nhất Mã Thẻ và Họ Tên sinh viên!"); 
                 return; 
             }
 
-            // Lưu bộ nhớ đệm trên Web
+            // Lưu Database Web
             membersDb[u] = { name: n, mssv: m, shift: s, timestamp: Date.now() }; 
             syncLocal(); 
             renderAll();
             
-            // Gộp chuỗi cách nhau bởi dấu gạch đứng |
             const n_noAccent = removeVietnameseTones(n);
             const m_noAccent = removeVietnameseTones(m);
             const s_noAccent = removeVietnameseTones(s);
             const chuoi = `${u}|${n_noAccent}|${m_noAccent}|${s_noAccent}`;
             
-            const ketQuaInput = document.getElementById('ketQua');
+            const ketQuaInput = document.getElementById(`ketQua-${source}`);
             ketQuaInput.value = chuoi;
-            document.getElementById('result-group').classList.remove('hidden');
+            document.getElementById(`copy-section-${source}`).classList.remove('hidden');
             
-            // Tự động Copy
-            copyChuoi();
+            copyChuoi(source);
         };
 
-        window.copyChuoi = () => {
-            const copyText = document.getElementById("ketQua");
+        window.copyChuoi = (source) => {
+            const copyText = document.getElementById(`ketQua-${source}`);
             if(!copyText.value) return;
             copyText.select();
             document.execCommand("copy");
-            alert("Đã Copy thành công!\nGiờ hãy dán vào ô Text Input (V3) trên ERa Dashboard để nạp thẻ.");
+            showToast("Đã Copy Thành Công! Hãy dán (Ctrl+V) vào V3 trên Web ERa.", "success");
             
-            // Xoá trắng
-            document.getElementById('reg-name').value = "";
-            document.getElementById('reg-mssv').value = "";
+            // Dọn dẹp form sau khi copy xong
+            document.getElementById(`reg-name-${source}`).value = "";
+            document.getElementById(`reg-mssv-${source}`).value = "";
         };
 
-        // LẮNG NGHE ESP32
         eraWidget.init({
             needRealtimeConfigs: true, 
-            needActions: true, // YÊU CẦU CẤP QUYỀN ĐỌC ACTIONS
+            needActions: true, // Cho phép đọc Actions (Nút nhấn)
             maxRealtimeConfigsCount: 20,
             maxActionsCount: 5,
+            
             onConfiguration: (c) => {
-                // Nhận diện Realtime Configs
                 if (c.realtime_configs) {
                     c.realtime_configs.forEach(cfg => {
                         const pinId = parseInt(cfg.id); const nameLower = cfg.name ? cfg.name.toLowerCase().trim() : "";
@@ -399,16 +495,14 @@
                     });
                 }
 
-                // LẤY ACTIONS CHÍNH XÁC NHƯ CODE TEST CỦA SẾP
+                // CHỤP CẤU HÌNH CÁC NÚT NHẤN (ACTION) - Như ví dụ Sếp gửi
                 if (c.actions && c.actions.length >= 2) {
-                    actionV7 = c.actions[0].action; // Action thứ 1 dành cho Đồng ý (V7)
-                    actionV8 = c.actions[1].action; // Action thứ 2 dành cho Từ chối (V8)
-                    console.log("Đã nạp thành công các Actions dưới dạng Nút nhấn!");
-                } else {
-                    console.error("Cảnh báo: Chưa cấu hình đủ 2 Actions trên Web Dashboard!");
+                    actionV7 = c.actions[0].action; // Chân V7 (Đồng ý)
+                    actionV8 = c.actions[1].action; // Chân V8 (Từ chối)
                 }
 
-                document.getElementById('era-status-text').innerText = "ĐÃ KẾT NỐI ESP32"; document.getElementById('era-status-dot').classList.replace('bg-slate-300', 'bg-blue-500');
+                document.getElementById('era-status-text').innerText = "ĐÃ KẾT NỐI ESP32"; 
+                document.getElementById('era-status-dot').classList.replace('bg-slate-300', 'bg-blue-500');
             },
             onValues: (v) => {
                 // Nhận cờ báo động V6
@@ -431,7 +525,7 @@
             }
         });
 
-        // XỬ LÝ LOGIC ĐIỂM DANH TRÊN WEB SAU KHI QUẸT THẺ (CHỈ GHI LOG)
+        // XỬ LÝ LOGIC ĐIỂM DANH (GHI VÀO BẢNG)
         let resetTimer = null;
         function handleScan(uid) {
             const hardcoded = ESP32_HARD_STUDENTS[uid]; const localMember = membersDb[uid]; 
@@ -466,10 +560,11 @@
             else if (status === 5) { UI.name.innerText = fName; UI.name.className = "text-4xl md:text-5xl font-black text-rose-500 mb-4 tracking-tighter"; UI.avatar.classList.add('glow-out'); UI.icon.className = "fa-solid fa-person-walking-arrow-right text-6xl text-rose-500 transition-transform transform scale-110"; UI.sub.innerText = "ĐÃ ĐIỂM DANH RA LỚP"; }
             else { UI.name.innerText = fName; UI.name.className = "text-4xl md:text-5xl font-black text-emerald-400 mb-4 tracking-tighter"; UI.avatar.classList.add('glow-in'); UI.icon.className = "fa-solid fa-check text-6xl text-emerald-500 transition-transform transform scale-110"; UI.sub.innerText = "ĐIỂM DANH VÀO LỚP THÀNH CÔNG"; }
 
-            // GHI NHẬT KÝ
+            // GHI NHẬT KÝ VÀO BẢNG
             if (fName && status !== 3) {
                 let sIdx = SHIFTS.findIndex(s => s.name === fShift);
-                const entry = { id: Date.now().toString(), uid, name: fName, mssv: fMssv, shiftReg: fShift, time: now.toLocaleTimeString('vi-VN', {hour12: false}), timestamp: now.getTime(), date: now.toDateString(), status: actionStr, shiftId: currentShift?.id || "none", shiftIndex: sIdx };
+                // Nếu quẹt sai ca, không gán Index vào biểu đồ
+                const entry = { id: Date.now().toString(), uid, name: fName, mssv: fMssv, shiftReg: fShift, time: now.toLocaleTimeString('vi-VN', {hour12: false}), timestamp: now.getTime(), date: now.toDateString(), status: actionStr, shiftId: currentShift?.id || "none", shiftIndex: (status == 2) ? -1 : sIdx };
                 logsDb.unshift(entry); syncLocal(); renderAll();
             }
 
@@ -480,36 +575,72 @@
             }, 6000);
         }
 
-        function getShiftByTime(n) { const t = n.getHours()*60 + n.getMinutes(); return SHIFTS.find(s => { const [h, m] = s.start.split(':').map(Number); const [eh, em] = s.end.split(':').map(Number); return t >= (h*60+m) && t <= (eh*60+em); }); }
+        // TÌM CA THEO THỜI GIAN
+        function getShiftByTime(n) { 
+            const t = n.getHours()*60 + n.getMinutes(); 
+            return SHIFTS.find(s => { 
+                const [h, m] = s.start.split(':').map(Number); 
+                const [eh, em] = s.end.split(':').map(Number); 
+                return t >= (h*60+m) && t <= (eh*60+em); 
+            }); 
+        }
 
+        // VẼ BIỂU ĐỒ VÀ BẢNG THỐNG KÊ (CHỈ HIỂN THỊ 5 CA HỌC)
         function renderAll() {
             const logsToRender = logsDb.filter(l => l.date === selectedDateStr);
-            const tbody = document.getElementById('log-body'); let presentUIDs = new Set(); let chartSets = [new Set(), new Set(), new Set(), new Set(), new Set()]; let isViewingToday = selectedDateStr === new Date().toDateString(); let totalInShift = 0; if(isViewingToday && currentShift) { totalInShift = Object.values(ESP32_HARD_STUDENTS).filter(s => s.shift === currentShift.name).length + Object.values(membersDb).filter(m => m.shift === currentShift.name).length; }
+            const tbody = document.getElementById('log-body'); 
+            let presentUIDs = new Set(); 
+            let chartSets = [new Set(), new Set(), new Set(), new Set(), new Set()]; // Array cho 5 ca
+            let isViewingToday = selectedDateStr === new Date().toDateString(); 
+            let totalInShift = 0; 
+            
+            if(isViewingToday && currentShift) { 
+                totalInShift = Object.values(ESP32_HARD_STUDENTS).filter(s => s.shift === currentShift.name).length + Object.values(membersDb).filter(m => m.shift === currentShift.name).length; 
+            }
+            
             tbody.innerHTML = logsToRender.map(l => {
                 if (isViewingToday && currentShift && l.shiftId === currentShift.id && (l.status.includes("VÀO LỚP") || l.status.includes("TRỄ") || l.status === "RA LỚP")) presentUIDs.add(l.uid);
+                
+                // Add vào mảng biểu đồ nếu nó là ca hợp lệ (index từ 0 đến 4)
                 if(l.shiftIndex !== undefined && l.shiftIndex >= 0 && l.shiftIndex < 5 && (l.status.includes("VÀO LỚP") || l.status.includes("TRỄ") || l.status === "RA LỚP")) chartSets[l.shiftIndex].add(l.uid);
+                
                 let badgeClass = l.status.includes("VÀO LỚP") ? "badge-in" : (l.status === "RA LỚP" ? "badge-out" : (l.status.includes("TRỄ") ? "badge-late" : (l.status === "SAI CA" ? "badge-wrong" : "badge-unknown")));
-                return `<tr class="hover:bg-slate-50 transition-colors">
+                
+                return `<tr class="hover:bg-blue-50/50 transition-colors">
                     <td class="font-mono text-[11px] text-slate-500 font-bold pl-4">${l.time}</td>
                     <td class="font-black text-slate-700 uppercase">${l.name}</td>
-                    <td>${l.mssv} <span class="bg-slate-100 text-slate-600 text-[9px] px-2 py-0.5 rounded-md ml-1 font-bold border border-slate-200">${l.shiftReg}</span></td>
+                    <td>${l.mssv} <span class="bg-blue-100 text-blue-700 text-[9px] px-2.5 py-0.5 rounded-md ml-1 font-black border border-blue-200">${l.shiftReg}</span></td>
                     <td class="text-center"><span class="badge ${badgeClass}">${l.status}</span></td>
                 </tr>`;
             }).join('');
+            
             if(!logsToRender.length) tbody.innerHTML = `<tr><td colspan="4" class="py-12 text-center text-slate-400 font-bold uppercase text-xs">Chưa có dữ liệu</td></tr>`;
-            if(isViewingToday && currentShift) { document.getElementById('total-count').innerText = totalInShift; document.getElementById('present-count').innerText = presentUIDs.size; document.getElementById('absent-count').innerText = Math.max(0, totalInShift - presentUIDs.size); }
-            attendanceChart.data.datasets[0].data = chartSets.map(s => s.size); attendanceChart.update();
+            
+            if(isViewingToday && currentShift) { 
+                document.getElementById('total-count').innerText = totalInShift; 
+                document.getElementById('present-count').innerText = presentUIDs.size; 
+                document.getElementById('absent-count').innerText = Math.max(0, totalInShift - presentUIDs.size); 
+            } else {
+                // Giờ nghỉ thì xoá thông số
+                document.getElementById('total-count').innerText = "--";
+                document.getElementById('present-count').innerText = "--";
+                document.getElementById('absent-count').innerText = "--";
+            }
+            
+            // Cập nhật biểu đồ (Mảng 5 phần tử)
+            attendanceChart.data.datasets[0].data = chartSets.map(s => s.size); 
+            attendanceChart.update();
             document.getElementById('registered-count-badge').innerText = `ĐÃ LƯU: ${Object.keys(membersDb).length}`;
         }
 
         window.openMembersModal = () => { 
-            document.getElementById('modal-members-list').innerHTML = Object.keys(membersDb).map(u => `<tr class="hover:bg-slate-50 border-b border-slate-100"><td class="font-mono text-slate-500 font-bold pl-4">${u}</td><td class="font-black uppercase text-slate-700">${membersDb[u].name}</td><td class="font-semibold text-slate-500">${membersDb[u].mssv}</td><td><span class="bg-blue-50 text-blue-600 border border-blue-100 text-[9px] font-bold px-2.5 py-1 rounded-md">${membersDb[u].shift}</span></td><td class="text-right pr-4"><button onclick="delMember('${u}')" class="text-rose-500 font-bold uppercase text-[10px] bg-rose-50 hover:bg-rose-500 hover:text-white transition-all px-3 py-1.5 rounded-lg border border-rose-100">Xóa</button></td></tr>`).join(''); 
+            document.getElementById('modal-members-list').innerHTML = Object.keys(membersDb).map(u => `<tr class="hover:bg-slate-50 border-b border-slate-100"><td class="font-mono text-slate-500 font-bold pl-4">${u}</td><td class="font-black uppercase text-slate-700">${membersDb[u].name}</td><td class="font-semibold text-slate-500">${membersDb[u].mssv}</td><td><span class="bg-blue-50 text-blue-600 border border-blue-100 text-[9px] font-bold px-2.5 py-1 rounded-md">${membersDb[u].shift}</span></td><td class="text-right pr-4"><button onclick="delMember('${u}')" class="text-rose-500 font-bold uppercase text-[10px] hover:text-rose-700 bg-rose-50 px-3 py-1.5 rounded-lg border border-rose-100 transition-colors">Xóa</button></td></tr>`).join(''); 
             document.getElementById('manage-members-modal').classList.remove('hidden'); 
         };
         window.closeMembersModal = () => { document.getElementById('manage-members-modal').classList.add('hidden'); };
         
         window.delMember = (u) => { 
-            if(confirm("Xóa thẻ này khỏi CSDL trên Web?\nLưu ý: Để xóa trên ESP32, hãy dán chuỗi xóa vào V3.")) { 
+            if(confirm("Xóa thẻ này khỏi CSDL trên Web?\nLưu ý: Để xóa trên ESP32, hãy copy mã xóa và dán vào V3.")) { 
                 delete membersDb[u]; syncLocal(); renderAll(); closeMembersModal(); 
                 const chuoiXoa = `${u}|DELETE|---|---`;
                 const d = document.createElement("textarea"); document.body.appendChild(d); d.value = chuoiXoa; d.select(); document.execCommand("copy"); document.body.removeChild(d);
@@ -520,8 +651,33 @@
         window.clearLogs = () => { const displayDate = document.getElementById('filter-date').value.split('-').reverse().join('/'); if(confirm(`Xóa toàn bộ nhật ký của ngày ${displayDate}?`)) { logsDb = logsDb.filter(l => l.date !== selectedDateStr); syncLocal(); renderAll(); } };
         window.exportExcel = () => { const logsToExport = logsDb.filter(l => l.date === selectedDateStr); if(logsToExport.length===0) return alert("Trống! Không có dữ liệu."); const ws = XLSX.utils.json_to_sheet(logsToExport.map(l => ({ "Giờ": l.time, "Tên": l.name, "MSSV": l.mssv, "Trạng thái": l.status }))); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Attendance"); XLSX.writeFile(wb, `FPOLY_${selectedDateStr.replace(/ /g,'_')}.xlsx`); };
 
-        function initClock() { const now = new Date(); currentShift = getShiftByTime(now); if (currentShift) { document.getElementById('current-shift-badge').innerText = currentShift.name.toUpperCase(); } else { document.getElementById('current-shift-badge').innerText = "NGOÀI CA"; } }
-        initClock(); setInterval(() => { const now = new Date(); document.getElementById('clock').innerText = now.toLocaleTimeString('vi-VN', {hour12: false}); document.getElementById('date-now').innerText = now.toLocaleDateString('vi-VN', {weekday: 'long', day: 'numeric', month: 'numeric'}); const newShift = getShiftByTime(now); if (newShift && (!currentShift || currentShift.id !== newShift.id)) { currentShift = newShift; document.getElementById('current-shift-badge').innerText = currentShift.name.toUpperCase(); renderAll(); } else if (!newShift) { document.getElementById('current-shift-badge').innerText = "NGOÀI CA"; } }, 1000);
+        function initClock() { 
+            const now = new Date(); currentShift = getShiftByTime(now); 
+            if (currentShift) { document.getElementById('current-shift-badge').innerText = currentShift.name.toUpperCase(); } 
+            else { document.getElementById('current-shift-badge').innerText = "NGOÀI CA / CA NGHỈ"; } 
+        }
+        
+        initClock(); 
+        
+        setInterval(() => { 
+            const now = new Date(); 
+            document.getElementById('clock').innerText = now.toLocaleTimeString('vi-VN', {hour12: false}); 
+            document.getElementById('date-now').innerText = now.toLocaleDateString('vi-VN', {weekday: 'long', day: 'numeric', month: 'numeric'}); 
+            
+            const newShift = getShiftByTime(now); 
+            if (newShift && (!currentShift || currentShift.id !== newShift.id)) { 
+                currentShift = newShift; 
+                document.getElementById('current-shift-badge').innerText = currentShift.name.toUpperCase(); 
+                renderAll(); 
+            } else if (!newShift) { 
+                document.getElementById('current-shift-badge').innerText = "NGOÀI CA / CA NGHỈ"; 
+                // Xóa tổng số trong thời gian nghỉ
+                document.getElementById('total-count').innerText = "--"; 
+                document.getElementById('present-count').innerText = "--"; 
+                document.getElementById('absent-count').innerText = "--"; 
+            } 
+        }, 1000);
+        
         renderAll();
     </script>
 </body>
