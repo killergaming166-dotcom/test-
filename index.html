@@ -222,10 +222,10 @@
                     <span id="cloud-status-dot" class="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.8)]"></span>
                 </div>
                 <div class="bg-slate-900 p-4 rounded-xl border border-slate-700 text-[12px] font-mono mb-4 relative z-10">
-                    <p class="text-slate-500 uppercase text-[9px] font-sans font-bold mb-1">PRO CHD V1.8.0</p>
-                    <p id="cloud-status" class="font-bold text-orange-400">Card Deletion Update</p>
+                    <p class="text-slate-500 uppercase text-[9px] font-sans font-bold mb-1">PRO CHD V1.8.1</p>
+                    <p id="cloud-status" class="font-bold text-emerald-400">Smart Bug Fixes</p>
                 </div>
-                <p class="text-[11px] text-slate-400 mb-5 leading-relaxed relative z-10">Bạn có thể tạo mã hủy thẻ nhanh để gỡ bỏ thẻ khỏi phần cứng ESP32 khi có sự cố phát sinh.</p>
+                <p class="text-[11px] text-slate-400 mb-5 leading-relaxed relative z-10">Đã cập nhật lỗi đơ trang web khi nằm ngoài khung giờ. Trình duyệt nhẹ và mượt mà hơn.</p>
                 <button onclick="location.reload()" class="w-full py-3.5 bg-slate-700 hover:bg-slate-600 rounded-xl text-[11px] font-black text-white transition-all uppercase tracking-widest relative z-10">
                     <i class="fa-solid fa-rotate-right mr-2"></i>Làm mới kết nối
                 </button>
@@ -291,7 +291,7 @@
 
                 <div class="pt-4 flex flex-col sm:flex-row gap-3 border-t border-slate-200 mt-2">
                     <button onclick="createAndCopy('modal')" class="flex-1 py-4 bg-gradient-to-r from-orange-500 to-rose-500 hover:from-orange-600 hover:to-rose-600 text-white font-black uppercase text-sm rounded-xl shadow-lg shadow-orange-500/30 transition-all transform hover:-translate-y-1">
-                        <i class="fa-solid fa-wand-magic-sparkles mr-2"></i> TẠO MÀ NẠP & LƯU CSDL
+                        <i class="fa-solid fa-wand-magic-sparkles mr-2"></i> TẠO MÃ NẠP & LƯU CSDL
                     </button>
                 </div>
 
@@ -336,7 +336,6 @@
         ];
         
         const CHECKOUT_COOLDOWN_MINUTES = 15; 
-        // Dữ liệu nạp cứng (Chỉ để hiển thị tổng sĩ số cho đúng)
         const ESP32_HARD_STUDENTS = { "96576E05": { name: "Nguyen Dinh Danh", mssv: "PS45028", shift: "Ca 2" } }; 
 
         let isProcessing = false, lastUid = "", currentShift = null, selectedDateStr = new Date().toDateString(); 
@@ -361,7 +360,7 @@
 
         let ctx = document.getElementById('attendanceChart').getContext('2d');
         let gradientChart = ctx.createLinearGradient(0,0,0,200); 
-        gradientChart.addColorStop(0, '#f97316'); // Orange
+        gradientChart.addColorStop(0, '#f97316'); 
         gradientChart.addColorStop(1, '#ea580c'); 
         
         let attendanceChart = new Chart(ctx, { 
@@ -413,7 +412,7 @@
             document.getElementById('copy-section-main').classList.add('hidden');
         };
 
-        // --- HÀM TẠO MÃ NẠP ---
+        // --- HÀM TẠO MÃ ---
         window.createAndCopy = (source) => {
             const u = document.getElementById(`reg-uid-${source}`).value.trim();
             const n = document.getElementById(`reg-name-${source}`).value.trim();
@@ -433,7 +432,6 @@
             const ketQuaInput = document.getElementById(`ketQua-${source}`);
             ketQuaInput.value = chuoi;
             
-            // Xử lý Giao diện CSS sang màu Xanh Nạp
             const copySection = document.getElementById(`copy-section-${source}`);
             copySection.classList.remove('hidden', 'bg-rose-50', 'border-rose-200');
             copySection.classList.add('bg-emerald-50', 'border-emerald-200');
@@ -447,18 +445,15 @@
             copyChuoi(source, 'save');
         };
 
-        // --- HÀM TẠO MÃ HỦY ---
         window.createDeleteCode = (source) => {
             const u = document.getElementById(`reg-uid-${source}`).value.trim();
 
             if (!u) { showToast("Vui lòng nhập Mã Thẻ (UID) cần hủy!", "warning"); return; }
 
             const chuoiXoa = `${u}|DELETE|---|---`;
-            
             const ketQuaInput = document.getElementById(`ketQua-${source}`);
             ketQuaInput.value = chuoiXoa;
             
-            // Xử lý Giao diện CSS sang màu Đỏ Hủy
             const copySection = document.getElementById(`copy-section-${source}`);
             copySection.classList.remove('hidden', 'bg-emerald-50', 'border-emerald-200');
             copySection.classList.add('bg-rose-50', 'border-rose-200');
@@ -483,7 +478,6 @@
                 showToast("Đã Copy Mã NẠP! Hãy dán vào ô nhập liệu hệ thống.", "success");
             }
             
-            // Chỉ xóa thông tin tên, giữ lại UID cho tiện nếu cần sửa
             document.getElementById(`reg-name-${source}`).value = "";
             document.getElementById(`reg-mssv-${source}`).value = "";
         };
@@ -574,7 +568,7 @@
             UI.avatar.className = "avatar-circle"; 
 
             if (!fName) { 
-                UI.name.innerText = "THỂ CHƯA ĐĂNG KÝ"; UI.name.className = "text-4xl md:text-5xl font-black text-orange-500 mb-4 tracking-tighter drop-shadow-sm"; 
+                UI.name.innerText = "THẺ CHƯA ĐĂNG KÝ"; UI.name.className = "text-4xl md:text-5xl font-black text-orange-500 mb-4 tracking-tighter drop-shadow-sm"; 
                 UI.avatar.classList.add('glow-unknown'); 
                 UI.icon.className = "fa-solid fa-fingerprint text-6xl text-orange-500 transition-transform transform scale-110"; 
                 UI.sub.innerText = "ĐANG CHỜ XIN QUYỀN ĐĂNG KÝ..."; 
@@ -618,7 +612,7 @@
 
             if (fName && status !== 3 && status !== 6) {
                 let sIdx = SHIFTS.findIndex(s => s.name === fShift);
-                const entry = { id: Date.now().toString(), uid, name: fName, mssv: fMssv, shiftReg: fShift, time: now.toLocaleTimeString('vi-VN', {hour12: false}), timestamp: now.getTime(), date: now.toDateString(), status: actionStr, shiftId: currentShift?.id || "none", shiftIndex: (status == 2) ? -1 : sIdx };
+                const entry = { id: Date.now().toString(), uid, name: fName, mssv: fMssv, shiftReg: fShift, time: now.toLocaleTimeString('vi-VN', {hour12: false}), timestamp: now.getTime(), date: now.toDateString(), status: actionStr, shiftId: currentShift?.id || "none", shiftIndex: (status == 2 || status == 6) ? -1 : sIdx };
                 logsDb.unshift(entry); syncLocal(); renderAll();
             }
 
@@ -701,13 +695,28 @@
         window.clearLogs = () => { if(confirm(`Xóa toàn bộ nhật ký?`)) { logsDb = []; syncLocal(); renderAll(); } };
         window.exportExcel = () => { const logsToExport = logsDb.filter(l => l.date === selectedDateStr); if(logsToExport.length===0) return alert("Trống!"); const ws = XLSX.utils.json_to_sheet(logsToExport.map(l => ({ "Giờ": l.time, "Tên": l.name, "MSSV": l.mssv, "Trạng thái": l.status }))); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Attendance"); XLSX.writeFile(wb, `CHD_${selectedDateStr.replace(/ /g,'_')}.xlsx`); };
 
+        // FIX TẠI ĐÂY: KHÔNG CÒN GỌI renderAll() MỖI GIÂY KHI Ở NGOÀI CA NỮA
         setInterval(() => { 
-            const now = new Date(); document.getElementById('clock').innerText = now.toLocaleTimeString('vi-VN', {hour12: false}); 
+            const now = new Date(); 
+            document.getElementById('clock').innerText = now.toLocaleTimeString('vi-VN', {hour12: false}); 
             document.getElementById('date-now').innerText = now.toLocaleDateString('vi-VN', {weekday: 'long', day: 'numeric', month: 'numeric'}); 
+            
             const newShift = getShiftByTime(now); 
-            if (newShift && (!currentShift || currentShift.id !== newShift.id)) { currentShift = newShift; document.getElementById('current-shift-badge').innerText = currentShift.name.toUpperCase(); renderAll(); 
-            } else if (!newShift) { document.getElementById('current-shift-badge').innerText = "NGOÀI CA / NGHỈ"; renderAll(); } 
+            if (newShift) {
+                if (!currentShift || currentShift.id !== newShift.id) { 
+                    currentShift = newShift; 
+                    document.getElementById('current-shift-badge').innerText = currentShift.name.toUpperCase(); 
+                    renderAll(); 
+                }
+            } else {
+                if (currentShift !== null) { 
+                    currentShift = null; 
+                    document.getElementById('current-shift-badge').innerText = "NGOÀI CA / NGHỈ"; 
+                    renderAll(); 
+                }
+            }
         }, 1000);
+        
         renderAll();
     </script>
 </body>
